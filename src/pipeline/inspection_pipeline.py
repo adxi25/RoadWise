@@ -90,6 +90,7 @@ SUPPORTED_EXTENSIONS = {
 MAX_IMAGE_SIZE_MB = 20
 
 DEFAULT_CONFIDENCE = 0.25
+DEFAULT_IMGSZ = 640
 
 
 # ============================================================
@@ -628,6 +629,7 @@ def run_inspection(
     conf: float = DEFAULT_CONFIDENCE,
     save_to_db: bool = True,
     model_path: str | Path | None = None,
+    imgsz: int = DEFAULT_IMGSZ,
 ) -> dict[str, Any]:
     """
     Run one complete RoadWise Mode 1 inspection.
@@ -702,6 +704,16 @@ def run_inspection(
             "Detection confidence must be between 0.05 and 0.95."
         )
 
+    try:
+        imgsz = int(imgsz)
+    except (TypeError, ValueError):
+        raise ValueError("Inference image size (imgsz) must be an integer.")
+
+    if not 320 <= imgsz <= 1920:
+        raise ValueError(
+            "Inference image size (imgsz) must be between 320 and 1920 pixels."
+        )
+
     # --------------------------------------------------------
     # B. Validate image
     # --------------------------------------------------------
@@ -759,6 +771,7 @@ def run_inspection(
             detections, annotated = detect(
                 str(original_path),
                 conf=conf,
+                imgsz=imgsz,
             )
 
         else:
@@ -767,6 +780,7 @@ def run_inspection(
                 str(original_path),
                 conf=conf,
                 model_path=model_path,
+                imgsz=imgsz,
             )
 
     except FileNotFoundError:
@@ -950,6 +964,13 @@ if __name__ == "__main__":
     )
 
     parser.add_argument(
+        "--imgsz",
+        type=int,
+        default=DEFAULT_IMGSZ,
+        help="YOLO inference image size (default: 640).",
+    )
+
+    parser.add_argument(
         "--road-type",
         default="main_road",
         help="Road type.",
@@ -1026,6 +1047,7 @@ if __name__ == "__main__":
         context=context,
         conf=args.conf,
         save_to_db=not args.no_db,
+        imgsz=args.imgsz,
     )
 
     print()

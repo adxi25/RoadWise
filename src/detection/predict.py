@@ -16,6 +16,7 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parents[2]
 DEFAULT_MODEL = BASE_DIR / "models" / "best.pt"
 DEFAULT_CONF = 0.25
+DEFAULT_IMGSZ = 640
 
 CLASS_CODE = {
     "longitudinal_crack": "D00",
@@ -59,15 +60,22 @@ def results_to_detections(result):
     return detections
 
 
-def detect(image_path, conf=DEFAULT_CONF, model_path=DEFAULT_MODEL):
-    """Run the model on one image.
+def detect(image_path, conf=DEFAULT_CONF, model_path=DEFAULT_MODEL, imgsz=DEFAULT_IMGSZ):
+    """Run the model on one image."""
+    try:
+        imgsz = int(imgsz)
+    except (TypeError, ValueError):
+        imgsz = DEFAULT_IMGSZ
+    if imgsz <= 0:
+        imgsz = DEFAULT_IMGSZ
 
-    Returns:
-        detections: list of dicts (class_code, class_name, confidence, x_center, y_center, width, height)
-        annotated:  image array (BGR) with boxes drawn, or None
-    """
     model = load_model(model_path)
-    result = model.predict(source=str(image_path), conf=conf, imgsz=640, verbose=False)[0]
+    result = model.predict(
+        source=str(image_path),
+        conf=conf,
+        imgsz=imgsz,
+        verbose=False
+    )[0]
     return results_to_detections(result), result.plot()
 
 
@@ -84,9 +92,12 @@ if __name__ == "__main__":
     ap.add_argument("--image", required=True)
     ap.add_argument("--conf", type=float, default=DEFAULT_CONF)
     ap.add_argument("--model", default=str(DEFAULT_MODEL))
+    ap.add_argument("--imgsz", type=int, default=640)
     a = ap.parse_args()
 
-    dets, annotated = detect(a.image, conf=a.conf, model_path=a.model)
+    dets, annotated = detect(
+        a.image, conf=a.conf, model_path=a.model, imgsz=a.imgsz
+    )
     out = BASE_DIR / "results" / "predictions" / f"{Path(a.image).stem}_annotated.jpg"
     save_annotated(annotated, out)
 

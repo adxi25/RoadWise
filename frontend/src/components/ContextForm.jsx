@@ -17,6 +17,8 @@ export default function ContextForm({
   setContext,
   conf,
   setConf,
+  imgsz = 640,
+  setImgsz,
   onAnalyze,
   isLoading,
   canAnalyze,
@@ -29,22 +31,22 @@ export default function ContextForm({
   const [showManualCoords, setShowManualCoords] = useState(false);
 
   const roadTypes = [
-    { value: 'national_highway', label: 'National Highway (NH)', group: 'Major' },
-    { value: 'state_highway', label: 'State Highway (SH)', group: 'Major' },
-    { value: 'expressway', label: 'Expressway', group: 'Major' },
-    { value: 'major_arterial', label: 'Major Arterial Road', group: 'Major' },
-    { value: 'main_road', label: 'Main City Road', group: 'Urban' },
-    { value: 'ring_road', label: 'Ring Road / Bypass', group: 'Urban' },
-    { value: 'collector_road', label: 'Collector Road', group: 'Urban' },
-    { value: 'commercial_road', label: 'Commercial Area Road', group: 'Urban' },
-    { value: 'market_road', label: 'Market / Commercial Corridor', group: 'Urban' },
-    { value: 'school_road', label: 'School Zone Route', group: 'Sensitive' },
-    { value: 'hospital_road', label: 'Hospital Access Route', group: 'Sensitive' },
-    { value: 'emergency_route', label: 'Emergency Service Corridor', group: 'Sensitive' },
-    { value: 'residential', label: 'Residential Street', group: 'Local' },
-    { value: 'colony_road', label: 'Colony / Access Road', group: 'Local' },
-    { value: 'rural_road', label: 'Rural / Feeder Road', group: 'Rural' },
-    { value: 'other', label: 'Other Road Category', group: 'Other' },
+    { value: 'national_highway', label: 'National Highway (NH)', group: 'Major Highway' },
+    { value: 'state_highway', label: 'State Highway (SH)', group: 'Major Highway' },
+    { value: 'expressway', label: 'Expressway', group: 'Major Highway' },
+    { value: 'major_arterial', label: 'Major Arterial Road', group: 'Urban Corridor' },
+    { value: 'main_road', label: 'Main City Road', group: 'Urban Corridor' },
+    { value: 'ring_road', label: 'Ring Road / Bypass', group: 'Urban Corridor' },
+    { value: 'collector_road', label: 'Collector Road', group: 'Urban Corridor' },
+    { value: 'commercial_road', label: 'Commercial Area Road', group: 'Urban Corridor' },
+    { value: 'market_road', label: 'Market / Commercial Corridor', group: 'Urban Corridor' },
+    { value: 'school_road', label: 'School Zone Route', group: 'Sensitive Facility' },
+    { value: 'hospital_road', label: 'Hospital Access Route', group: 'Sensitive Facility' },
+    { value: 'emergency_route', label: 'Emergency Service Corridor', group: 'Sensitive Facility' },
+    { value: 'residential', label: 'Residential Street', group: 'Local Road' },
+    { value: 'colony_road', label: 'Colony / Access Road', group: 'Local Road' },
+    { value: 'rural_road', label: 'Rural / Feeder Road', group: 'Rural Road' },
+    { value: 'other', label: 'Other Road Category', group: 'General' },
   ];
 
   const trafficLevels = [
@@ -138,28 +140,28 @@ export default function ContextForm({
   return (
     <form onSubmit={(e) => { e.preventDefault(); onAnalyze(); }} className="space-y-4">
       
-      {/* Infrastructure Context Card */}
-      <div className="p-4 rounded-xl bg-slate-900/90 border border-slate-800 space-y-3.5">
-        <div className="flex items-center justify-between border-b border-slate-800 pb-2">
-          <div className="flex items-center space-x-2 text-xs font-semibold text-slate-200 uppercase tracking-wider font-mono">
-            <Compass className="w-3.5 h-3.5 text-cyan-400" />
+      {/* 1. Infrastructure Context Card */}
+      <div className="p-4 rounded-lg bg-white border border-[#DFE3E1] space-y-3.5 shadow-2xs">
+        <div className="flex items-center justify-between border-b border-[#DFE3E1] pb-2">
+          <div className="flex items-center space-x-2 text-xs font-bold text-[#141D20] uppercase tracking-wider font-mono">
+            <Compass className="w-3.5 h-3.5 text-[#114B44]" />
             <span>Infrastructure Context</span>
           </div>
-          <span className="text-[10px] text-slate-400 font-mono">Required</span>
+          <span className="text-[10px] text-[#505E63] font-mono font-medium">Required</span>
         </div>
 
         {/* Road Type */}
         <div>
-          <label className="block text-xs font-medium text-slate-300 mb-1">
-            Road Classification <span className="text-rose-400">*</span>
+          <label className="block text-xs font-semibold text-[#141D20] mb-1">
+            Road Classification <span className="text-rose-600">*</span>
           </label>
           <select
             value={context.road_type}
             onChange={(e) => setContext(prev => ({ ...prev, road_type: e.target.value }))}
-            className="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-700 text-slate-100 text-xs focus:outline-none focus:border-cyan-500 font-sans cursor-pointer"
+            className="w-full px-3 py-2 rounded bg-white border border-[#DFE3E1] text-[#141D20] text-xs focus-visible:ring-2 focus-visible:ring-[#114B44] font-sans cursor-pointer hover:border-[#CCDCD8]"
           >
             {roadTypes.map((item) => (
-              <option key={item.value} value={item.value} className="bg-slate-900 text-slate-100">
+              <option key={item.value} value={item.value}>
                 [{item.group}] {item.label}
               </option>
             ))}
@@ -169,23 +171,23 @@ export default function ContextForm({
         {/* Traffic Level */}
         <div>
           <div className="flex items-center justify-between mb-1">
-            <label className="text-xs font-medium text-slate-300">
-              Traffic Density <span className="text-rose-400">*</span>
+            <label className="text-xs font-semibold text-[#141D20]">
+              Traffic Density <span className="text-rose-600">*</span>
             </label>
-            <span className="text-[10px] text-slate-400 uppercase font-mono">
+            <span className="text-[10px] text-[#505E63] uppercase font-mono font-medium">
               {context.traffic_level.replace('_', ' ')}
             </span>
           </div>
-          <div className="grid grid-cols-5 gap-1 p-1 rounded-lg bg-slate-950 border border-slate-800">
+          <div className="grid grid-cols-5 gap-1 p-1 rounded bg-[#F8F7F4] border border-[#DFE3E1]">
             {trafficLevels.map((t) => (
               <button
                 type="button"
                 key={t.value}
                 onClick={() => setContext(prev => ({ ...prev, traffic_level: t.value }))}
-                className={`py-1.5 px-1 rounded text-[11px] font-medium transition-colors text-center ${
+                className={`py-1.5 px-1 rounded text-[11px] font-semibold transition-all text-center focus-visible:ring-2 focus-visible:ring-[#114B44] ${
                   context.traffic_level === t.value
-                    ? 'bg-cyan-500 text-slate-950 font-bold'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900'
+                    ? 'bg-[#114B44] text-white shadow-2xs'
+                    : 'text-[#505E63] hover:text-[#141D20] hover:bg-[#EAE7E1]'
                 }`}
               >
                 {t.label}
@@ -196,16 +198,16 @@ export default function ContextForm({
 
         {/* Location Sensitivity */}
         <div>
-          <label className="block text-xs font-medium text-slate-300 mb-1">
-            Location Sensitivity <span className="text-rose-400">*</span>
+          <label className="block text-xs font-semibold text-[#141D20] mb-1">
+            Facility Proximity / Sensitivity <span className="text-rose-600">*</span>
           </label>
           <select
             value={context.location_sensitivity}
             onChange={(e) => setContext(prev => ({ ...prev, location_sensitivity: e.target.value }))}
-            className="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-700 text-slate-100 text-xs focus:outline-none focus:border-cyan-500 font-sans cursor-pointer"
+            className="w-full px-3 py-2 rounded bg-white border border-[#DFE3E1] text-[#141D20] text-xs focus-visible:ring-2 focus-visible:ring-[#114B44] font-sans cursor-pointer hover:border-[#CCDCD8]"
           >
             {sensitivities.map((item) => (
-              <option key={item.value} value={item.value} className="bg-slate-900 text-slate-100">
+              <option key={item.value} value={item.value}>
                 {item.label}
               </option>
             ))}
@@ -213,26 +215,26 @@ export default function ContextForm({
         </div>
       </div>
 
-      {/* Geographic Location Card */}
-      <div className="p-4 rounded-xl bg-slate-900/90 border border-slate-800 space-y-3">
-        <div className="flex items-center justify-between border-b border-slate-800 pb-2">
-          <div className="flex items-center space-x-2 text-xs font-semibold text-slate-200 uppercase tracking-wider font-mono">
-            <MapPin className="w-3.5 h-3.5 text-cyan-400" />
-            <span>Geographic Location</span>
+      {/* 2. Geographic Location Card */}
+      <div className="p-4 rounded-lg bg-white border border-[#DFE3E1] space-y-3 shadow-2xs">
+        <div className="flex items-center justify-between border-b border-[#DFE3E1] pb-2">
+          <div className="flex items-center space-x-2 text-xs font-bold text-[#141D20] uppercase tracking-wider font-mono">
+            <MapPin className="w-3.5 h-3.5 text-[#114B44]" />
+            <span>Geographic Coordinates</span>
           </div>
-          <span className="text-[10px] text-slate-400 font-mono">Optional</span>
+          <span className="text-[10px] text-[#505E63] font-mono">Optional</span>
         </div>
 
-        {/* Location Action Buttons */}
+        {/* Location Actions */}
         <div className="flex flex-col sm:flex-row gap-2">
           <button
             type="button"
             onClick={handleGetCurrentLocation}
             disabled={geoStatus === 'locating'}
-            className={`flex-1 py-2 px-3 rounded-lg text-xs font-medium flex items-center justify-center space-x-1.5 transition-colors ${
+            className={`flex-1 py-2 px-3 rounded text-xs font-semibold flex items-center justify-center space-x-1.5 transition-colors border focus-visible:ring-2 focus-visible:ring-[#114B44] ${
               geoStatus === 'locating'
-                ? 'bg-cyan-950 text-cyan-300 border border-cyan-500/40 cursor-wait'
-                : 'bg-slate-950 hover:bg-slate-800 text-cyan-400 border border-cyan-500/40'
+                ? 'bg-[#EBF4F2] text-[#114B44] border-[#CCDCD8] cursor-wait'
+                : 'bg-[#F8F7F4] hover:bg-[#EBF4F2] text-[#114B44] border-[#DFE3E1]'
             }`}
           >
             <LocateFixed className={`w-3.5 h-3.5 ${geoStatus === 'locating' ? 'animate-spin' : ''}`} />
@@ -244,26 +246,26 @@ export default function ContextForm({
           <button
             type="button"
             onClick={() => setShowManualCoords(!showManualCoords)}
-            className="py-2 px-3 rounded-lg bg-slate-950 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 text-xs font-medium flex items-center justify-center space-x-1.5 transition-colors"
+            className="py-2 px-3 rounded bg-[#F8F7F4] hover:bg-[#F3F1EC] text-[#505E63] hover:text-[#141D20] border border-[#DFE3E1] text-xs font-semibold flex items-center justify-center space-x-1.5 transition-colors focus-visible:ring-2 focus-visible:ring-[#114B44]"
           >
-            <Edit3 className="w-3.5 h-3.5 text-slate-400" />
-            <span>{showManualCoords ? 'Hide Coordinates' : 'Enter Coordinates Manually'}</span>
+            <Edit3 className="w-3.5 h-3.5 text-[#79888E]" />
+            <span>{showManualCoords ? 'Hide Lat/Long' : 'Enter Manually'}</span>
           </button>
         </div>
 
         {/* Active Coordinates Display */}
         {hasCoords && (
-          <div className="p-2.5 rounded-lg bg-emerald-950/40 border border-emerald-500/30 text-xs flex items-center justify-between gap-2">
+          <div className="p-2.5 rounded bg-[#F0FDF4] border border-[#BBF7D0] text-xs flex items-center justify-between gap-2">
             <div className="flex items-center space-x-2">
-              <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
-              <span className="font-mono text-[11px] text-emerald-300 font-semibold">
+              <CheckCircle2 className="w-4 h-4 text-emerald-700 flex-shrink-0" />
+              <span className="font-mono text-[11px] text-emerald-900 font-bold">
                 Lat: {Number(context.latitude).toFixed(6)}°, Lng: {Number(context.longitude).toFixed(6)}°
               </span>
             </div>
             <button
               type="button"
               onClick={handleClearLocation}
-              className="text-[11px] text-rose-400 hover:text-rose-300 underline font-mono ml-auto"
+              className="text-[11px] text-rose-700 hover:text-rose-900 underline font-mono ml-auto font-semibold"
             >
               Clear
             </button>
@@ -272,15 +274,15 @@ export default function ContextForm({
 
         {/* Geolocation Error Message */}
         {geoError && (
-          <div className="p-2.5 rounded-lg bg-rose-950/40 border border-rose-500/30 text-xs text-rose-300 flex items-start justify-between gap-2">
+          <div className="p-2.5 rounded bg-[#FEF2F2] border border-[#FECDD3] text-xs text-rose-800 flex items-start justify-between gap-2">
             <div className="flex items-start space-x-2">
-              <AlertTriangle className="w-4 h-4 text-rose-400 flex-shrink-0 mt-0.5" />
+              <AlertTriangle className="w-4 h-4 text-rose-600 flex-shrink-0 mt-0.5" />
               <span className="text-[11px] leading-relaxed">{geoError}</span>
             </div>
             <button
               type="button"
               onClick={() => setGeoError(null)}
-              className="text-xs text-rose-400 hover:text-rose-200 ml-1"
+              className="text-xs text-rose-600 hover:text-rose-900 ml-1 font-bold"
             >
               ✕
             </button>
@@ -289,13 +291,13 @@ export default function ContextForm({
 
         {/* Manual Coordinates Input */}
         {showManualCoords && (
-          <div className="p-2.5 rounded-lg bg-slate-950 border border-slate-800 space-y-2">
-            <span className="text-[10px] text-slate-400 uppercase font-mono block">
-              Decimal Degrees
+          <div className="p-3 rounded bg-[#F8F7F4] border border-[#DFE3E1] space-y-2">
+            <span className="text-[10px] text-[#505E63] uppercase font-mono font-semibold block">
+              Decimal Degrees (WGS 84)
             </span>
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <label className="block text-[10px] text-slate-400 mb-0.5">Latitude (-90 to 90)</label>
+                <label className="block text-[10px] font-semibold text-[#505E63] mb-0.5">Latitude (-90 to 90)</label>
                 <input
                   type="number"
                   step="any"
@@ -308,11 +310,11 @@ export default function ContextForm({
                     setContext(prev => ({ ...prev, latitude: val === '' ? null : parseFloat(val) }));
                     if (val !== '') setGeoStatus('success');
                   }}
-                  className="w-full px-2.5 py-1.5 rounded bg-slate-900 border border-slate-700 text-slate-200 text-xs font-mono focus:outline-none focus:border-cyan-500"
+                  className="w-full px-2.5 py-1.5 rounded bg-white border border-[#DFE3E1] text-[#141D20] text-xs font-mono focus-visible:ring-2 focus-visible:ring-[#114B44]"
                 />
               </div>
               <div>
-                <label className="block text-[10px] text-slate-400 mb-0.5">Longitude (-180 to 180)</label>
+                <label className="block text-[10px] font-semibold text-[#505E63] mb-0.5">Longitude (-180 to 180)</label>
                 <input
                   type="number"
                   step="any"
@@ -325,7 +327,7 @@ export default function ContextForm({
                     setContext(prev => ({ ...prev, longitude: val === '' ? null : parseFloat(val) }));
                     if (val !== '') setGeoStatus('success');
                   }}
-                  className="w-full px-2.5 py-1.5 rounded bg-slate-900 border border-slate-700 text-slate-200 text-xs font-mono focus:outline-none focus:border-cyan-500"
+                  className="w-full px-2.5 py-1.5 rounded bg-white border border-[#DFE3E1] text-[#141D20] text-xs font-mono focus-visible:ring-2 focus-visible:ring-[#114B44]"
                 />
               </div>
             </div>
@@ -333,88 +335,132 @@ export default function ContextForm({
         )}
 
         {/* Administrative Region Inputs */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1 border-t border-slate-800/80">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1 border-t border-[#DFE3E1]">
           <div>
+            <label className="block text-[10px] font-semibold text-[#505E63] mb-0.5">City</label>
             <input
               type="text"
-              placeholder="City (e.g. Bengaluru)"
+              placeholder="e.g. Bengaluru"
               value={context.city || ''}
               onChange={(e) => setContext(prev => ({ ...prev, city: e.target.value }))}
-              className="w-full px-2.5 py-1.5 rounded-lg bg-slate-950 border border-slate-800 text-slate-200 text-xs focus:outline-none focus:border-cyan-500 placeholder:text-slate-600"
+              className="w-full px-2.5 py-1.5 rounded bg-[#F8F7F4] border border-[#DFE3E1] text-[#141D20] text-xs focus-visible:ring-2 focus-visible:ring-[#114B44] placeholder:text-[#A3B1AC]"
             />
           </div>
           <div>
+            <label className="block text-[10px] font-semibold text-[#505E63] mb-0.5">State</label>
             <input
               type="text"
-              placeholder="State (e.g. Karnataka)"
+              placeholder="e.g. Karnataka"
               value={context.state || ''}
               onChange={(e) => setContext(prev => ({ ...prev, state: e.target.value }))}
-              className="w-full px-2.5 py-1.5 rounded-lg bg-slate-950 border border-slate-800 text-slate-200 text-xs focus:outline-none focus:border-cyan-500 placeholder:text-slate-600"
+              className="w-full px-2.5 py-1.5 rounded bg-[#F8F7F4] border border-[#DFE3E1] text-[#141D20] text-xs focus-visible:ring-2 focus-visible:ring-[#114B44] placeholder:text-[#A3B1AC]"
             />
           </div>
           <div>
+            <label className="block text-[10px] font-semibold text-[#505E63] mb-0.5">Area / Ward</label>
             <input
               type="text"
-              placeholder="Area / Ward"
+              placeholder="e.g. Ward 150"
               value={context.area || ''}
               onChange={(e) => setContext(prev => ({ ...prev, area: e.target.value }))}
-              className="w-full px-2.5 py-1.5 rounded-lg bg-slate-950 border border-slate-800 text-slate-200 text-xs focus:outline-none focus:border-cyan-500 placeholder:text-slate-600"
+              className="w-full px-2.5 py-1.5 rounded bg-[#F8F7F4] border border-[#DFE3E1] text-[#141D20] text-xs focus-visible:ring-2 focus-visible:ring-[#114B44] placeholder:text-[#A3B1AC]"
             />
           </div>
         </div>
       </div>
 
-      {/* Advanced Settings (Confidence Threshold) */}
-      <div className="p-3 rounded-xl bg-slate-900/60 border border-slate-800/80 space-y-2">
+      {/* 3. Advanced Detection Calibration */}
+      <div className="p-3 rounded-lg bg-white border border-[#DFE3E1] space-y-2 shadow-2xs">
         <button
           type="button"
           onClick={() => setShowAdvanced(!showAdvanced)}
-          className="w-full flex items-center justify-between text-xs font-medium text-slate-400 hover:text-slate-200 transition-colors"
+          className="w-full flex items-center justify-between text-xs font-semibold text-[#505E63] hover:text-[#114B44] transition-colors focus-visible:ring-2 focus-visible:ring-[#114B44]"
         >
           <div className="flex items-center space-x-1.5 font-mono">
-            <Sliders className="w-3 h-3 text-cyan-400" />
-            <span>Detection Sensitivity</span>
+            <Sliders className="w-3.5 h-3.5 text-[#114B44]" />
+            <span>YOLOv8 Detection Confidence Threshold</span>
           </div>
           <div className="flex items-center space-x-2">
-            <span className="text-[11px] font-mono text-cyan-400 font-bold">{conf.toFixed(2)}</span>
+            <span className="text-[11px] font-mono font-bold text-[#114B44]">{conf.toFixed(2)}</span>
             {showAdvanced ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
           </div>
         </button>
 
         {showAdvanced && (
-          <div className="pt-2 border-t border-slate-800 space-y-1.5">
-            <input
-              type="range"
-              min="0.10"
-              max="0.80"
-              step="0.05"
-              value={conf}
-              onChange={(e) => setConf(parseFloat(e.target.value))}
-              className="w-full accent-cyan-400 cursor-pointer h-1.5 bg-slate-800 rounded"
-            />
-            <div className="flex justify-between text-[10px] text-slate-400 font-mono">
-              <span>0.10 (High Recall)</span>
-              <span>0.25 (Default)</span>
-              <span>0.80 (High Precision)</span>
+          <div className="pt-2.5 border-t border-[#DFE3E1] space-y-3">
+            {/* Confidence Threshold */}
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between text-[11px] font-semibold text-[#141D20]">
+                <span>Confidence Threshold</span>
+                <span className="font-mono text-[#114B44] font-bold">{conf.toFixed(2)}</span>
+              </div>
+              <input
+                type="range"
+                min="0.10"
+                max="0.80"
+                step="0.05"
+                value={conf}
+                onChange={(e) => setConf(parseFloat(e.target.value))}
+                className="w-full accent-[#114B44] cursor-pointer h-1.5 bg-[#EAE7E1] rounded"
+              />
+              <div className="flex justify-between text-[10px] text-[#505E63] font-mono">
+                <span>0.10 (High Recall)</span>
+                <span>0.25 (Default)</span>
+                <span>0.80 (High Precision)</span>
+              </div>
             </div>
+
+            {/* Inference Resolution (imgsz) */}
+            {setImgsz && (
+              <div className="pt-2 border-t border-[#DFE3E1] space-y-1.5">
+                <div className="flex items-center justify-between text-[11px] font-semibold text-[#141D20]">
+                  <span>Inference Resolution</span>
+                  <span className="font-mono text-[#114B44] font-bold">{imgsz} px</span>
+                </div>
+                <div className="grid grid-cols-3 gap-1.5">
+                  {[
+                    { val: 640, label: '640 px', desc: 'Standard' },
+                    { val: 960, label: '960 px', desc: 'Enhanced' },
+                    { val: 1280, label: '1280 px', desc: 'High Detail' },
+                  ].map((opt) => (
+                    <button
+                      type="button"
+                      key={opt.val}
+                      onClick={() => setImgsz(opt.val)}
+                      className={`py-1.5 px-2 rounded border text-center transition-all ${
+                        imgsz === opt.val
+                          ? 'bg-[#114B44] text-white border-[#114B44] shadow-2xs font-semibold'
+                          : 'bg-[#F8F7F4] text-[#505E63] border-[#DFE3E1] hover:bg-[#F3F1EC]'
+                      }`}
+                    >
+                      <div className="text-[11px] font-mono leading-none">{opt.label}</div>
+                      <div className={`text-[9px] mt-0.5 ${imgsz === opt.val ? 'text-white/80' : 'text-[#79888E]'}`}>{opt.desc}</div>
+                    </button>
+                  ))}
+                </div>
+                <p className="text-[10px] text-[#505E63] leading-tight">
+                  640px is the model's native training resolution. Higher resolutions scale the input canvas for large images.
+                </p>
+              </div>
+            )}
           </div>
         )}
       </div>
 
-      {/* Primary Action Button */}
+      {/* 4. Primary Inspection Execution Button */}
       <button
         type="submit"
         disabled={!canAnalyze || isLoading}
-        className={`w-full py-3 px-4 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center space-x-2 transition-colors ${
+        className={`w-full py-3 px-4 rounded-lg font-bold text-xs sm:text-sm flex items-center justify-center space-x-2 transition-all shadow-sm focus-visible:ring-2 focus-visible:ring-[#114B44] ${
           !canAnalyze || isLoading
-            ? 'bg-slate-800 text-slate-500 border border-slate-700/50 cursor-not-allowed'
-            : 'bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold shadow-sm'
+            ? 'bg-[#EAE7E1] text-[#79888E] border border-[#DFE3E1] cursor-not-allowed'
+            : 'bg-[#114B44] hover:bg-[#0D3833] active:bg-[#0A2A26] text-white'
         }`}
       >
         {isLoading ? (
           <>
-            <span className="w-4 h-4 border-2 border-slate-950/30 border-t-slate-950 rounded-full animate-spin" />
-            <span>Running Road Inspection...</span>
+            <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            <span>Processing Road Inspection Pipeline...</span>
           </>
         ) : (
           <>

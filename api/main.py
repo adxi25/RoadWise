@@ -34,6 +34,7 @@ from database.database import (  # noqa: E402
 from detection.predict import load_model  # noqa: E402
 from pipeline.inspection_pipeline import (  # noqa: E402
     DEFAULT_CONFIDENCE,
+    DEFAULT_IMGSZ,
     run_inspection,
 )
 
@@ -170,6 +171,10 @@ async def inspect_road(
         DEFAULT_CONFIDENCE,
         description="YOLO confidence threshold (0.05 to 0.95, default: 0.25)",
     ),
+    imgsz: Optional[int] = Form(
+        DEFAULT_IMGSZ,
+        description="YOLO inference image size in pixels (default: 640)",
+    ),
 ) -> dict[str, Any]:
     """
     Execute a Mode 1 inspection on an uploaded road image.
@@ -192,6 +197,19 @@ async def inspect_road(
             detail="The uploaded image file is empty.",
         )
 
+    # Validate imgsz
+    target_imgsz = DEFAULT_IMGSZ
+    if imgsz is not None:
+        try:
+            target_imgsz = int(imgsz)
+            if not 320 <= target_imgsz <= 1920:
+                raise ValueError("imgsz must be between 320 and 1920 pixels.")
+        except (TypeError, ValueError) as val_err:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Invalid inference image size: {val_err}",
+            )
+
     context = {
         "road_type": road_type,
         "traffic_level": traffic_level,
@@ -210,6 +228,7 @@ async def inspect_road(
             context=context,
             conf=conf if conf is not None else DEFAULT_CONFIDENCE,
             save_to_db=True,
+            imgsz=target_imgsz,
         )
 
         # Convert absolute filesystem paths to relative static web mount paths

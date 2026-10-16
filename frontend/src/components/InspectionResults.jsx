@@ -10,8 +10,9 @@ import {
   X,
   MapPin, 
   Calendar, 
-  AlertTriangle,
-  Layers
+  ShieldAlert,
+  Layers,
+  Info
 } from 'lucide-react';
 import ScoreGauge from './ScoreGauge';
 import PriorityBadge from './PriorityBadge';
@@ -50,49 +51,49 @@ export default function InspectionResults({ result, onReset }) {
   };
 
   const damageClassBadges = {
-    D40: { label: 'Pothole', bg: 'bg-rose-950/60 text-rose-300 border-rose-600/40' },
-    D20: { label: 'Alligator Crack', bg: 'bg-orange-950/60 text-orange-300 border-orange-500/40' },
-    D10: { label: 'Transverse Crack', bg: 'bg-amber-950/60 text-amber-300 border-amber-500/40' },
-    D00: { label: 'Longitudinal Crack', bg: 'bg-cyan-950/60 text-cyan-300 border-cyan-500/40' },
+    D40: { label: 'Pothole', bg: 'bg-[#FFF1F2] text-[#9F1239] border-[#FECDD3]' },
+    D20: { label: 'Alligator Crack', bg: 'bg-[#FFF7ED] text-[#C2410C] border-[#FED7AA]' },
+    D10: { label: 'Transverse Crack', bg: 'bg-[#FFFBEB] text-[#B45309] border-[#FDE68A]' },
+    D00: { label: 'Longitudinal Crack', bg: 'bg-[#F0FDFA] text-[#0F766E] border-[#CCFBF1]' },
   };
 
   return (
     <div className="space-y-6">
       
       {/* 1. Header Toolbar */}
-      <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+      <div className="p-4 rounded-lg bg-white border border-[#DFE3E1] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-2xs">
         <div className="space-y-1">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-[11px] font-mono text-slate-400 font-semibold">REPORT:</span>
-            <span className="text-xs font-mono font-bold text-cyan-400 bg-slate-950 px-2 py-0.5 rounded border border-slate-800">
+            <span className="text-[11px] font-mono text-[#505E63] font-bold">REPORT:</span>
+            <span className="text-xs font-mono font-bold text-[#114B44] bg-[#EBF4F2] px-2 py-0.5 rounded border border-[#CCDCD8]">
               {report_id}
             </span>
             <button
               type="button"
               onClick={handleCopyReportId}
-              className="p-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs transition-colors"
+              className="p-1 rounded bg-[#F8F7F4] hover:bg-[#F3F1EC] border border-[#DFE3E1] text-[#505E63] hover:text-[#141D20] text-xs transition-colors focus-visible:ring-2 focus-visible:ring-[#114B44]"
               title="Copy Report ID"
             >
-              {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+              {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
             </button>
             {inspection_id && (
-              <span className="text-[11px] font-mono text-slate-500">
+              <span className="text-[11px] font-mono text-[#79888E]">
                 (Record #{inspection_id})
               </span>
             )}
           </div>
 
-          <div className="flex flex-wrap items-center gap-3 text-xs text-slate-400 font-mono pt-0.5">
+          <div className="flex flex-wrap items-center gap-3 text-xs text-[#505E63] font-mono pt-0.5">
             {location?.city && (
-              <span className="flex items-center space-x-1 text-slate-300">
-                <MapPin className="w-3 h-3 text-slate-500" />
-                <span>{location.city}{location.state ? `, ${location.state}` : ''}</span>
+              <span className="flex items-center space-x-1 text-[#141D20]">
+                <MapPin className="w-3.5 h-3.5 text-[#114B44]" />
+                <span className="font-semibold">{location.city}{location.state ? `, ${location.state}` : ''}</span>
               </span>
             )}
             <span className="capitalize">{context?.road_type?.replace(/_/g, ' ')}</span>
             <span className="capitalize">{context?.traffic_level?.replace(/_/g, ' ')} traffic</span>
             {created_at && (
-              <span className="flex items-center space-x-1 text-slate-500">
+              <span className="flex items-center space-x-1 text-[#79888E]">
                 <Calendar className="w-3 h-3" />
                 <span>{new Date(created_at).toLocaleString()}</span>
               </span>
@@ -103,36 +104,36 @@ export default function InspectionResults({ result, onReset }) {
         <button
           type="button"
           onClick={onReset}
-          className="px-3.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-semibold flex items-center space-x-1.5 transition-colors self-stretch sm:self-auto justify-center"
+          className="px-4 py-2 rounded bg-[#114B44] hover:bg-[#0D3833] text-white text-xs font-semibold flex items-center space-x-1.5 transition-colors self-stretch sm:self-auto justify-center shadow-2xs focus-visible:ring-2 focus-visible:ring-[#114B44]"
         >
-          <RotateCcw className="w-3.5 h-3.5 text-cyan-400" />
+          <RotateCcw className="w-3.5 h-3.5" />
           <span>New Inspection</span>
         </button>
       </div>
 
-      {/* 2. Top Grid: High-Resolution Road Image Viewer & Score Telemetry */}
+      {/* 2. Top Grid: Road Image Viewer & Score Telemetry */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         
         {/* Left: Road Image Viewer (7 cols) */}
         <div className="lg:col-span-7 space-y-3">
           
-          <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-3">
+          <div className="p-4 rounded-lg bg-white border border-[#DFE3E1] space-y-3 shadow-2xs">
             
             {/* View Controls */}
             <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2 text-xs font-semibold text-slate-200 uppercase tracking-wider font-mono">
-                <Eye className="w-3.5 h-3.5 text-cyan-400" />
-                <span>Road Imagery Viewer</span>
+              <div className="flex items-center space-x-2 text-xs font-bold text-[#141D20] uppercase tracking-wider font-mono">
+                <Eye className="w-3.5 h-3.5 text-[#114B44]" />
+                <span>Road Surface Imagery</span>
               </div>
 
-              <div className="flex items-center space-x-1 bg-slate-950 p-1 rounded-lg border border-slate-800 text-xs">
+              <div className="flex items-center space-x-1 bg-[#F8F7F4] p-1 rounded border border-[#DFE3E1] text-xs">
                 <button
                   type="button"
                   onClick={() => setViewMode('annotated')}
-                  className={`px-2.5 py-1 rounded text-[11px] font-medium transition-colors ${
+                  className={`px-2.5 py-1 rounded text-[11px] font-semibold transition-all focus-visible:ring-2 focus-visible:ring-[#114B44] ${
                     viewMode === 'annotated'
-                      ? 'bg-slate-800 text-cyan-400 font-bold border border-slate-700'
-                      : 'text-slate-400 hover:text-white'
+                      ? 'bg-[#114B44] text-white shadow-2xs'
+                      : 'text-[#505E63] hover:text-[#141D20]'
                   }`}
                 >
                   AI Annotated ({detections.length})
@@ -140,10 +141,10 @@ export default function InspectionResults({ result, onReset }) {
                 <button
                   type="button"
                   onClick={() => setViewMode('original')}
-                  className={`px-2.5 py-1 rounded text-[11px] font-medium transition-colors ${
+                  className={`px-2.5 py-1 rounded text-[11px] font-semibold transition-all focus-visible:ring-2 focus-visible:ring-[#114B44] ${
                     viewMode === 'original'
-                      ? 'bg-slate-800 text-cyan-400 font-bold border border-slate-700'
-                      : 'text-slate-400 hover:text-white'
+                      ? 'bg-[#114B44] text-white shadow-2xs'
+                      : 'text-[#505E63] hover:text-[#141D20]'
                   }`}
                 >
                   Original
@@ -151,10 +152,10 @@ export default function InspectionResults({ result, onReset }) {
                 <button
                   type="button"
                   onClick={() => setViewMode('split')}
-                  className={`px-2.5 py-1 rounded text-[11px] font-medium transition-colors hidden sm:block ${
+                  className={`px-2.5 py-1 rounded text-[11px] font-semibold transition-all hidden sm:block focus-visible:ring-2 focus-visible:ring-[#114B44] ${
                     viewMode === 'split'
-                      ? 'bg-slate-800 text-cyan-400 font-bold border border-slate-700'
-                      : 'text-slate-400 hover:text-white'
+                      ? 'bg-[#114B44] text-white shadow-2xs'
+                      : 'text-[#505E63] hover:text-[#141D20]'
                   }`}
                 >
                   Side-by-Side
@@ -162,8 +163,8 @@ export default function InspectionResults({ result, onReset }) {
               </div>
             </div>
 
-            {/* Main Image Display Area (Strict Aspect Ratio Preservation) */}
-            <div className="relative rounded-lg overflow-hidden bg-black border border-slate-800 min-h-[380px] max-h-[560px] flex items-center justify-center">
+            {/* Main Image Display Area */}
+            <div className="relative rounded bg-[#141D20] border border-[#DFE3E1] min-h-[380px] max-h-[560px] flex items-center justify-center overflow-hidden">
               
               {viewMode === 'annotated' && (
                 <div className="relative w-full h-full flex items-center justify-center p-1">
@@ -172,13 +173,13 @@ export default function InspectionResults({ result, onReset }) {
                     alt="AI Annotated road defects"
                     className="max-h-[540px] w-auto max-w-full object-contain rounded"
                   />
-                  <div className="absolute top-2.5 left-2.5 bg-slate-950/90 border border-slate-800 px-2 py-0.5 rounded text-[10px] font-mono text-cyan-400">
+                  <div className="absolute top-2.5 left-2.5 bg-[#141D20]/90 border border-white/20 px-2 py-0.5 rounded text-[10px] font-mono text-white">
                     YOLOv8 Detection Overlay
                   </div>
                   <button
                     type="button"
                     onClick={() => setFullscreenImage(annotatedUrl || originalUrl)}
-                    className="absolute top-2.5 right-2.5 p-1.5 rounded bg-slate-900/90 hover:bg-slate-800 border border-slate-700 text-slate-300 hover:text-white transition-colors"
+                    className="absolute top-2.5 right-2.5 p-1.5 rounded bg-[#141D20]/90 hover:bg-[#141D20] border border-white/20 text-white transition-colors focus-visible:ring-2 focus-visible:ring-white"
                     title="Fullscreen view"
                   >
                     <Maximize2 className="w-3.5 h-3.5" />
@@ -193,13 +194,13 @@ export default function InspectionResults({ result, onReset }) {
                     alt="Original road inspection photo"
                     className="max-h-[540px] w-auto max-w-full object-contain rounded"
                   />
-                  <div className="absolute top-2.5 left-2.5 bg-slate-950/90 border border-slate-800 px-2 py-0.5 rounded text-[10px] font-mono text-slate-400">
+                  <div className="absolute top-2.5 left-2.5 bg-[#141D20]/90 border border-white/20 px-2 py-0.5 rounded text-[10px] font-mono text-white">
                     Original Camera Source
                   </div>
                   <button
                     type="button"
                     onClick={() => setFullscreenImage(originalUrl)}
-                    className="absolute top-2.5 right-2.5 p-1.5 rounded bg-slate-900/90 hover:bg-slate-800 border border-slate-700 text-slate-300 hover:text-white transition-colors"
+                    className="absolute top-2.5 right-2.5 p-1.5 rounded bg-[#141D20]/90 hover:bg-[#141D20] border border-white/20 text-white transition-colors focus-visible:ring-2 focus-visible:ring-white"
                     title="Fullscreen view"
                   >
                     <Maximize2 className="w-3.5 h-3.5" />
@@ -210,8 +211,8 @@ export default function InspectionResults({ result, onReset }) {
               {viewMode === 'split' && (
                 <div className="grid grid-cols-2 gap-2 p-2 w-full h-full">
                   <div className="space-y-1">
-                    <span className="text-[10px] font-mono text-slate-400 block">Original</span>
-                    <div className="bg-slate-950 border border-slate-800 rounded p-1 flex items-center justify-center min-h-[300px]">
+                    <span className="text-[10px] font-mono text-white/80 block">Original</span>
+                    <div className="bg-[#000000] border border-white/10 rounded p-1 flex items-center justify-center min-h-[300px]">
                       <img
                         src={originalUrl}
                         alt="Original"
@@ -220,8 +221,8 @@ export default function InspectionResults({ result, onReset }) {
                     </div>
                   </div>
                   <div className="space-y-1">
-                    <span className="text-[10px] font-mono text-cyan-400 block">Annotated</span>
-                    <div className="bg-slate-950 border border-slate-800 rounded p-1 flex items-center justify-center min-h-[300px]">
+                    <span className="text-[10px] font-mono text-emerald-400 block font-bold">Annotated</span>
+                    <div className="bg-[#000000] border border-white/10 rounded p-1 flex items-center justify-center min-h-[300px]">
                       <img
                         src={annotatedUrl}
                         alt="Annotated"
@@ -242,9 +243,9 @@ export default function InspectionResults({ result, onReset }) {
         <div className="lg:col-span-5 space-y-3">
           
           {/* Action Priority Card */}
-          <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-2.5">
-            <span className="text-[11px] font-mono uppercase tracking-wider text-slate-400 font-semibold block">
-              Maintenance Priority
+          <div className="p-4 rounded-lg bg-white border border-[#DFE3E1] space-y-2.5 shadow-2xs">
+            <span className="text-[11px] font-mono uppercase tracking-wider text-[#505E63] font-bold block">
+              Calculated Maintenance Priority
             </span>
             <PriorityBadge
               priority={priority.level || risk.maintenance_priority}
@@ -265,49 +266,49 @@ export default function InspectionResults({ result, onReset }) {
               score={risk.risk_score ?? 0}
               title="MAINTENANCE RISK"
               type="risk"
-              subtitle="Risk combines detected damage with road classification and sensitivity"
+              subtitle="Combines damage load with road category and sensitive facility weight"
             />
           </div>
 
           {/* Risk Factors Breakdown */}
-          <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-2.5 text-xs">
-            <span className="text-[11px] font-mono uppercase tracking-wider text-slate-400 font-semibold block">
+          <div className="p-4 rounded-lg bg-white border border-[#DFE3E1] space-y-2.5 text-xs shadow-2xs">
+            <span className="text-[11px] font-mono uppercase tracking-wider text-[#505E63] font-bold block">
               Scoring Telemetry
             </span>
 
-            <div className="space-y-1.5 font-mono">
-              <div className="flex justify-between py-1 border-b border-slate-800 text-slate-400">
+            <div className="space-y-1.5 font-mono text-xs">
+              <div className="flex justify-between py-1 border-b border-[#DFE3E1] text-[#505E63]">
                 <span>Calculated Damage Load:</span>
-                <span className="text-slate-200 font-bold">{condition.damage_load ?? 0}</span>
+                <span className="text-[#141D20] font-bold">{condition.damage_load ?? 0}</span>
               </div>
-              <div className="flex justify-between py-1 border-b border-slate-800 text-slate-400">
+              <div className="flex justify-between py-1 border-b border-[#DFE3E1] text-[#505E63]">
                 <span>Damage Level (Stretched):</span>
-                <span className="text-slate-200 font-bold">{risk.damage_level ?? 0} / 100</span>
+                <span className="text-[#141D20] font-bold">{risk.damage_level ?? 0} / 100</span>
               </div>
-              <div className="flex justify-between py-1 border-b border-slate-800 text-slate-400">
+              <div className="flex justify-between py-1 border-b border-[#DFE3E1] text-[#505E63]">
                 <span>Context Multiplier:</span>
-                <span className="text-cyan-400 font-bold">{risk.context_factor ? `${risk.context_factor.toFixed(2)}x` : '1.00x'}</span>
+                <span className="text-[#114B44] font-bold">{risk.context_factor ? `${risk.context_factor.toFixed(2)}x` : '1.00x'}</span>
               </div>
-              <div className="flex justify-between py-1 border-b border-slate-800 text-slate-400">
-                <span>Location Sensitivity:</span>
-                <span className="text-slate-200 font-sans capitalize">{context.location_sensitivity?.replace(/_/g, ' ')}</span>
+              <div className="flex justify-between py-1 border-b border-[#DFE3E1] text-[#505E63]">
+                <span>Facility Sensitivity:</span>
+                <span className="text-[#141D20] font-sans capitalize font-medium">{context.location_sensitivity?.replace(/_/g, ' ')}</span>
               </div>
               {location?.latitude && location?.longitude && (
-                <div className="flex justify-between py-1 text-slate-400">
+                <div className="flex justify-between py-1 text-[#505E63]">
                   <span>GPS Coordinates:</span>
-                  <span className="text-slate-200">{Number(location.latitude).toFixed(6)}°, {Number(location.longitude).toFixed(6)}°</span>
+                  <span className="text-[#141D20] font-bold">{Number(location.latitude).toFixed(6)}°, {Number(location.longitude).toFixed(6)}°</span>
                 </div>
               )}
             </div>
           </div>
 
-          {/* Actionable Guidance Box */}
-          <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-1.5 text-xs">
-            <div className="flex items-center space-x-1.5 text-xs font-semibold text-slate-200 uppercase font-mono">
-              <FileText className="w-3.5 h-3.5 text-cyan-400" />
+          {/* Operational Guidance Box */}
+          <div className="p-4 rounded-lg bg-white border border-[#DFE3E1] space-y-1.5 text-xs shadow-2xs">
+            <div className="flex items-center space-x-1.5 text-xs font-bold text-[#141D20] uppercase font-mono">
+              <FileText className="w-3.5 h-3.5 text-[#114B44]" />
               <span>Operational Guidance</span>
             </div>
-            <p className="text-slate-300 leading-relaxed font-sans text-xs">
+            <p className="text-[#505E63] leading-relaxed font-sans text-xs">
               {recommendation}
             </p>
           </div>
@@ -317,13 +318,13 @@ export default function InspectionResults({ result, onReset }) {
       </div>
 
       {/* 3. Dedicated Defect Telemetry Table */}
-      <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-3">
-        <div className="flex items-center justify-between border-b border-slate-800 pb-2.5">
-          <div className="flex items-center space-x-2 text-xs font-semibold text-slate-200 uppercase tracking-wider font-mono">
-            <Layers className="w-3.5 h-3.5 text-cyan-400" />
+      <div className="p-4 rounded-lg bg-white border border-[#DFE3E1] space-y-3 shadow-2xs">
+        <div className="flex items-center justify-between border-b border-[#DFE3E1] pb-2.5">
+          <div className="flex items-center space-x-2 text-xs font-bold text-[#141D20] uppercase tracking-wider font-mono">
+            <Layers className="w-3.5 h-3.5 text-[#114B44]" />
             <span>Detected Defect Telemetry</span>
           </div>
-          <span className="text-[11px] font-mono text-slate-400">
+          <span className="text-[11px] font-mono text-[#505E63] font-semibold">
             Total Detections: {detections.length}
           </span>
         </div>
@@ -332,18 +333,18 @@ export default function InspectionResults({ result, onReset }) {
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs font-mono">
               <thead>
-                <tr className="border-b border-slate-800 text-slate-400 text-[11px]">
-                  <th className="py-2 px-3">#</th>
-                  <th className="py-2 px-3">Class</th>
-                  <th className="py-2 px-3">Damage Type</th>
-                  <th className="py-2 px-3">Confidence</th>
-                  <th className="py-2 px-3">Relative Box Size (W × H)</th>
-                  <th className="py-2 px-3">Center (X, Y)</th>
+                <tr className="border-b border-[#DFE3E1] text-[#505E63] text-[11px] bg-[#F8F7F4]">
+                  <th className="py-2.5 px-3">#</th>
+                  <th className="py-2.5 px-3">Class</th>
+                  <th className="py-2.5 px-3">Damage Type</th>
+                  <th className="py-2.5 px-3">Confidence</th>
+                  <th className="py-2.5 px-3">Relative Box Size (W × H)</th>
+                  <th className="py-2.5 px-3">Center (X, Y)</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800/60">
+              <tbody className="divide-y divide-[#DFE3E1]">
                 {detections.map((d, idx) => {
-                  const badge = damageClassBadges[d.class_code] || { label: d.class_name, bg: 'bg-slate-800 text-slate-300 border-slate-700' };
+                  const badge = damageClassBadges[d.class_code] || { label: d.class_name, bg: 'bg-[#F8F7F4] text-[#141D20] border-[#DFE3E1]' };
                   const isHighlighted = highlightedIndex === idx;
 
                   return (
@@ -352,25 +353,25 @@ export default function InspectionResults({ result, onReset }) {
                       onMouseEnter={() => setHighlightedIndex(idx)}
                       onMouseLeave={() => setHighlightedIndex(null)}
                       className={`transition-colors cursor-default ${
-                        isHighlighted ? 'bg-slate-800/80' : 'hover:bg-slate-800/40'
+                        isHighlighted ? 'bg-[#EBF4F2]' : 'hover:bg-[#F8F7F4]'
                       }`}
                     >
-                      <td className="py-2 px-3 text-slate-500 font-mono">{idx + 1}</td>
-                      <td className="py-2 px-3">
+                      <td className="py-2.5 px-3 text-[#79888E] font-mono font-bold">{idx + 1}</td>
+                      <td className="py-2.5 px-3">
                         <span className={`px-2 py-0.5 rounded text-[10px] font-bold border font-mono ${badge.bg}`}>
                           {d.class_code}
                         </span>
                       </td>
-                      <td className="py-2 px-3 font-medium text-slate-200 capitalize font-sans">
+                      <td className="py-2.5 px-3 font-semibold text-[#141D20] capitalize font-sans">
                         {d.class_name.replace(/_/g, ' ')}
                       </td>
-                      <td className="py-2 px-3 font-bold text-cyan-400">
+                      <td className="py-2.5 px-3 font-bold text-[#114B44]">
                         {(d.confidence * 100).toFixed(1)}%
                       </td>
-                      <td className="py-2 px-3 text-slate-400">
+                      <td className="py-2.5 px-3 text-[#505E63]">
                         {(d.width * 100).toFixed(1)}% × {(d.height * 100).toFixed(1)}%
                       </td>
-                      <td className="py-2 px-3 text-slate-500 text-[11px]">
+                      <td className="py-2.5 px-3 text-[#79888E] text-[11px]">
                         ({d.x_center.toFixed(3)}, {d.y_center.toFixed(3)})
                       </td>
                     </tr>
@@ -380,11 +381,24 @@ export default function InspectionResults({ result, onReset }) {
             </table>
           </div>
         ) : (
-          <div className="p-4 rounded-lg bg-slate-950 border border-slate-800 text-xs text-slate-400 flex items-center space-x-2">
-            <Check className="w-4 h-4 text-emerald-400" />
-            <span>No road surface defects detected above the confidence threshold.</span>
+          <div className="p-4 rounded-lg bg-[#F8F7F4] border border-[#DFE3E1] space-y-2">
+            <div className="flex items-center space-x-2 text-xs font-semibold text-[#141D20]">
+              <Info className="w-4 h-4 text-[#114B44] flex-shrink-0" />
+              <span>No road surface defects detected above confidence threshold</span>
+            </div>
+            <p className="text-xs text-[#505E63] leading-relaxed">
+              <strong className="text-[#141D20]">Model Limitations Notice:</strong> Zero model detections indicates that no trained defect features met the confidence threshold in this frame. It does <em>not</em> guarantee that the road is undamaged or physically safe. Faint cracks, low-contrast potholes, or defects obscured by shade or distance may be missed. Certified field inspection remains necessary.
+            </p>
           </div>
         )}
+      </div>
+
+      {/* 4. Prototype Disclaimer Notice */}
+      <div className="p-3.5 rounded-lg bg-[#F8F7F4] border border-[#DFE3E1] text-xs text-[#62737A] flex items-start gap-2.5">
+        <ShieldAlert className="w-4 h-4 text-[#114B44] flex-shrink-0 mt-0.5" />
+        <p className="leading-relaxed">
+          <strong className="text-[#141D20] font-semibold">Decision-Support Notice:</strong> The condition score, risk index, and priority rating are project-defined calculations intended to assist engineering triage based on detected distress. Zero model detections does not certify physical road safety. Qualified on-site verification is advised before allocating repair resources.
+        </p>
       </div>
 
       {/* Fullscreen Zoom Modal */}
@@ -396,14 +410,14 @@ export default function InspectionResults({ result, onReset }) {
           <div className="relative max-w-5xl max-h-[90vh] flex flex-col items-center">
             <button
               onClick={() => setFullscreenImage(null)}
-              className="absolute -top-10 right-0 p-1.5 rounded-lg bg-slate-800 text-white hover:bg-slate-700"
+              className="absolute -top-10 right-0 p-1.5 rounded bg-white text-[#141D20] hover:bg-[#F3F1EC] focus-visible:ring-2 focus-visible:ring-white"
             >
               <X className="w-5 h-5" />
             </button>
             <img
               src={fullscreenImage}
               alt="Fullscreen high-res inspection"
-              className="max-h-[85vh] w-auto max-w-full object-contain rounded-lg border border-slate-700"
+              className="max-h-[85vh] w-auto max-w-full object-contain rounded border border-white/20"
             />
           </div>
         </div>

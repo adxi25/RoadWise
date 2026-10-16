@@ -3,63 +3,94 @@
 @layer base {
   :root {
     --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-    --font-heading: 'Inter', system-ui, -apple-system, sans-serif;
+    --font-heading: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
     --font-mono: 'JetBrains Mono', monospace;
+
+    /* Palette tokens */
+    --color-bg-canvas: #F8F7F4;
+    --color-bg-surface: #FFFFFF;
+    --color-bg-subtle: #F3F1EC;
+    --color-bg-muted: #EAE7E1;
+
+    --color-brand-primary: #114B44;
+    --color-brand-hover: #0D3833;
+    --color-brand-accent: #195E55;
+    --color-brand-tint: #EBF4F2;
+
+    --color-text-main: #141D20;
+    --color-text-muted: #505E63;
+    --color-text-subtle: #79888E;
+
+    --color-border: #DFE3E1;
+    --color-border-subtle: #ECEFE8;
   }
 
   body {
     font-family: var(--font-sans);
-    background-color: #030712;
-    color: #f1f5f9;
+    background-color: var(--color-bg-canvas);
+    color: var(--color-text-main);
     overflow-x: hidden;
+    line-height: 1.5;
   }
 
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-heading);
-    letter-spacing: -0.025em;
+    letter-spacing: -0.02em;
+    color: var(--color-text-main);
   }
 
   code, pre, .font-mono {
     font-family: var(--font-mono);
   }
+
+  /* Accessible focus indicators */
+  *:focus-visible {
+    outline: 2px solid var(--color-brand-primary);
+    outline-offset: 2px;
+  }
 }
 
-/* Technical custom scrollbar */
+/* Civic Scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 7px;
+  height: 7px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #030712;
+  background: #F3F1EC;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #1e293b;
-  border-radius: 3px;
+  background: #C8D1CE;
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #334155;
+  background: #A3B1AC;
 }
 
-/* Engineering surface utilities */
-.surface-panel {
-  background-color: #0b0f19;
-  border: 1px solid #1e293b;
-}
-
+/* Civic Infrastructure Surface Utilities */
 .surface-card {
-  background-color: #0f172a;
-  border: 1px solid #1e293b;
+  background-color: #FFFFFF;
+  border: 1px solid #DFE3E1;
 }
 
-.surface-card-subtle {
-  background-color: #090d16;
-  border: 1px solid #1e293b;
+.surface-subtle {
+  background-color: #F8F7F4;
+  border: 1px solid #E5E8E6;
 }
 
-/* Precise subtle transition */
-.transition-smooth {
-  transition: all 150ms cubic-bezier(0.16, 1, 0.3, 1);
+.surface-muted {
+  background-color: #F1EFEA;
+  border: 1px solid #DFE3E1;
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

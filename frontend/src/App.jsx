@@ -6,7 +6,7 @@ import InspectionResults from './components/InspectionResults';
 import LoadingOverlay from './components/LoadingOverlay';
 import DashboardPlaceholder from './components/DashboardPlaceholder';
 import { checkHealth, inspectRoad } from './api/client';
-import { AlertTriangle, Layers, Cpu, Activity, ShieldCheck, FileText } from 'lucide-react';
+import { AlertTriangle, Layers, Cpu, Activity, ShieldCheck, FileText, CheckCircle2 } from 'lucide-react';
 import LandingPage from './Pages/LandingPage.jsx';
 
 export default function App() {
@@ -32,6 +32,7 @@ export default function App() {
   });
 
   const [conf, setConf] = useState(0.25);
+  const [imgsz, setImgsz] = useState(640);
 
   // Execution State
   const [isLoading, setIsLoading] = useState(false);
@@ -51,7 +52,10 @@ export default function App() {
   }, []);
 
   const handleAnalyze = async () => {
+    if (isLoading) return;
+
     setApiError(null);
+    setInspectionResult(null);
 
     if (!selectedFile) {
       setFileError("Please select or drag-and-drop a road image first.");
@@ -67,6 +71,7 @@ export default function App() {
       formData.append('traffic_level', context.traffic_level);
       formData.append('location_sensitivity', context.location_sensitivity);
       formData.append('conf', String(conf));
+      formData.append('imgsz', String(imgsz));
 
       if (context.latitude !== null && context.latitude !== undefined && !isNaN(context.latitude)) {
         formData.append('latitude', String(context.latitude));
@@ -93,19 +98,28 @@ export default function App() {
     setApiError(null);
     setFileError(null);
   };
+
   if (showLanding) {
-  return (
-    <LandingPage
-      onStartInspection={() => setShowLanding(false)}
-      onTrackComplaint={() => {
-        alert('Complaint tracking will be implemented next.');
-      }}
-    />
-  );
-}
+    return (
+      <LandingPage
+        onStartInspection={() => {
+          setShowLanding(false);
+          setActiveTab('inspect');
+        }}
+        onOpenDashboard={() => {
+          setShowLanding(false);
+          setActiveTab('dashboard');
+        }}
+        onTrackComplaint={() => {
+          setShowLanding(false);
+          setActiveTab('dashboard');
+        }}
+      />
+    );
+  }
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#030712] text-slate-100 font-sans selection:bg-cyan-500 selection:text-slate-950">
+    <div className="min-h-screen flex flex-col bg-[#F8F7F4] text-[#141D20] font-sans selection:bg-[#114B44] selection:text-white">
       
       {/* Top Navigation */}
       <Navbar
@@ -126,17 +140,18 @@ export default function App() {
             
             {/* Error Banner */}
             {apiError && (
-              <div className="p-3.5 rounded-xl bg-rose-950/60 border border-rose-500/40 text-rose-200 text-xs flex items-start justify-between gap-3 shadow-sm">
+              <div className="p-3.5 rounded-lg bg-[#FEF2F2] border border-[#FECDD3] text-[#991B1B] text-xs flex items-start justify-between gap-3 shadow-2xs">
                 <div className="flex items-start space-x-2.5">
-                  <AlertTriangle className="w-4 h-4 text-rose-400 flex-shrink-0 mt-0.5" />
+                  <AlertTriangle className="w-4 h-4 text-rose-600 flex-shrink-0 mt-0.5" />
                   <div>
-                    <span className="font-semibold block text-white">Inspection Failed</span>
-                    <span className="text-[11px] text-rose-200/90 leading-relaxed font-mono">{apiError}</span>
+                    <span className="font-bold block text-[#141D20]">Inspection Error</span>
+                    <span className="text-xs text-[#991B1B] leading-relaxed font-mono">{apiError}</span>
                   </div>
                 </div>
                 <button
+                  type="button"
                   onClick={() => setApiError(null)}
-                  className="text-xs text-rose-400 hover:text-rose-200 underline font-mono ml-auto"
+                  className="text-xs text-[#991B1B] hover:text-[#141D20] underline font-mono ml-auto font-semibold"
                 >
                   Dismiss
                 </button>
@@ -155,13 +170,15 @@ export default function App() {
                 
                 {/* Left Column: Inspection Input (5 cols) */}
                 <div className="lg:col-span-5 space-y-4">
-                  <div className="p-4 sm:p-5 rounded-xl bg-slate-900/60 border border-slate-800 space-y-4">
+                  <div className="p-5 rounded-lg bg-white border border-[#DFE3E1] space-y-4 shadow-2xs">
                     
-                    <div className="border-b border-slate-800 pb-2 flex items-center justify-between">
-                      <span className="text-xs font-semibold text-slate-200 uppercase font-mono tracking-wider">
+                    <div className="border-b border-[#DFE3E1] pb-2 flex items-center justify-between">
+                      <span className="text-xs font-bold text-[#141D20] uppercase font-mono tracking-wider">
                         Inspection Input
                       </span>
-                      <span className="text-[11px] text-slate-500 font-mono">Mode 1</span>
+                      <span className="text-[11px] text-[#505E63] font-mono bg-[#F8F7F4] px-2 py-0.5 rounded border border-[#DFE3E1]">
+                        Mode 1 Live
+                      </span>
                     </div>
 
                     <ImageUploader
@@ -180,6 +197,8 @@ export default function App() {
                       setContext={setContext}
                       conf={conf}
                       setConf={setConf}
+                      imgsz={imgsz}
+                      setImgsz={setImgsz}
                       onAnalyze={handleAnalyze}
                       isLoading={isLoading}
                       canAnalyze={!!selectedFile}
@@ -188,7 +207,7 @@ export default function App() {
                   </div>
                 </div>
 
-                {/* Right Column: Analysis Summary & Empty State (7 cols) */}
+                {/* Right Column: Pipeline Overview & Empty State (7 cols) */}
                 <div className="lg:col-span-7">
                   {isLoading ? (
                     <div className="py-12">
@@ -196,67 +215,67 @@ export default function App() {
                     </div>
                   ) : (
                     /* Intentional Professional Empty State */
-                    <div className="p-6 sm:p-8 rounded-xl bg-slate-900/40 border border-slate-800 space-y-6">
+                    <div className="p-6 sm:p-8 rounded-lg bg-white border border-[#DFE3E1] space-y-6 shadow-2xs">
                       
-                      <div className="space-y-1.5 border-b border-slate-800 pb-4">
-                        <div className="flex items-center space-x-2 text-slate-300">
-                          <Layers className="w-4 h-4 text-cyan-400" />
+                      <div className="space-y-1.5 border-b border-[#DFE3E1] pb-4">
+                        <div className="flex items-center space-x-2 text-[#141D20]">
+                          <Layers className="w-4 h-4 text-[#114B44]" />
                           <h2 className="text-sm font-bold uppercase font-mono tracking-wider">
-                            Ready for inspection
+                            Ready for Inspection
                           </h2>
                         </div>
-                        <p className="text-xs text-slate-400 leading-relaxed font-sans">
-                          Upload a road image and provide the infrastructure context to run the analysis.
+                        <p className="text-xs text-[#505E63] leading-relaxed font-sans">
+                          Select a road surface photograph and specify road classification to calculate condition rating and maintenance risk.
                         </p>
                       </div>
 
                       {/* Technical Pipeline Overview Cards */}
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
                         
-                        <div className="p-3.5 rounded-lg bg-slate-950 border border-slate-800 space-y-1.5">
-                          <div className="flex items-center space-x-2 text-xs font-semibold text-slate-200">
-                            <Cpu className="w-3.5 h-3.5 text-cyan-400" />
+                        <div className="p-4 rounded-lg bg-[#F8F7F4] border border-[#DFE3E1] space-y-1.5">
+                          <div className="flex items-center space-x-2 text-xs font-bold text-[#141D20]">
+                            <Cpu className="w-4 h-4 text-[#114B44]" />
                             <span>Defect Object Detection</span>
                           </div>
-                          <p className="text-[11px] text-slate-400 leading-relaxed">
-                            Identifies potholes (D40), alligator cracks (D20), transverse cracks (D10), and longitudinal cracks (D00).
+                          <p className="text-xs text-[#505E63] leading-relaxed">
+                            Detects potholes (D40), alligator cracks (D20), transverse cracks (D10), and longitudinal cracks (D00).
                           </p>
                         </div>
 
-                        <div className="p-3.5 rounded-lg bg-slate-950 border border-slate-800 space-y-1.5">
-                          <div className="flex items-center space-x-2 text-xs font-semibold text-slate-200">
-                            <Activity className="w-3.5 h-3.5 text-cyan-400" />
+                        <div className="p-4 rounded-lg bg-[#F8F7F4] border border-[#DFE3E1] space-y-1.5">
+                          <div className="flex items-center space-x-2 text-xs font-bold text-[#141D20]">
+                            <Activity className="w-4 h-4 text-[#114B44]" />
                             <span>Condition Scoring</span>
                           </div>
-                          <p className="text-[11px] text-slate-400 leading-relaxed">
-                            Exponential damage load decay formula (100 = perfect, 0 = severe degradation) with duplicate overlap discounting.
+                          <p className="text-xs text-[#505E63] leading-relaxed">
+                            Exponential damage load decay formula (100 = intact, 0 = severe distress) with overlap compensation.
                           </p>
                         </div>
 
-                        <div className="p-3.5 rounded-lg bg-slate-950 border border-slate-800 space-y-1.5">
-                          <div className="flex items-center space-x-2 text-xs font-semibold text-slate-200">
-                            <ShieldCheck className="w-3.5 h-3.5 text-cyan-400" />
+                        <div className="p-4 rounded-lg bg-[#F8F7F4] border border-[#DFE3E1] space-y-1.5">
+                          <div className="flex items-center space-x-2 text-xs font-bold text-[#141D20]">
+                            <ShieldCheck className="w-4 h-4 text-[#114B44]" />
                             <span>Context-Calibrated Risk</span>
                           </div>
-                          <p className="text-[11px] text-slate-400 leading-relaxed">
-                            Amplifies damage severity using road classification, traffic volume, and proximity to critical sensitive facilities.
+                          <p className="text-xs text-[#505E63] leading-relaxed">
+                            Calibrates defect severity using road classification, traffic volume, and proximity to sensitive facilities.
                           </p>
                         </div>
 
-                        <div className="p-3.5 rounded-lg bg-slate-950 border border-slate-800 space-y-1.5">
-                          <div className="flex items-center space-x-2 text-xs font-semibold text-slate-200">
-                            <FileText className="w-3.5 h-3.5 text-cyan-400" />
+                        <div className="p-4 rounded-lg bg-[#F8F7F4] border border-[#DFE3E1] space-y-1.5">
+                          <div className="flex items-center space-x-2 text-xs font-bold text-[#141D20]">
+                            <FileText className="w-4 h-4 text-[#114B44]" />
                             <span>Actionable Telemetry</span>
                           </div>
-                          <p className="text-[11px] text-slate-400 leading-relaxed">
-                            Generates maintenance priority bands (LOW to CRITICAL) and operational guidance stored in the database.
+                          <p className="text-xs text-[#505E63] leading-relaxed">
+                            Generates maintenance priority bands (LOW to CRITICAL) and operational guidance recorded to SQLite.
                           </p>
                         </div>
 
                       </div>
 
                       {/* Technical Specs Footer */}
-                      <div className="p-3 rounded-lg bg-slate-950/80 border border-slate-800/80 text-[11px] font-mono text-slate-400 flex flex-wrap items-center justify-between gap-2">
+                      <div className="p-3 rounded bg-[#F8F7F4] border border-[#DFE3E1] text-[11px] font-mono text-[#505E63] flex flex-wrap items-center justify-between gap-2">
                         <span>Model: YOLOv8 640px</span>
                         <span>Backend: FastAPI + SQLite</span>
                         <span>Mode: Single Frame Inspection</span>
@@ -274,11 +293,11 @@ export default function App() {
 
       </main>
 
-      {/* Technical Footer */}
-      <footer className="border-t border-slate-800/80 bg-slate-950 py-3.5 text-xs text-slate-400 font-mono mt-auto">
+      {/* Technical Civic Footer */}
+      <footer className="border-t border-[#DFE3E1] bg-white py-3.5 text-xs text-[#505E63] font-mono mt-auto">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-2">
           <span>RoadWise Road Safety & Asset Inspection Platform</span>
-          <span className="text-slate-400">Mode 1 — Single Road Inspection</span>
+          <span className="text-[#79888E]">Mode 1 — Single Road Inspection</span>
         </div>
       </footer>
 
