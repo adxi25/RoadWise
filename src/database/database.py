@@ -301,7 +301,7 @@ def get_inspection(inspection_id):
 
 def get_all_inspections():
     """
-    Get all RoadWise inspections.
+    Get all RoadWise inspections with detection counts, sorted deterministically by risk score and ID.
     """
 
     connection = get_connection()
@@ -309,20 +309,29 @@ def get_all_inspections():
 
     cursor.execute("""
         SELECT
-            id,
-            report_id,
-            latitude,
-            longitude,
-            state,
-            city,
-            area,
-            road_type,
-            condition_score,
-            risk_score,
-            priority,
-            created_at
-        FROM inspections
-        ORDER BY risk_score DESC
+            i.id,
+            i.report_id,
+            i.image_path,
+            i.annotated_image_path,
+            i.latitude,
+            i.longitude,
+            i.state,
+            i.city,
+            i.area,
+            i.road_type,
+            i.traffic_level,
+            i.location_sensitivity,
+            i.condition_score,
+            i.risk_score,
+            i.priority,
+            i.recommendation,
+            i.pdf_path,
+            i.created_at,
+            COUNT(d.id) AS detection_count
+        FROM inspections i
+        LEFT JOIN detections d ON i.id = d.inspection_id
+        GROUP BY i.id
+        ORDER BY i.risk_score DESC, i.id DESC
     """)
 
     rows = cursor.fetchall()
@@ -330,16 +339,23 @@ def get_all_inspections():
     columns = [
         "id",
         "report_id",
+        "image_path",
+        "annotated_image_path",
         "latitude",
         "longitude",
         "state",
         "city",
         "area",
         "road_type",
+        "traffic_level",
+        "location_sensitivity",
         "condition_score",
         "risk_score",
         "priority",
-        "created_at"
+        "recommendation",
+        "pdf_path",
+        "created_at",
+        "detection_count"
     ]
 
     inspections = [
@@ -350,6 +366,52 @@ def get_all_inspections():
     connection.close()
 
     return inspections
+
+
+def get_inspection_stats():
+    """
+    Get aggregated inspection metrics from the SQLite database.
+    """
+    connection = get_connection()
+    cursor = connection.cursor()
+
+    cursor.execute("""
+        SELECT
+            COUNT(*) AS total_inspections,
+            SUM(CASE WHEN UPPER(priority) = 'CRITICAL' THEN 1 ELSE 0 END) AS critical_count,
+            SUM(CASE WHEN UPPER(priority) = 'HIGH' THEN 1 ELSE 0 END) AS high_count,
+            SUM(CASE WHEN UPPER(priority) = 'MEDIUM' THEN 1 ELSE 0 END) AS medium_count,
+            SUM(CASE WHEN UPPER(priority) = 'LOW' THEN 1 ELSE 0 END) AS low_count,
+            AVG(condition_score) AS avg_condition_score,
+            AVG(risk_score) AS avg_risk_score,
+            SUM(CASE WHEN latitude IS NOT NULL AND longitude IS NOT NULL THEN 1 ELSE 0 END) AS valid_gps_count
+        FROM inspections
+    """)
+    row = cursor.fetchone()
+    connection.close()
+
+    if not row or row[0] == 0:
+        return {
+            "total_inspections": 0,
+            "critical_count": 0,
+            "high_count": 0,
+            "medium_count": 0,
+            "low_count": 0,
+            "avg_condition_score": 0.0,
+            "avg_risk_score": 0.0,
+            "valid_gps_count": 0,
+        }
+
+    return {
+        "total_inspections": row[0] or 0,
+        "critical_count": row[1] or 0,
+        "high_count": row[2] or 0,
+        "medium_count": row[3] or 0,
+        "low_count": row[4] or 0,
+        "avg_condition_score": round(row[5], 2) if row[5] is not None else 0.0,
+        "avg_risk_score": round(row[6], 2) if row[6] is not None else 0.0,
+        "valid_gps_count": row[7] or 0,
+    }
 
 
 if __name__ == "__main__":

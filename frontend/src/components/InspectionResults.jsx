@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Check, 
   Copy, 
@@ -12,7 +12,9 @@ import {
   Calendar, 
   ShieldAlert,
   Layers,
-  Info
+  Info,
+  ImageOff,
+  AlertCircle
 } from 'lucide-react';
 import ScoreGauge from './ScoreGauge';
 import PriorityBadge from './PriorityBadge';
@@ -23,6 +25,11 @@ export default function InspectionResults({ result, onReset }) {
   const [copied, setCopied] = useState(false);
   const [fullscreenImage, setFullscreenImage] = useState(null);
   const [highlightedIndex, setHighlightedIndex] = useState(null);
+
+  // Failure tracking for images
+  const [annotatedError, setAnnotatedError] = useState(false);
+  const [originalError, setOriginalError] = useState(false);
+  const [fullscreenError, setFullscreenError] = useState(false);
 
   if (!result) return null;
 
@@ -41,8 +48,17 @@ export default function InspectionResults({ result, onReset }) {
     created_at,
   } = result;
 
-  const originalUrl = getImageUrl(image?.original_path);
-  const annotatedUrl = getImageUrl(image?.annotated_path);
+  const rawOriginal = image?.original_path || result?.image_path || result?.original_path;
+  const rawAnnotated = image?.annotated_path || result?.annotated_image_path || result?.annotated_path;
+
+  const originalUrl = getImageUrl(rawOriginal);
+  const annotatedUrl = getImageUrl(rawAnnotated);
+
+  useEffect(() => {
+    setAnnotatedError(false);
+    setOriginalError(false);
+    setFullscreenError(false);
+  }, [originalUrl, annotatedUrl]);
 
   const handleCopyReportId = () => {
     navigator.clipboard.writeText(report_id);
@@ -84,9 +100,15 @@ export default function InspectionResults({ result, onReset }) {
           </div>
 
           <div className="flex flex-wrap items-center gap-3 text-xs text-[#505E63] font-mono pt-0.5">
+            {location?.latitude !== null && location?.latitude !== undefined &&
+             location?.longitude !== null && location?.longitude !== undefined && (
+              <span className="flex items-center space-x-1 text-[#114B44] font-bold bg-[#EBF4F2] px-2 py-0.5 rounded border border-[#CCDCD8]">
+                <MapPin className="w-3.5 h-3.5" />
+                <span>{Number(location.latitude).toFixed(6)}°, {Number(location.longitude).toFixed(6)}°</span>
+              </span>
+            )}
             {location?.city && (
               <span className="flex items-center space-x-1 text-[#141D20]">
-                <MapPin className="w-3.5 h-3.5 text-[#114B44]" />
                 <span className="font-semibold">{location.city}{location.state ? `, ${location.state}` : ''}</span>
               </span>
             )}
@@ -168,43 +190,107 @@ export default function InspectionResults({ result, onReset }) {
               
               {viewMode === 'annotated' && (
                 <div className="relative w-full h-full flex items-center justify-center p-1">
-                  <img
-                    src={annotatedUrl || originalUrl}
-                    alt="AI Annotated road defects"
-                    className="max-h-[540px] w-auto max-w-full object-contain rounded"
-                  />
-                  <div className="absolute top-2.5 left-2.5 bg-[#141D20]/90 border border-white/20 px-2 py-0.5 rounded text-[10px] font-mono text-white">
-                    YOLOv8 Detection Overlay
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setFullscreenImage(annotatedUrl || originalUrl)}
-                    className="absolute top-2.5 right-2.5 p-1.5 rounded bg-[#141D20]/90 hover:bg-[#141D20] border border-white/20 text-white transition-colors focus-visible:ring-2 focus-visible:ring-white"
-                    title="Fullscreen view"
-                  >
-                    <Maximize2 className="w-3.5 h-3.5" />
-                  </button>
+                  {annotatedUrl && !annotatedError ? (
+                    <>
+                      <img
+                        src={annotatedUrl}
+                        alt="AI Annotated road defects"
+                        onError={() => setAnnotatedError(true)}
+                        className="max-h-[540px] w-auto max-w-full object-contain rounded"
+                      />
+                      <div className="absolute top-2.5 left-2.5 bg-[#141D20]/90 border border-white/20 px-2 py-0.5 rounded text-[10px] font-mono text-white">
+                        YOLOv8 Detection Overlay
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setFullscreenError(false);
+                          setFullscreenImage(annotatedUrl);
+                        }}
+                        className="absolute top-2.5 right-2.5 p-1.5 rounded bg-[#141D20]/90 hover:bg-[#141D20] border border-white/20 text-white transition-colors focus-visible:ring-2 focus-visible:ring-white"
+                        title="Fullscreen view"
+                      >
+                        <Maximize2 className="w-3.5 h-3.5" />
+                      </button>
+                    </>
+                  ) : originalUrl && !originalError ? (
+                    <>
+                      <img
+                        src={originalUrl}
+                        alt="Original road inspection photo (AI overlay unavailable)"
+                        onError={() => setOriginalError(true)}
+                        className="max-h-[540px] w-auto max-w-full object-contain rounded"
+                      />
+                      <div className="absolute top-2.5 left-2.5 bg-[#141D20]/90 border border-amber-400/40 px-2 py-0.5 rounded text-[10px] font-mono text-amber-200 flex items-center space-x-1">
+                        <AlertCircle className="w-3 h-3 text-amber-400" />
+                        <span>AI Overlay Unavailable — Showing Source</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setFullscreenError(false);
+                          setFullscreenImage(originalUrl);
+                        }}
+                        className="absolute top-2.5 right-2.5 p-1.5 rounded bg-[#141D20]/90 hover:bg-[#141D20] border border-white/20 text-white transition-colors focus-visible:ring-2 focus-visible:ring-white"
+                        title="Fullscreen view"
+                      >
+                        <Maximize2 className="w-3.5 h-3.5" />
+                      </button>
+                    </>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center p-8 text-center space-y-3 text-[#79888E] min-h-[340px]">
+                      <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center text-white/60">
+                        <ImageOff className="w-6 h-6" />
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-sm font-semibold text-white">Road Surface Imagery Unavailable</p>
+                        <p className="text-xs text-white/60 max-w-sm">
+                          The road inspection image could not be loaded from server storage. Detected defect telemetry and scoring formulas remain intact below.
+                        </p>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 
               {viewMode === 'original' && (
                 <div className="relative w-full h-full flex items-center justify-center p-1">
-                  <img
-                    src={originalUrl}
-                    alt="Original road inspection photo"
-                    className="max-h-[540px] w-auto max-w-full object-contain rounded"
-                  />
-                  <div className="absolute top-2.5 left-2.5 bg-[#141D20]/90 border border-white/20 px-2 py-0.5 rounded text-[10px] font-mono text-white">
-                    Original Camera Source
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setFullscreenImage(originalUrl)}
-                    className="absolute top-2.5 right-2.5 p-1.5 rounded bg-[#141D20]/90 hover:bg-[#141D20] border border-white/20 text-white transition-colors focus-visible:ring-2 focus-visible:ring-white"
-                    title="Fullscreen view"
-                  >
-                    <Maximize2 className="w-3.5 h-3.5" />
-                  </button>
+                  {originalUrl && !originalError ? (
+                    <>
+                      <img
+                        src={originalUrl}
+                        alt="Original road inspection photo"
+                        onError={() => setOriginalError(true)}
+                        className="max-h-[540px] w-auto max-w-full object-contain rounded"
+                      />
+                      <div className="absolute top-2.5 left-2.5 bg-[#141D20]/90 border border-white/20 px-2 py-0.5 rounded text-[10px] font-mono text-white">
+                        Original Camera Source
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setFullscreenError(false);
+                          setFullscreenImage(originalUrl);
+                        }}
+                        className="absolute top-2.5 right-2.5 p-1.5 rounded bg-[#141D20]/90 hover:bg-[#141D20] border border-white/20 text-white transition-colors focus-visible:ring-2 focus-visible:ring-white"
+                        title="Fullscreen view"
+                      >
+                        <Maximize2 className="w-3.5 h-3.5" />
+                      </button>
+                    </>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center p-8 text-center space-y-3 text-[#79888E] min-h-[340px]">
+                      <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center text-white/60">
+                        <ImageOff className="w-6 h-6" />
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-sm font-semibold text-white">Original Photo Unavailable</p>
+                        <p className="text-xs text-white/60 max-w-sm">
+                          The original road photograph could not be retrieved from the server.
+                        </p>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -213,21 +299,37 @@ export default function InspectionResults({ result, onReset }) {
                   <div className="space-y-1">
                     <span className="text-[10px] font-mono text-white/80 block">Original</span>
                     <div className="bg-[#000000] border border-white/10 rounded p-1 flex items-center justify-center min-h-[300px]">
-                      <img
-                        src={originalUrl}
-                        alt="Original"
-                        className="max-h-[340px] w-auto max-w-full object-contain rounded"
-                      />
+                      {originalUrl && !originalError ? (
+                        <img
+                          src={originalUrl}
+                          alt="Original"
+                          onError={() => setOriginalError(true)}
+                          className="max-h-[340px] w-auto max-w-full object-contain rounded"
+                        />
+                      ) : (
+                        <div className="flex flex-col items-center justify-center p-4 text-center space-y-2 text-white/50">
+                          <ImageOff className="w-5 h-5 text-white/40" />
+                          <span className="text-[11px] font-mono">Original unavailable</span>
+                        </div>
+                      )}
                     </div>
                   </div>
                   <div className="space-y-1">
                     <span className="text-[10px] font-mono text-emerald-400 block font-bold">Annotated</span>
                     <div className="bg-[#000000] border border-white/10 rounded p-1 flex items-center justify-center min-h-[300px]">
-                      <img
-                        src={annotatedUrl}
-                        alt="Annotated"
-                        className="max-h-[340px] w-auto max-w-full object-contain rounded"
-                      />
+                      {annotatedUrl && !annotatedError ? (
+                        <img
+                          src={annotatedUrl}
+                          alt="Annotated"
+                          onError={() => setAnnotatedError(true)}
+                          className="max-h-[340px] w-auto max-w-full object-contain rounded"
+                        />
+                      ) : (
+                        <div className="flex flex-col items-center justify-center p-4 text-center space-y-2 text-white/50">
+                          <ImageOff className="w-5 h-5 text-white/40" />
+                          <span className="text-[11px] font-mono">Annotated overlay unavailable</span>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -293,7 +395,8 @@ export default function InspectionResults({ result, onReset }) {
                 <span>Facility Sensitivity:</span>
                 <span className="text-[#141D20] font-sans capitalize font-medium">{context.location_sensitivity?.replace(/_/g, ' ')}</span>
               </div>
-              {location?.latitude && location?.longitude && (
+              {location?.latitude !== null && location?.latitude !== undefined &&
+               location?.longitude !== null && location?.longitude !== undefined && (
                 <div className="flex justify-between py-1 text-[#505E63]">
                   <span>GPS Coordinates:</span>
                   <span className="text-[#141D20] font-bold">{Number(location.latitude).toFixed(6)}°, {Number(location.longitude).toFixed(6)}°</span>
@@ -407,18 +510,31 @@ export default function InspectionResults({ result, onReset }) {
           className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4 backdrop-blur-sm"
           onClick={() => setFullscreenImage(null)}
         >
-          <div className="relative max-w-5xl max-h-[90vh] flex flex-col items-center">
+          <div 
+            className="relative max-w-5xl max-h-[90vh] flex flex-col items-center"
+            onClick={(e) => e.stopPropagation()}
+          >
             <button
               onClick={() => setFullscreenImage(null)}
               className="absolute -top-10 right-0 p-1.5 rounded bg-white text-[#141D20] hover:bg-[#F3F1EC] focus-visible:ring-2 focus-visible:ring-white"
+              title="Close modal"
             >
               <X className="w-5 h-5" />
             </button>
-            <img
-              src={fullscreenImage}
-              alt="Fullscreen high-res inspection"
-              className="max-h-[85vh] w-auto max-w-full object-contain rounded border border-white/20"
-            />
+            {fullscreenError ? (
+              <div className="p-8 rounded bg-[#141D20] border border-white/20 text-center text-white space-y-3">
+                <ImageOff className="w-8 h-8 text-white/50 mx-auto" />
+                <p className="text-sm font-semibold">Image Preview Unavailable</p>
+                <p className="text-xs text-white/60">The high-resolution image could not be loaded.</p>
+              </div>
+            ) : (
+              <img
+                src={fullscreenImage}
+                alt="Fullscreen high-res inspection"
+                onError={() => setFullscreenError(true)}
+                className="max-h-[85vh] w-auto max-w-full object-contain rounded border border-white/20"
+              />
+            )}
           </div>
         </div>
       )}

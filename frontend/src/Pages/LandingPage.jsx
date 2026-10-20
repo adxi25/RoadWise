@@ -11,7 +11,7 @@ import {
   FileText,
   Search
 } from 'lucide-react';
-import heroRoadImage from '../assets/hero_road.jpg';
+import heroRoadImage from '../assets/hero_road_annotated.jpg';
 
 export default function LandingPage({ onStartInspection, onOpenDashboard, onTrackComplaint }) {
   return (
@@ -141,57 +141,17 @@ export default function LandingPage({ onStartInspection, onOpenDashboard, onTrac
                   className="w-full h-full object-cover"
                 />
 
-                {/* Simulated Real Bounding Box Telemetry (YOLO overlay demonstration) */}
-                <div className="absolute inset-0 pointer-events-none p-4 flex flex-col justify-between">
-                  
-                  {/* Top Bar Status */}
-                  <div className="flex items-center justify-between text-[10px] font-mono text-white bg-[#0D3833]/85 backdrop-blur-sm px-2.5 py-1 rounded border border-white/20">
-                    <span className="flex items-center gap-1.5">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                      YOLOv8 Single-Frame Inspection
-                    </span>
-                    <span>Conf: ≥0.25</span>
-                  </div>
-
-                  {/* Representative Bounding Box Graphic Overlay */}
-                  <div className="relative w-full h-36">
-                    <div className="absolute bottom-2 left-6 w-32 h-20 border-2 border-[#E11D48] bg-[#E11D48]/15 rounded flex flex-col justify-start">
-                      <span className="bg-[#E11D48] text-white text-[9px] font-mono font-bold px-1 py-0.5 self-start">
-                        D40 Pothole 89.4%
-                      </span>
-                    </div>
-
-                    <div className="absolute bottom-6 right-8 w-28 h-16 border-2 border-[#EA580C] bg-[#EA580C]/15 rounded flex flex-col justify-start">
-                      <span className="bg-[#EA580C] text-white text-[9px] font-mono font-bold px-1 py-0.5 self-start">
-                        D20 Alligator 78.2%
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Bottom Telemetry Strip */}
-                  <div className="grid grid-cols-3 gap-2 bg-[#141D20]/90 backdrop-blur-sm p-2 rounded border border-white/10 text-white text-center font-mono">
-                    <div>
-                      <span className="text-[9px] text-[#A3B1AC] block">Condition</span>
-                      <span className="text-xs font-bold text-amber-300">58.4 / 100</span>
-                    </div>
-                    <div>
-                      <span className="text-[9px] text-[#A3B1AC] block">Risk Multiplier</span>
-                      <span className="text-xs font-bold text-emerald-300">1.35x</span>
-                    </div>
-                    <div>
-                      <span className="text-[9px] text-[#A3B1AC] block">Priority</span>
-                      <span className="text-xs font-bold text-rose-300">HIGH</span>
-                    </div>
-                  </div>
-
+                {/* Illustrative image label — no fabricated detection results */}
+                <div className="absolute top-3 left-3 rounded border border-white/20 bg-[#0D3833]/85 px-3 py-2 text-[10px] font-mono text-white">
+                  Illustrative road imagery
                 </div>
 
               </div>
 
               {/* Visual Caption */}
               <div className="pt-2 px-1 flex items-center justify-between text-[11px] font-mono text-[#505E63]">
-                <span>Corridor: Urban Main Road</span>
-                <span>Telemetry: Mode 1 Live</span>
+                  <span>Road inspection example</span>
+                  <span>Live results appear after inspection</span>
               </div>
 
             </div>

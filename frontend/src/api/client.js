@@ -20,37 +20,54 @@ export function getImageUrl(pathStr) {
   if (!pathStr) return '';
   if (typeof pathStr !== 'string') pathStr = String(pathStr);
 
-  // If already a valid absolute URL, return directly
-  if (pathStr.startsWith('http://') || pathStr.startsWith('https://')) {
-    return pathStr;
+  const trimmed = pathStr.trim();
+  if (!trimmed) return '';
+
+  // If already a valid absolute URL, data URI, or blob URL, return directly
+  if (
+    trimmed.startsWith('http://') ||
+    trimmed.startsWith('https://') ||
+    trimmed.startsWith('blob:') ||
+    trimmed.startsWith('data:')
+  ) {
+    return trimmed;
   }
 
   // Normalize all Windows backslashes to forward slashes
-  const normalized = pathStr.replace(/\\/g, '/').trim();
+  const normalized = trimmed.replace(/\\/g, '/');
 
-  // If path contains data/uploads or results/predictions
+  // If path contains data/uploads or results/predictions (Windows or POSIX paths)
   if (normalized.includes('data/uploads/')) {
-    const filename = normalized.split('data/uploads/').pop();
+    const filename = normalized.split('data/uploads/').pop().replace(/^\/+/, '');
     return `${API_BASE_URL}/data/uploads/${filename}`;
   }
 
   if (normalized.includes('results/predictions/')) {
-    const filename = normalized.split('results/predictions/').pop();
+    const filename = normalized.split('results/predictions/').pop().replace(/^\/+/, '');
     return `${API_BASE_URL}/results/predictions/${filename}`;
   }
 
-  // Handle bare filename
-  if (normalized.includes('_annotated')) {
-    const filename = normalized.split('/').pop();
+  // Also handle paths like uploads/filename or predictions/filename
+  if (normalized.includes('uploads/')) {
+    const filename = normalized.split('uploads/').pop().replace(/^\/+/, '');
+    return `${API_BASE_URL}/data/uploads/${filename}`;
+  }
+
+  if (normalized.includes('predictions/')) {
+    const filename = normalized.split('predictions/').pop().replace(/^\/+/, '');
     return `${API_BASE_URL}/results/predictions/${filename}`;
   }
 
-  if (!normalized.includes('/')) {
-    return `${API_BASE_URL}/data/uploads/${normalized}`;
+  // Extract filename from any remaining absolute (e.g. C:/path/file.jpg) or relative path
+  const filename = normalized.split('/').pop().replace(/^\/+/, '');
+  if (!filename) return '';
+
+  // Annotated files belong in results/predictions, original uploads belong in data/uploads
+  if (filename.includes('_annotated')) {
+    return `${API_BASE_URL}/results/predictions/${filename}`;
   }
 
-  const cleanPath = normalized.replace(/^\//, '');
-  return `${API_BASE_URL}/${cleanPath}`;
+  return `${API_BASE_URL}/data/uploads/${filename}`;
 }
 
 /**
@@ -138,3 +155,21 @@ export async function getInspectionById(id) {
 
   return await res.json();
 }
+
+/**
+ * Fetch aggregate metrics for Mode 2 Authority Dashboard.
+ */
+export async function getDashboardStats() {
+  const res = await fetch(`${API_BASE_URL}/api/dashboard/stats`, {
+    method: 'GET',
+    headers: { 'Accept': 'application/json' },
+  });
+
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}));
+    throw new Error(errorData.detail || `Failed to fetch dashboard stats: ${res.statusText}`);
+  }
+
+  return await res.json();
+}
+

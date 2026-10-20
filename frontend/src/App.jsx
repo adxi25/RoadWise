@@ -4,7 +4,7 @@ import ImageUploader from './components/ImageUploader';
 import ContextForm from './components/ContextForm';
 import InspectionResults from './components/InspectionResults';
 import LoadingOverlay from './components/LoadingOverlay';
-import DashboardPlaceholder from './components/DashboardPlaceholder';
+import AuthorityDashboard from './Pages/AuthorityDashboard';
 import { checkHealth, inspectRoad } from './api/client';
 import { AlertTriangle, Layers, Cpu, Activity, ShieldCheck, FileText, CheckCircle2 } from 'lucide-react';
 import LandingPage from './Pages/LandingPage.jsx';
@@ -51,6 +51,21 @@ export default function App() {
     return () => clearInterval(interval);
   }, []);
 
+  const hasValidGps = Boolean(
+    context.latitude !== null &&
+    context.latitude !== undefined &&
+    context.longitude !== null &&
+    context.longitude !== undefined &&
+    !isNaN(Number(context.latitude)) &&
+    !isNaN(Number(context.longitude)) &&
+    Number(context.latitude) >= -90 &&
+    Number(context.latitude) <= 90 &&
+    Number(context.longitude) >= -180 &&
+    Number(context.longitude) <= 180
+  );
+
+  const canAnalyze = Boolean(selectedFile && hasValidGps);
+
   const handleAnalyze = async () => {
     if (isLoading) return;
 
@@ -59,6 +74,11 @@ export default function App() {
 
     if (!selectedFile) {
       setFileError("Please select or drag-and-drop a road image first.");
+      return;
+    }
+
+    if (!hasValidGps) {
+      setApiError("Valid live GPS coordinates (latitude and longitude) are mandatory before submitting an inspection. Please click 'Use My Current Location'.");
       return;
     }
 
@@ -73,12 +93,11 @@ export default function App() {
       formData.append('conf', String(conf));
       formData.append('imgsz', String(imgsz));
 
-      if (context.latitude !== null && context.latitude !== undefined && !isNaN(context.latitude)) {
-        formData.append('latitude', String(context.latitude));
-      }
-      if (context.longitude !== null && context.longitude !== undefined && !isNaN(context.longitude)) {
-        formData.append('longitude', String(context.longitude));
-      }
+      // Mandatory verified live GPS coordinates
+      formData.append('latitude', String(context.latitude));
+      formData.append('longitude', String(context.longitude));
+
+      // Supplementary regional context only
       if (context.state?.trim()) formData.append('state', context.state.trim());
       if (context.city?.trim()) formData.append('city', context.city.trim());
       if (context.area?.trim()) formData.append('area', context.area.trim());
@@ -94,9 +113,21 @@ export default function App() {
   };
 
   const handleReset = () => {
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl);
+    }
+    setSelectedFile(null);
+    setPreviewUrl(null);
+    setImageMeta(null);
     setInspectionResult(null);
     setApiError(null);
     setFileError(null);
+    setContext(prev => ({
+      ...prev,
+      latitude: null,
+      longitude: null,
+      accuracy: null,
+    }));
   };
 
   if (showLanding) {
@@ -134,7 +165,7 @@ export default function App() {
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
         
         {activeTab === 'dashboard' ? (
-          <DashboardPlaceholder onBackToInspect={() => setActiveTab('inspect')} />
+          <AuthorityDashboard onBackToInspect={() => setActiveTab('inspect')} />
         ) : (
           <div className="space-y-6">
             
@@ -161,6 +192,7 @@ export default function App() {
             {/* If result is ready, show full results dashboard */}
             {inspectionResult ? (
               <InspectionResults
+                key={inspectionResult.report_id || inspectionResult.inspection_id || 'result'}
                 result={inspectionResult}
                 onReset={handleReset}
               />
@@ -201,7 +233,7 @@ export default function App() {
                       setImgsz={setImgsz}
                       onAnalyze={handleAnalyze}
                       isLoading={isLoading}
-                      canAnalyze={!!selectedFile}
+                      canAnalyze={canAnalyze}
                     />
 
                   </div>

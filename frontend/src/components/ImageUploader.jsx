@@ -21,13 +21,32 @@ export default function ImageUploader({
     const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
     if (!validTypes.includes(file.type)) {
       setError("Supported formats: JPG, JPEG, PNG, or WebP.");
+      setSelectedFile(null);
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+        setPreviewUrl(null);
+      }
+      setImageMeta(null);
+      if (fileInputRef.current) fileInputRef.current.value = '';
       return;
     }
 
     const sizeMb = file.size / (1024 * 1024);
     if (sizeMb > 20) {
       setError(`File size (${sizeMb.toFixed(1)} MB) exceeds the 20 MB limit.`);
+      setSelectedFile(null);
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+        setPreviewUrl(null);
+      }
+      setImageMeta(null);
+      if (fileInputRef.current) fileInputRef.current.value = '';
       return;
+    }
+
+    // Revoke previous object URL if one exists to avoid memory leaks
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl);
     }
 
     setSelectedFile(file);
@@ -43,6 +62,14 @@ export default function ImageUploader({
         width: img.naturalWidth,
         height: img.naturalHeight,
       });
+    };
+    img.onerror = () => {
+      setError("Failed to decode the selected image. Please try a different road photograph.");
+      setSelectedFile(null);
+      URL.revokeObjectURL(url);
+      setPreviewUrl(null);
+      setImageMeta(null);
+      if (fileInputRef.current) fileInputRef.current.value = '';
     };
     img.src = url;
   };
@@ -69,6 +96,8 @@ export default function ImageUploader({
     if (e.target.files && e.target.files[0]) {
       processFile(e.target.files[0]);
     }
+    // Clear input value so selecting the same file again triggers onChange
+    e.target.value = '';
   };
 
   const handleRemove = (e) => {
@@ -194,18 +223,12 @@ export default function ImageUploader({
         </div>
       )}
 
-      {/* Field Image-Capture Guidance */}
-      <div className="p-3 rounded-lg bg-[#F8F7F4] border border-[#DFE3E1] space-y-2 text-xs">
-        <div className="flex items-center space-x-1.5 text-[#141D20] font-semibold text-[11px] uppercase font-mono tracking-wider">
-          <FileCheck className="w-3.5 h-3.5 text-[#114B44]" />
-          <span>Field Photography Guidance</span>
-        </div>
-        <ul className="space-y-1 text-[#505E63] text-[11px] leading-relaxed list-disc list-inside">
-          <li><strong>Pavement framing:</strong> Aim camera squarely at the road surface; avoid excessive sky or dashboard glare.</li>
-          <li><strong>Lighting & stability:</strong> Prefer steady, well-lit, unblurred shots with defects clearly centered.</li>
-          <li><strong>Proximity:</strong> If safe, capture an additional photo closer to the specific distress area.</li>
-          <li className="text-[#991B1B] font-medium"><strong>Safety priority:</strong> Never stop in active traffic or enter hazardous lanes to capture photos.</li>
-        </ul>
+      {/* Compact Photo Quality Warning */}
+      <div className="flex items-start gap-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-2.5 text-xs text-amber-900">
+        <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-amber-700" />
+        <p className="leading-relaxed">
+          <strong>For better detection results:</strong> Upload a clear, well-lit photo with road damage fully visible and in focus.
+        </p>
       </div>
     </div>
   );

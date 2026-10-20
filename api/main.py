@@ -30,6 +30,7 @@ from database.database import (  # noqa: E402
     create_tables,
     get_all_inspections,
     get_inspection,
+    get_inspection_stats,
 )
 from detection.predict import load_model  # noqa: E402
 from pipeline.inspection_pipeline import (  # noqa: E402
@@ -301,13 +302,13 @@ def list_inspections(
         ) from exc
 
     # Apply filters
-    if priority:
+    if isinstance(priority, str) and priority.strip():
         target_priority = priority.strip().upper()
         inspections = [
             i for i in inspections if str(i.get("priority")).upper() == target_priority
         ]
 
-    if city:
+    if isinstance(city, str) and city.strip():
         target_city = city.strip().lower()
         inspections = [
             i
@@ -315,7 +316,7 @@ def list_inspections(
             if i.get("city") and target_city in str(i.get("city")).lower()
         ]
 
-    if road_type:
+    if isinstance(road_type, str) and road_type.strip():
         target_road_type = road_type.strip().lower()
         inspections = [
             i
@@ -323,10 +324,34 @@ def list_inspections(
             if str(i.get("road_type")).lower() == target_road_type
         ]
 
-    if limit is not None:
+    if isinstance(limit, int):
         inspections = inspections[:limit]
 
+    # Normalize image paths for web static mounts
+    for i in inspections:
+        if i.get("image_path"):
+            orig_name = Path(str(i["image_path"])).name
+            i["image_path"] = f"data/uploads/{orig_name}"
+        if i.get("annotated_image_path"):
+            ann_name = Path(str(i["annotated_image_path"])).name
+            i["annotated_image_path"] = f"results/predictions/{ann_name}"
+
     return _to_json_safe(inspections)
+
+
+@app.get("/api/dashboard/stats", tags=["Dashboard"])
+def dashboard_stats() -> dict[str, Any]:
+    """
+    Retrieve aggregate metrics across all stored inspections for Mode 2 dashboard.
+    """
+    try:
+        stats = get_inspection_stats()
+        return _to_json_safe(stats)
+    except Exception as exc:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to calculate dashboard statistics: {exc}",
+        ) from exc
 
 
 @app.get("/api/inspections/{inspection_id}", tags=["Inspections"])
