@@ -1,0 +1,18 @@
+# RoadWise YOLO Dataset Configuration
+# 4 Canonical Classes:
+#   0: D00 - Longitudinal Crack
+#   1: D10 - Transverse Crack
+#   2: D20 - Alligator Crack
+#   3: D40 - Pothole
+
+path: datasets/roadwise_pothole
+train: images/train
+val: images/val
+test: images/test
+
+nc: 4
+names:
+  0: D00
+  1: D10
+  2: D20
+  3: D40
