@@ -15,14 +15,29 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parents[2]
 DEFAULT_MODEL = BASE_DIR / "models" / "best.pt"
-DEFAULT_CONF = 0.25
+DEFAULT_CONF = 0.15
 DEFAULT_IMGSZ = 640
 
+# New fine-tuned model (roadwise_v2) uses D00/D10/D20/D40 as class names directly.
+# This mapping handles both the new model (D-code names) and old model (english names).
 CLASS_CODE = {
+    # New model class names (D-codes)
+    "D00": "D00",
+    "D10": "D10",
+    "D20": "D20",
+    "D40": "D40",
+    # Old model class names (english) — kept for backwards compatibility
     "longitudinal_crack": "D00",
     "transverse_crack": "D10",
     "alligator_crack": "D20",
     "pothole": "D40",
+}
+
+CLASS_LABEL = {
+    "D00": "Longitudinal Crack",
+    "D10": "Transverse Crack",
+    "D20": "Alligator Crack",
+    "D40": "Pothole",
 }
 
 _model_cache = {}
@@ -48,9 +63,10 @@ def results_to_detections(result):
                                 result.boxes.conf.tolist(),
                                 result.boxes.xywhn.tolist()):
         name = names[int(cls)]
+        code = CLASS_CODE.get(name, "UNK")
         detections.append({
-            "class_code": CLASS_CODE.get(name, "UNK"),
-            "class_name": name,
+            "class_code": code,
+            "class_name": CLASS_LABEL.get(code, name),
             "confidence": round(float(conf), 4),
             "x_center": round(xywhn[0], 5),
             "y_center": round(xywhn[1], 5),

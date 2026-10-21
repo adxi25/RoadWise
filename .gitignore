@@ -10,9 +10,13 @@ __pycache__/
 *.db
 *.sqlite
 *.sqlite3
-*.pt
+# *.pt  # Model weights are now tracked (best.pt only)
+!models/best.pt
 *.pth
 .DS_Store
 results/predictions/
 results/figures/
 results/metrics/
+
+# Allow tracked model weights
+!models/best.pt
