@@ -134,7 +134,7 @@ export default function LandingPage({ onStartInspection, onOpenDashboard, onTrac
             <div className="relative rounded-lg border border-[#DFE3E1] bg-white p-2.5 shadow-sm overflow-hidden">
               
               {/* Local Road Asset */}
-              <div className="relative rounded overflow-hidden bg-[#141D20] aspect-[4/3] flex items-center justify-center">
+              <div className="relative rounded overflow-hidden bg-[#141D20] aspect-[4/4.7] max-h-[500px] flex items-center justify-center">
                 <img
                   src={heroRoadImage}
                   alt="Real civic road inspection sample"

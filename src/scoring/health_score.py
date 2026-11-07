@@ -27,7 +27,7 @@ CLASS_WEIGHT = {"D40": 1.00, "D20": 0.80, "D00": 0.50, "D10": 0.50}
 # so its value is a placeholder.
 AREA_REF = {"D40": 0.101, "D20": 0.235, "D00": 0.070, "D10": 0.070}
 
-MIN_CONFIDENCE = 0.25   # detections below this are ignored
+MIN_CONFIDENCE = 0.10   # detections below this are ignored (aligned with fine-tuned model conf=0.15/0.10)
 SIZE_FLOOR = 0.40       # even a small box counts at least this much of full size
 K = 2.0                 # curve steepness: bigger K = score falls more slowly
 
@@ -51,7 +51,7 @@ def detection_severity(det):
     return weight * det["confidence"] * size_factor
 
 
-def calculate_condition(detections):
+def calculate_condition(detections, min_confidence=None):
     """Condition score for one image.
 
     Overlapping boxes of the SAME class are discounted so duplicate detections of the same
@@ -60,8 +60,9 @@ def calculate_condition(detections):
     class. Boxes of different classes are not discounted against each other (for example a pothole
     inside a large alligator-crack box still counts).
     """
+    threshold = MIN_CONFIDENCE if min_confidence is None else float(min_confidence)
     kept = [d for d in detections
-            if d["confidence"] >= MIN_CONFIDENCE and d["class_code"] in CLASS_WEIGHT]
+            if d.get("confidence", 0.0) >= (threshold - 1e-4) and d.get("class_code") in CLASS_WEIGHT]
     kept.sort(key=detection_severity, reverse=True)
 
     accepted = []  # (class_code, box)

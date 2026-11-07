@@ -133,10 +133,10 @@ def validate_image_bytes(image_bytes: bytes) -> dict[str, Any]:
             "The uploaded file is not a valid image."
         ) from exc
 
-    if width < 320 or height < 240:
+    if width < 64 or height < 64:
         raise ValueError(
             f"Image resolution is too small ({width}x{height}). "
-            "Please upload a clearer road image."
+            "Please upload an image of at least 64x64 pixels."
         )
 
     return {
@@ -819,7 +819,8 @@ def run_inspection(
     try:
 
         condition_result = calculate_condition(
-            detections
+            detections,
+            min_confidence=conf,
         )
 
     except Exception as exc:

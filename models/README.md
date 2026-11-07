@@ -30,3 +30,10 @@ from ultralytics import YOLO
 model = YOLO("models/best.pt")
 results = model.predict(source="road_image.jpg", conf=0.15)
 ```
+
+## Training Artifacts (Fine-Tuned Model)
+The complete training run outputs are saved in [training_artifacts/](file:///c:/Users/aquad/OneDrive/Desktop/RoadWise/training_artifacts):
+- [args.yaml](file:///c:/Users/aquad/OneDrive/Desktop/RoadWise/training_artifacts/args.yaml): Complete hyperparameters and training settings used for `roadwise_v2`.
+- [results.csv](file:///c:/Users/aquad/OneDrive/Desktop/RoadWise/training_artifacts/results.csv): Epoch-by-epoch loss and validation metrics for all 83 epochs.
+- [data.yaml](file:///c:/Users/aquad/OneDrive/Desktop/RoadWise/training_artifacts/data.yaml): Dataset specification and 4-class head mapping.
+
