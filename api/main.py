@@ -1,8 +1,51 @@
 """
-RoadWise - FastAPI Application
+RoadWise - FastAPI RESTful Backend Service
+==========================================
 
-Thin adapter around the existing RoadWise inspection pipeline and database.
-Preserves all existing ML, scoring, and pipeline logic without modification.
+ROLE IN ROADWISE ARCHITECTURE:
+    This module exposes high-performance asynchronous HTTP endpoints that bridge the
+    React frontend with the Python computer vision, scoring, and persistence engines.
+    It follows a thin-adapter architecture: business and ML logic reside in `src/`,
+    while `api/main.py` handles HTTP request serialization, input validation,
+    CORS negotiation, static image streaming, and HTTP status code mappings.
+
+ENDPOINTS SPECIFICATION:
+    1. System Health & Warmup:
+       - `GET /api/health`
+         Verifies active YOLOv8 model file presence (`models/best.pt`), checks database
+         reachability, tests model weights loading cache, and reports service availability.
+
+    2. Mode 1 — Road Inspection:
+       - `POST /api/inspections/inspect` (multipart/form-data)
+         Accepts road image bytes, operational road context, and inference hyperparameters.
+         Executes image validation, EXIF parsing, YOLO inference, condition scoring,
+         risk prioritization, and SQLite persistence. Returns HTTP 201 Created with full report.
+
+    3. Mode 2 — Authority Dashboard Analytics:
+       - `GET /api/inspections`
+         Returns risk-ranked list of all road inspections. Supports query filtering:
+         `priority` (CRITICAL/HIGH/MEDIUM/LOW), `city`, `road_type`, and `limit`.
+       - `GET /api/dashboard/stats`
+         Returns aggregated authority KPIs: total inspections, breakdown by priority tier,
+         fleet-wide average condition score, average risk score, and valid GPS count.
+       - `GET /api/inspections/{id}`
+         Retrieves granular inspection record joined with child bounding box detections.
+
+STATIC ASSET MOUNTING:
+    - `/data/uploads`       -> Streams original uncompressed uploaded road images.
+    - `/results/predictions` -> Streams YOLO bounding-box annotated output images.
+
+KEY VIVA QUESTIONS & CONCEPTS:
+    - Q: Why FastAPI instead of Flask or Django?
+      A: Native async/await concurrency, automatic OpenAPI (Swagger) documentation,
+         type checking, high throughput built on Starlette and Uvicorn ASGI server.
+    - Q: What does the lifespan context manager do?
+      A: Executes startup hooks (such as `create_tables()` to ensure SQLite schema exists)
+         before the ASGI server begins accepting socket connections, guaranteeing zero cold-start DB crashes.
+    - Q: Why are image paths transformed before sending JSON to the client?
+      A: File system paths (e.g., `C:/.../RoadWise/data/uploads/image.jpg`) cannot be fetched directly
+         by a web browser due to browser security sandbox rules. The API normalizes them into web-accessible
+         relative URLs (e.g., `data/uploads/image.jpg`), which resolve against `http://127.0.0.1:8000/`.
 """
 
 from __future__ import annotations
@@ -53,7 +96,16 @@ ANNOTATED_DIR.mkdir(parents=True, exist_ok=True)
 # ---------------------------------------------------------------------------
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Ensure database tables exist on startup
+    """
+    Manage FastAPI application lifespan events.
+
+    STARTUP:
+        Executes `create_tables()` to ensure all required SQLite tables (`inspections`,
+        `detections`) and secondary B-Tree indices exist before socket listening starts.
+    SHUTDOWN:
+        Yields execution to the ASGI server until termination signals (SIGINT/SIGTERM).
+    """
+    # Ensure database schema and indexes exist prior to handling any inbound requests
     create_tables()
     yield
 
@@ -71,6 +123,8 @@ app = FastAPI(
 # ---------------------------------------------------------------------------
 # CORS Middleware
 # ---------------------------------------------------------------------------
+# Configure Cross-Origin Resource Sharing (CORS) to allow browser HTTP requests
+# from the local Vite development server (http://localhost:5173) or production hosts.
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -82,6 +136,9 @@ app.add_middleware(
 # ---------------------------------------------------------------------------
 # Static File Mounts (Serve uploaded & annotated images)
 # ---------------------------------------------------------------------------
+# Mount physical filesystem directories so browser can load image URLs:
+# - `/data/uploads/...`       -> Serves original uploaded road photos
+# - `/results/predictions/...` -> Serves YOLO annotated bounding-box photos
 app.mount("/data/uploads", StaticFiles(directory=str(UPLOAD_DIR)), name="uploads")
 app.mount(
     "/results/predictions",
@@ -94,7 +151,14 @@ app.mount(
 # Helper: Ensure JSON serializability
 # ---------------------------------------------------------------------------
 def _to_json_safe(obj: Any) -> Any:
-    """Recursively convert Path objects or non-serializables to standard types."""
+    """
+    Recursively convert pathlib.Path objects or non-serializable types into standard JSON primitives.
+
+    WHY IT IS REQUIRED:
+        Python `pathlib.Path` objects cannot be serialized by standard JSON encoders.
+        Traversing nested dicts and lists to cast Paths to strings ensures FastAPI's
+        jsonable_encoder emits valid JSON without 500 SerializationErrors.
+    """
     if isinstance(obj, Path):
         return str(obj)
     if isinstance(obj, dict):
@@ -113,6 +177,14 @@ def _to_json_safe(obj: Any) -> Any:
 def health_check() -> dict[str, Any]:
     """
     Check the health of the RoadWise API service and verify model availability.
+
+    SYSTEM VALIDATION CHECKS:
+        1. Checks whether `models/best.pt` exists on disk.
+        2. Tests the model loading cache via `load_model()` to confirm valid PyTorch weights.
+        3. Confirms database readiness.
+
+    Returns:
+        dict: Operational readiness status and component diagnostics.
     """
     model_exists = MODEL_PATH.exists()
     model_status = "not_found"
@@ -184,6 +256,7 @@ async def inspect_road(
     computes condition score and risk priority, persists to SQLite, and
     returns the complete structured report.
     """
+    # Read raw image upload binary stream asynchronously into memory
     try:
         image_bytes = await image.read()
     except Exception as exc:
@@ -198,7 +271,7 @@ async def inspect_road(
             detail="The uploaded image file is empty.",
         )
 
-    # Validate imgsz
+    # Validate inference resolution (imgsz) boundary constraints
     target_imgsz = DEFAULT_IMGSZ
     if imgsz is not None:
         try:
@@ -211,6 +284,7 @@ async def inspect_road(
                 detail=f"Invalid inference image size: {val_err}",
             )
 
+    # Package operational context payload for inspection pipeline
     context = {
         "road_type": road_type,
         "traffic_level": traffic_level,
@@ -223,6 +297,9 @@ async def inspect_road(
     }
 
     try:
+        # Execute the full Mode 1 inspection pipeline:
+        # Image validation -> EXIF GPS extraction -> Original saving -> YOLO inference ->
+        # Condition scoring -> Risk scoring -> Recommendation -> SQLite persistence
         result = run_inspection(
             image_bytes=image_bytes,
             filename=image.filename or "uploaded_road_image.jpg",
@@ -232,7 +309,9 @@ async def inspect_road(
             imgsz=target_imgsz,
         )
 
-        # Convert absolute filesystem paths to relative static web mount paths
+        # Convert server-side absolute filesystem paths to relative static web mount paths
+        # (e.g., 'C:/.../data/uploads/RW-...jpg' -> 'data/uploads/RW-...jpg')
+        # This allows the React client to fetch images via FastAPI's static mounts.
         if isinstance(result, dict) and "image" in result and isinstance(result["image"], dict):
             if result["image"].get("original_path"):
                 orig_filename = Path(str(result["image"]["original_path"])).name
@@ -251,18 +330,21 @@ async def inspect_road(
         ) from exc
 
     except FileNotFoundError as exc:
+        # Missing model weights file or missing source directory
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Resource not found: {exc}",
         ) from exc
 
     except RuntimeError as exc:
+        # Internal pipeline execution fault (e.g. detector failure, database transaction error)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=str(exc),
         ) from exc
 
     except Exception as exc:
+        # Unhandled unexpected error fallback
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Unexpected inspection error: {exc}",
@@ -294,6 +376,7 @@ def list_inspections(
     Supports optional filtering by priority, city, road type, and limit.
     """
     try:
+        # Fetch all records with detection counts sorted by risk_score DESC
         inspections = get_all_inspections()
     except Exception as exc:
         raise HTTPException(
@@ -301,13 +384,14 @@ def list_inspections(
             detail=f"Failed to query database: {exc}",
         ) from exc
 
-    # Apply filters
+    # In-memory query filter: Priority tier matching (CRITICAL, HIGH, MEDIUM, LOW)
     if isinstance(priority, str) and priority.strip():
         target_priority = priority.strip().upper()
         inspections = [
             i for i in inspections if str(i.get("priority")).upper() == target_priority
         ]
 
+    # In-memory query filter: City case-insensitive substring search
     if isinstance(city, str) and city.strip():
         target_city = city.strip().lower()
         inspections = [
@@ -316,6 +400,7 @@ def list_inspections(
             if i.get("city") and target_city in str(i.get("city")).lower()
         ]
 
+    # In-memory query filter: Road classification matching
     if isinstance(road_type, str) and road_type.strip():
         target_road_type = road_type.strip().lower()
         inspections = [
@@ -324,6 +409,7 @@ def list_inspections(
             if str(i.get("road_type")).lower() == target_road_type
         ]
 
+    # Apply row limit constraint if specified
     if isinstance(limit, int):
         inspections = inspections[:limit]
 

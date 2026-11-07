@@ -1,33 +1,48 @@
 """
-RoadWise - Mode 1 Inspection Pipeline
+RoadWise - Mode 1 Automated Road Inspection Pipeline
+====================================================
 
-Complete pipeline:
+ROLE IN ROADWISE ARCHITECTURE:
+    This module serves as the primary end-to-end orchestrator for Mode 1 (Road Inspection).
+    It accepts raw uploaded image bytes and user-supplied context, coordinates computer
+    vision inference, calculates condition and risk analytics, persists audit records
+    to the SQLite database, and returns a unified JSON-serializable inspection report.
 
-    Uploaded image
-        ↓
-    Image validation
-        ↓
-    GPS extraction from EXIF (if available)
-        ↓
-    YOLO inference
-        ↓
-    Condition score
-        ↓
-    Risk score + priority
-        ↓
-    Recommendation + explanation
-        ↓
-    Save original + annotated image
-        ↓
-    Save complete inspection + detections to SQLite
+END-TO-END DATA FLOW:
+    1. Client (Browser / API POST / CLI)
+           ↓ multipart/form-data
+    2. Input Validation (Pillow verification, bounds, size check <= 20 MB)
+           ↓
+    3. EXIF Metadata Extraction (GPS IFD 0x8825 parsing DMS -> Decimal)
+           ↓ (User-submitted GPS takes precedence over EXIF)
+    4. Original Image Persistence (`data/uploads/{report_id}.ext`)
+           ↓
+    5. YOLO Object Detection (`predict.py:detect()`)
+           ↓ returns (detections: list[dict], annotated_bgr: np.ndarray)
+    6. Annotated Image Persistence (`results/predictions/{report_id}_annotated.jpg`)
+           ↓ (OpenCV BGR is converted to RGB before Pillow JPEG encoding)
+    7. Road Condition Scoring (`health_score.py:calculate_condition()`)
+           ↓ returns (condition_score, defect_deductions, severity_band)
+    8. Risk Assessment & Priority Ranking (`risk_score.py:analyze_risk()`)
+           ↓ returns (damage_level, context_factor, risk_score, priority)
+    9. Actionable Recommendation Generation (`build_recommendation()`)
+           ↓
+    10. SQLite Database Transaction (`database.py:save_inspection()`)
+           ↓ atomic insert into `inspections` and `detections` tables
+    11. Final Structured Response (`build_pipeline_result()`)
+           ↓ returned to Frontend / API
 
-The UI should call only `run_inspection()`.
-
-Important:
-- Scoring formulas remain project-defined.
-- GPS is optional because many uploaded images will not contain EXIF GPS.
-- Missing GPS does NOT stop an inspection.
-- The database remains the source of truth for Mode 2.
+KEY VIVA QUESTIONS & ARCHITECTURAL DECISIONS:
+    - Q: Why is GPS extraction optional?
+      A: Cameras and smartphones often strip EXIF metadata due to privacy settings or messaging
+         compression (e.g., WhatsApp). Making GPS optional prevents system failure when GPS
+         is absent, though the web UI enforces coordinate entry before submission for map plotting.
+    - Q: Why save the original image before inference?
+      A: For auditability, evidentiary traceability, and potential future model retraining.
+    - Q: Why does PIL verify require re-opening the image?
+      A: In Pillow, calling `image.verify()` reads and parses the image stream headers to detect
+         file corruption, but permanently closes/invalidates the file descriptor; a fresh
+         `io.BytesIO` must be opened to extract dimensions (`image.size`).
 """
 
 from __future__ import annotations
@@ -183,11 +198,18 @@ def extract_gps(image_bytes: bytes) -> tuple[float | None, float | None]:
     """
     Extract latitude and longitude from image EXIF GPS metadata.
 
-    Returns:
-        (latitude, longitude)
+    EXIF GPS TECHNICAL DETAILS (Viva Note):
+        - EXIF (Exchangeable Image File Format) stores metadata in IFD (Image File Directory) tags.
+        - Tag `0x8825` points specifically to the GPSInfo IFD block.
+        - Coordinates are stored as Degrees, Minutes, and Seconds (DMS) rationals:
+              DecimalDegrees = Degrees + (Minutes / 60.0) + (Seconds / 3600.0)
+        - Hemispheric references:
+              Tag 1 ('N'/'S'): South latitude is negative.
+              Tag 3 ('E'/'W'): West longitude is negative.
 
     Returns:
-        (None, None) when GPS is unavailable.
+        tuple[float | None, float | None]: (latitude, longitude) rounded to 6 decimal
+        places (~0.1m precision), or (None, None) when metadata is absent or unparseable.
     """
 
     try:

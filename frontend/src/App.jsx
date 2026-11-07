@@ -1,3 +1,33 @@
+/**
+ * RoadWise - Root Application Component & Mode Orchestrator
+ * ==========================================================
+ *
+ * ROLE IN ROADWISE ARCHITECTURE:
+ *   This is the master React component that manages top-level application state,
+ *   coordinates view routing between the Landing Page, Mode 1 (Road Inspection),
+ *   and Mode 2 (Authority Dashboard), and manages asynchronous lifecycle hooks.
+ *
+ * CORE STATE RESPONSIBILITIES:
+ *   1. View Switching:
+ *      - `showLanding` (boolean): Controls display of public landing page.
+ *      - `activeTab` ('inspect' | 'dashboard'): Switches between Mode 1 and Mode 2.
+ *   2. Mode 1 Upload & Context State:
+ *      - `selectedFile`: Raw browser File object uploaded via drag-and-drop or file picker.
+ *      - `previewUrl`: Blob URL generated via `URL.createObjectURL()` for immediate preview.
+ *      - `context`: Operational road environment parameters (road_type, traffic, sensitivity, GPS).
+ *      - `conf` & `imgsz`: User-adjustable YOLO inference hyperparameters.
+ *   3. Asynchronous Execution & Health:
+ *      - `health`: Server readiness state refreshed every 30s via `checkHealth()`.
+ *      - `isLoading`: Locks UI during multi-second model inference and DB transaction.
+ *      - `inspectionResult`: Structured JSON response rendered by `<InspectionResults />`.
+ *
+ * MEMORY MANAGEMENT & DEFENSIVE VALIDATION (Viva Note):
+ *   - `URL.revokeObjectURL()` is called inside `handleReset()` to free memory allocated
+ *     for client-side image preview blobs, avoiding browser memory leaks.
+ *   - Mandatory GPS validation (`hasValidGps`) guarantees that inspections can be accurately
+ *     plotted on the Leaflet geographic map before network submission.
+ */
+
 import React, { useState, useEffect } from 'react';
 import Navbar from './components/Navbar';
 import ImageUploader from './components/ImageUploader';
@@ -39,7 +69,7 @@ export default function App() {
   const [inspectionResult, setInspectionResult] = useState(null);
   const [apiError, setApiError] = useState(null);
 
-  // Initial Health Check
+  // Initial Health Check: Polled on mount and every 30 seconds
   const fetchHealth = async () => {
     const res = await checkHealth();
     setHealth(res);
@@ -48,9 +78,12 @@ export default function App() {
   useEffect(() => {
     fetchHealth();
     const interval = setInterval(fetchHealth, 30000);
+    // Cleanup interval on unmount to avoid background memory leaks
     return () => clearInterval(interval);
   }, []);
 
+  // Strict GPS coordinate validation guard:
+  // Ensures latitude in [-90, 90] and longitude in [-180, 180] before form submission
   const hasValidGps = Boolean(
     context.latitude !== null &&
     context.latitude !== undefined &&
@@ -64,19 +97,24 @@ export default function App() {
     Number(context.longitude) <= 180
   );
 
+  // Form submit guard: requires both an image file and valid coordinates
   const canAnalyze = Boolean(selectedFile && hasValidGps);
 
+  // Mode 1 Submission Handler:
+  // Serializes multipart/form-data and dispatches POST /api/inspections/inspect
   const handleAnalyze = async () => {
     if (isLoading) return;
 
     setApiError(null);
     setInspectionResult(null);
 
+    // Validate image presence
     if (!selectedFile) {
       setFileError("Please select or drag-and-drop a road image first.");
       return;
     }
 
+    // Validate mandatory GPS coordinates
     if (!hasValidGps) {
       setApiError("Valid live GPS coordinates (latitude and longitude) are mandatory before submitting an inspection. Please click 'Use My Current Location'.");
       return;
@@ -85,6 +123,7 @@ export default function App() {
     setIsLoading(true);
 
     try {
+      // Build multipart/form-data payload for FastAPI streaming
       const formData = new FormData();
       formData.append('image', selectedFile);
       formData.append('road_type', context.road_type);
@@ -97,11 +136,12 @@ export default function App() {
       formData.append('latitude', String(context.latitude));
       formData.append('longitude', String(context.longitude));
 
-      // Supplementary regional context only
+      // Supplementary regional context only (trimmed)
       if (context.state?.trim()) formData.append('state', context.state.trim());
       if (context.city?.trim()) formData.append('city', context.city.trim());
       if (context.area?.trim()) formData.append('area', context.area.trim());
 
+      // Execute inspection via client adapter
       const result = await inspectRoad(formData);
       setInspectionResult(result);
     } catch (err) {
@@ -112,6 +152,8 @@ export default function App() {
     }
   };
 
+  // State Reset & Memory Cleanup Handler:
+  // Revokes created object URLs to prevent browser memory leaks
   const handleReset = () => {
     if (previewUrl) {
       URL.revokeObjectURL(previewUrl);
@@ -151,7 +193,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen flex flex-col bg-[#F8F7F4] text-[#141D20] font-sans selection:bg-[#114B44] selection:text-white">
-      
+
       {/* Top Navigation */}
       <Navbar
         health={health}
@@ -163,12 +205,12 @@ export default function App() {
 
       {/* Main Container */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        
+
         {activeTab === 'dashboard' ? (
           <AuthorityDashboard onBackToInspect={() => setActiveTab('inspect')} />
         ) : (
           <div className="space-y-6">
-            
+
             {/* Error Banner */}
             {apiError && (
               <div className="p-3.5 rounded-lg bg-[#FEF2F2] border border-[#FECDD3] text-[#991B1B] text-xs flex items-start justify-between gap-3 shadow-2xs">
@@ -199,11 +241,11 @@ export default function App() {
             ) : (
               /* Two-Column Inspection Workspace */
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-                
+
                 {/* Left Column: Inspection Input (5 cols) */}
                 <div className="lg:col-span-5 space-y-4">
                   <div className="p-5 rounded-lg bg-white border border-[#DFE3E1] space-y-4 shadow-2xs">
-                    
+
                     <div className="border-b border-[#DFE3E1] pb-2 flex items-center justify-between">
                       <span className="text-xs font-bold text-[#141D20] uppercase font-mono tracking-wider">
                         Inspection Input
@@ -248,7 +290,7 @@ export default function App() {
                   ) : (
                     /* Intentional Professional Empty State */
                     <div className="p-6 sm:p-8 rounded-lg bg-white border border-[#DFE3E1] space-y-6 shadow-2xs">
-                      
+
                       <div className="space-y-1.5 border-b border-[#DFE3E1] pb-4">
                         <div className="flex items-center space-x-2 text-[#141D20]">
                           <Layers className="w-4 h-4 text-[#114B44]" />
@@ -263,7 +305,7 @@ export default function App() {
 
                       {/* Technical Pipeline Overview Cards */}
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-                        
+
                         <div className="p-4 rounded-lg bg-[#F8F7F4] border border-[#DFE3E1] space-y-1.5">
                           <div className="flex items-center space-x-2 text-xs font-bold text-[#141D20]">
                             <Cpu className="w-4 h-4 text-[#114B44]" />

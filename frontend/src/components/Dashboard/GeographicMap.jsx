@@ -1,3 +1,34 @@
+/**
+ * RoadWise - Interactive Geographic GIS Map Component
+ * ====================================================
+ *
+ * ROLE IN ROADWISE ARCHITECTURE:
+ *   This component provides Mode 2 with a dynamic geospatial visualization map powered
+ *   by Leaflet.js and OpenStreetMap raster tiles. It translates GPS coordinates stored
+ *   in SQLite into interactive map pins, allowing civil engineers to detect spatial defect
+ *   clusters and prioritize road repair crews geographically.
+ *
+ * CORE VISUAL & INTERACTIVE CAPABILITIES:
+ *   1. Custom SVG Priority Markers (`createCustomPin`):
+ *      - Uses `L.divIcon` to render custom HTML/CSS pins.
+ *      - Priority-coded colors: Critical (Rose #BE123C), High (Orange #C2410C),
+ *        Medium (Amber #B45309), Low (Teal #0F766E).
+ *      - Critical pins include an animated CSS ping/pulse ring to immediately capture attention.
+ *   2. Viewport Auto-Fitting:
+ *      - Accumulates all valid coordinate points into an `L.latLngBounds` object.
+ *      - Calls `map.fitBounds()` with defensive padding so all markers fit comfortably in view.
+ *   3. Interactive Information Popups:
+ *      - Each marker binds an interactive popup displaying Report ID, city/road type,
+ *        priority badge, condition score, and a quick-action button opening the detail modal.
+ *   4. Programmatic Camera Control:
+ *      - Responds to `focusInspection` property changes by smoothly flying the camera
+ *        (`map.flyTo([lat, lng], 16)`) to highlight a specific road segment selected in the table.
+ *
+ * LIFECYCLE & MEMORY CLEANUP:
+ *   - Leaflet modifies direct DOM elements. On React unmount, `map.remove()` is called
+ *     to prevent memory leaks and zombie tile layer listeners.
+ */
+
 import React, { useEffect, useRef } from 'react';
 import L from 'leaflet';
 import { MapPin, Navigation, Eye, AlertCircle } from 'lucide-react';

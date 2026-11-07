@@ -1,3 +1,45 @@
+"""
+RoadWise - SQLite Database & Persistence Layer
+==============================================
+
+ROLE IN ROADWISE ARCHITECTURE:
+    This module manages the persistent relational storage for RoadWise, serving as the
+    central data bridge between Mode 1 (Inspection Pipeline write operations) and
+    Mode 2 (Authority Dashboard read operations).
+
+DATABASE SCHEMA & RELATIONAL DESIGN:
+    1. `inspections` Table (Parent):
+       - Primary Key: `id` (INTEGER AUTOINCREMENT)
+       - Unique Identifier: `report_id` (TEXT UNIQUE) e.g., 'RW-20261007-180530-A7F2'
+       - Spatial & Regional Data: `latitude`, `longitude`, `state`, `city`, `area`
+       - Operational Context: `road_type`, `traffic_level`, `location_sensitivity`
+       - Analytical Results: `condition_score` [0-100], `risk_score` [0-100], `priority`
+       - Asset References: `image_path`, `annotated_image_path`, `pdf_path`
+       - Temporal Metadata: `created_at` (TIMESTAMP DEFAULT CURRENT_TIMESTAMP)
+
+    2. `detections` Table (Child):
+       - Primary Key: `id` (INTEGER AUTOINCREMENT)
+       - Foreign Key: `inspection_id` REFERENCES inspections(id) ON DELETE CASCADE
+       - Classification: `class_code` (e.g., 'D40'), `class_name` (e.g., 'pothole')
+       - Model Metrics: `confidence` [0.0 to 1.0]
+       - Normalized Bounding Box: `x_center`, `y_center`, `width`, `height` [0.0 to 1.0]
+
+KEY VIVA QUESTIONS & CONCEPTS:
+    - Q: Why SQLite for RoadWise?
+      A: Serverless, zero-configuration, self-contained single-file storage. It eliminates external
+         database daemon dependencies during deployment and testing while handling millions of records.
+    - Q: Why is `PRAGMA foreign_keys = ON` explicitly executed?
+      A: For backward compatibility, SQLite defaults foreign key enforcement to OFF. RoadWise
+         explicitly enables it on every connection to enforce cascading deletions and prevent orphaned records.
+    - Q: What indexing strategy is implemented?
+      A: Secondary B-Tree indexes are created on `priority`, `state`, `city`, `(latitude, longitude)`,
+         and foreign key `inspection_id`. This accelerates filtering, regional grouping, spatial queries,
+         and JOIN operations from O(N) linear scans to O(log N) tree lookups.
+    - Q: How is atomicity guaranteed?
+      A: `save_inspection()` wraps the parent insertion and all child detection insertions in a single
+         transaction. If any box insertion fails, `connection.rollback()` is invoked so partial data is never committed.
+"""
+
 import sqlite3
 from pathlib import Path
 
@@ -14,7 +56,9 @@ DATABASE_PATH = DATABASE_DIR / "roadwise.db"
 
 def get_connection():
     """
-    Create and return a connection to the RoadWise SQLite database.
+    Create and return an active connection to the RoadWise SQLite database.
+
+    Enforces relational integrity via `PRAGMA foreign_keys = ON`.
     """
     connection = sqlite3.connect(DATABASE_PATH)
     connection.execute("PRAGMA foreign_keys = ON")
@@ -114,16 +158,35 @@ def create_tables():
 
 def save_inspection(inspection, detections):
     """
-    Save one complete RoadWise inspection and its YOLO detections.
+    Save one complete RoadWise inspection and its associated YOLO detections atomically.
+
+    TRANSACTION MANAGEMENT & ATOMICITY (Viva Key Concept):
+    ------------------------------------------------------
+    Inserting an inspection requires modifying two relational tables: `inspections` (parent)
+    and `detections` (children). If any error occurs while inserting child bounding boxes
+    (e.g., malformed float or constraint violation), `connection.rollback()` cancels the
+    entire transaction so partial or orphaned records are never committed to disk.
+
+    SQL PARAMETERIZATION:
+    --------------------
+    All queries use parameterized placeholders (`?`) to prevent SQL injection attacks.
+
+    Parameters:
+    -----------
+    inspection : dict
+        Parent inspection data containing report_id, coordinates, scores, priority, etc.
+    detections : list[dict]
+        List of bounding box detections returned by predict.py.
 
     Returns:
-        int: ID of the newly created inspection.
+    --------
+    int: Autoincrement primary key ID of the newly inserted inspection row.
     """
-
     connection = get_connection()
     cursor = connection.cursor()
 
     try:
+        # Step 1: Insert parent record into `inspections` table
         cursor.execute("""
             INSERT INTO inspections (
                 report_id,
@@ -163,8 +226,10 @@ def save_inspection(inspection, detections):
             inspection.get("pdf_path")
         ))
 
+        # Retrieve the newly generated autoincrement primary key for foreign key linking
         inspection_id = cursor.lastrowid
 
+        # Step 2: Insert child records into `detections` table referencing `inspection_id`
         for detection in detections:
             cursor.execute("""
                 INSERT INTO detections (
@@ -189,26 +254,39 @@ def save_inspection(inspection, detections):
                 detection.get("height")
             ))
 
+        # Atomic commit: writes both parent and all children permanently to disk
         connection.commit()
 
         return inspection_id
 
     except Exception:
+        # On any exception, undo all uncommitted changes in this transaction
         connection.rollback()
         raise
 
     finally:
+        # Guarantee database socket connection is always closed to avoid file lock leaks
         connection.close()
 
 
 def get_inspection(inspection_id):
     """
-    Get one inspection and all its detections.
-    """
+    Retrieve a single inspection record joined with all its child bounding box detections.
 
+    Parameters:
+    -----------
+    inspection_id : int
+        The primary key ID of the inspection record.
+
+    Returns:
+    --------
+    dict | None: Dictionary representation of the inspection with nested 'detections' list,
+                 or None if no record matches the ID.
+    """
     connection = get_connection()
     cursor = connection.cursor()
 
+    # Query parent record
     cursor.execute("""
         SELECT
             id,
@@ -235,10 +313,12 @@ def get_inspection(inspection_id):
 
     inspection_row = cursor.fetchone()
 
+    # If ID does not exist, close connection and return None (FastAPI maps this to HTTP 404)
     if inspection_row is None:
         connection.close()
         return None
 
+    # Map raw SQL row tuple into a structured dictionary
     inspection_columns = [
         "id",
         "report_id",
@@ -262,6 +342,7 @@ def get_inspection(inspection_id):
 
     inspection = dict(zip(inspection_columns, inspection_row))
 
+    # Query all child detection rows linked by foreign key
     cursor.execute("""
         SELECT
             id,
@@ -289,6 +370,7 @@ def get_inspection(inspection_id):
         "height"
     ]
 
+    # Attach nested detections list to parent dictionary
     inspection["detections"] = [
         dict(zip(detection_columns, row))
         for row in detection_rows
@@ -301,9 +383,20 @@ def get_inspection(inspection_id):
 
 def get_all_inspections():
     """
-    Get all RoadWise inspections with detection counts, sorted deterministically by risk score and ID.
-    """
+    Retrieve all RoadWise inspections with defect counts, sorted deterministically by risk score.
 
+    SQL DESIGN & PERFORMANCE NOTES (Viva Key Concept):
+    ---------------------------------------------------
+    - Uses a `LEFT JOIN` between `inspections` and `detections` so that roads with zero defects
+      are still preserved in the query output with `detection_count = 0`.
+    - `GROUP BY i.id` aggregates multiple child bounding boxes into a single row count per road.
+    - `ORDER BY i.risk_score DESC, i.id DESC`: Ensures deterministic sorting order where high-risk
+      roads appear first, with autoincrement `id` acting as a secondary tie-breaker.
+
+    Returns:
+    --------
+    list[dict]: List of all inspection records formatted for Mode 2 table and map visualization.
+    """
     connection = get_connection()
     cursor = connection.cursor()
 
@@ -358,6 +451,7 @@ def get_all_inspections():
         "detection_count"
     ]
 
+    # Convert list of row tuples to list of dictionaries
     inspections = [
         dict(zip(columns, row))
         for row in rows
@@ -370,7 +464,18 @@ def get_all_inspections():
 
 def get_inspection_stats():
     """
-    Get aggregated inspection metrics from the SQLite database.
+    Calculate aggregate infrastructure metrics across all stored inspections in a single query.
+
+    SQL AGGREGATION HIGHLIGHTS:
+    ---------------------------
+    - Uses `SUM(CASE WHEN ... THEN 1 ELSE 0 END)` to compute conditional counts per priority tier
+      in a single table pass, avoiding 4 separate round-trip queries.
+    - `AVG(condition_score)` and `AVG(risk_score)` calculate fleet-wide health averages.
+    - Counts valid non-null coordinates to measure GIS geographic map coverage.
+
+    Returns:
+    --------
+    dict: Statistical KPI summary consumed by Mode 2 MetricCards component.
     """
     connection = get_connection()
     cursor = connection.cursor()
@@ -390,6 +495,7 @@ def get_inspection_stats():
     row = cursor.fetchone()
     connection.close()
 
+    # Defensive handling for empty database (zero inspections recorded)
     if not row or row[0] == 0:
         return {
             "total_inspections": 0,

@@ -1,3 +1,29 @@
+/**
+ * RoadWise - Authority Ranking Table & Prioritization Filter Component
+ * ====================================================================
+ *
+ * ROLE IN ROADWISE ARCHITECTURE:
+ *   This component renders the primary decision-support table for civil authorities
+ *   in Mode 2. It presents historical road inspection records ranked by maintenance urgency,
+ *   enabling highway authorities to schedule repair tenders and dispatch maintenance crews.
+ *
+ * KEY CAPABILITIES:
+ *   1. Memoized Multi-Factor Filtering (`useMemo`):
+ *      - Priority Filter: CRITICAL, HIGH, MEDIUM, LOW, or ALL.
+ *      - Road Classification: Filters by highway, arterial, residential, or rural categories.
+ *      - Geographic Scope: Dynamically extracts unique cities and states from SQLite records.
+ *      - Real-Time Search: Full-text substring search across Report ID, area, city, and recommendation text.
+ *   2. Flexible Multi-Column Sorting:
+ *      - Risk Score (Descending [default] / Ascending)
+ *      - Condition Score (Ascending [most damaged first] / Descending)
+ *      - Date Logged (Newest first / Oldest first)
+ *   3. Client-Side Pagination:
+ *      - Clean 10-records-per-page pagination with boundary guards and page jumping.
+ *   4. Cross-Component Interactivity:
+ *      - "Focus Map" button triggers Leaflet camera pan to GPS coordinates.
+ *      - "View Details" button opens deep-dive inspection modal with full defect bounding boxes.
+ */
+
 import React, { useState, useMemo } from 'react';
 import {
   Search,
@@ -189,7 +215,7 @@ export default function RankingTable({
 
   return (
     <div className="rounded-lg bg-white border border-[#DFE3E1] shadow-2xs overflow-hidden flex flex-col space-y-0">
-      
+
       {/* Table Header & Controls Toolbar */}
       <div className="p-4 border-b border-[#DFE3E1] bg-[#F8F7F4] space-y-3">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">

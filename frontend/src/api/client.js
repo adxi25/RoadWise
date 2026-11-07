@@ -1,6 +1,25 @@
 /**
- * RoadWise API Client Adapter
- * Connects the frontend to the FastAPI backend service.
+ * RoadWise - Frontend API Client Adapter Module
+ * ==============================================
+ *
+ * ROLE IN ROADWISE ARCHITECTURE:
+ *   This module acts as the centralized HTTP gateway connecting the React frontend (SPA)
+ *   to the FastAPI asynchronous backend service. It abstracts network requests, handles
+ *   cross-origin resource sharing (CORS), serializes multipart form data for road images,
+ *   deserializes JSON responses, and normalizes server-side file paths into web URLs.
+ *
+ * BACKEND ENDPOINTS CONSUMED:
+ *   - GET  /api/health              -> checkHealth()
+ *   - POST /api/inspections/inspect -> inspectRoad(formData)
+ *   - GET  /api/inspections         -> getInspections(filters)
+ *   - GET  /api/inspections/{id}    -> getInspectionById(id)
+ *   - GET  /api/dashboard/stats     -> getDashboardStats()
+ *
+ * STATIC ASSET NORMALIZATION (Viva Key Point):
+ *   The backend stores images on disk under `data/uploads/` and `results/predictions/`.
+ *   Because browsers cannot load local filesystem paths (`file://` or `C:\...`),
+ *   `getImageUrl()` converts Windows/POSIX disk paths into valid HTTP URLs accessible
+ *   via FastAPI's StaticFiles mount points (`http://127.0.0.1:8000/data/uploads/...`).
  */
 
 const API_BASE_URL = (

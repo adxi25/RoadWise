@@ -1,17 +1,30 @@
 """
-01_dataset_audit.py — Audit the pothole image dataset before any training.
+RoadWise ML Pipeline — Step 01: Pre-Training Dataset Forensic Audit
+===================================================================
 
-Usage:
-  python 01_dataset_audit.py --dataset_dir /path/to/Pothole_Image_Data
+ROLE IN ROADWISE ML LIFECYCLE:
+    Before investing GPU/CPU hours into deep learning training or fine-tuning, this
+    script performs a comprehensive quality assurance audit on a raw target dataset.
+    It verifies file readability, checks for cryptographic duplicates, validates bounding-box
+    label files, and flags corrupt or unannotated images.
 
-Reports:
-  - Total image count
-  - Supported / unsupported file types
-  - Corrupt images
-  - Annotation presence and format
-  - Class distribution
-  - Duplicate detection (hash-based)
-  - Recommendations
+TECHNICAL CHECKS PERFORMED:
+    1. PIL Verification:
+       Invokes `Image.open(p).verify()` to validate image file headers and bitstream
+       integrity without fully decompressing raw pixels into memory, avoiding Out-Of-Memory
+       crashes on large image collections.
+    2. SHA256 Cryptographic Deduplication:
+       Reads files in 64 KB blocks (`block=65536`) to compute SHA256 hashes. Detects
+       identical images stored under different names or across different subfolders.
+       Duplicate images in train and test splits cause data leakage and artificially
+       inflated validation scores.
+    3. Annotation Topology Audit:
+       Identifies whether the dataset contains YOLO `.txt`, Pascal VOC `.xml`, or COCO `.json`,
+       validates 5-token rows `(cls_id, cx, cy, w, h)`, and calculates class distribution.
+
+OUTPUT:
+    Generates a structured JSON audit report detailing total images, valid counts,
+    corrupt files, duplicate groups, and data preparation recommendations.
 """
 
 import argparse
@@ -31,14 +44,42 @@ LABEL_EXTS = {".txt", ".xml", ".json"}
 
 
 def sha256_of_file(path: Path, block=65536) -> str:
+    """
+    Compute cryptographic SHA256 hex digest of a file using chunked binary streaming.
+
+    WHY CHUNKED BUFFERING? (Viva Note):
+        Reading multi-gigabyte image datasets directly into RAM using `.read()` can exhaust
+        available memory. Reading in 64 KB blocks (`block=65536`) maintains a constant,
+        negligible memory footprint regardless of file size.
+
+    Args:
+        path (Path): Path to the target file.
+        block (int): Byte buffer size for incremental updates (default: 65,536 bytes / 64 KB).
+
+    Returns:
+        str: 64-character lowercase SHA256 hexadecimal string.
+    """
     h = hashlib.sha256()
     with open(path, "rb") as f:
+        # Incrementally update hash until End-Of-File (EOF) returns empty bytes
         while chunk := f.read(block):
             h.update(chunk)
     return h.hexdigest()
 
 
 def check_pil(path: Path):
+    """
+    Test image bitstream and format integrity using Pillow.
+
+    WHAT IT DOES:
+        Opens the image stream and invokes `img.verify()`.
+        Unlike `img.load()`, which unpacks every uncompressed pixel into a large numpy-like
+        matrix, `verify()` parses header structures, JPEG markers, and PNG chunks to detect
+        file truncation or bit corruption with near-zero memory and compute overhead.
+
+    Returns:
+        tuple[bool, str | None]: (True, None) if valid, or (False, error_message) if corrupt.
+    """
     try:
         from PIL import Image
         img = Image.open(path)
@@ -49,6 +90,11 @@ def check_pil(path: Path):
 
 
 def find_files(root: Path):
+    """
+    Recursively traverse target directory and categorize files into images, labels, and others.
+
+    Uses `pathlib.Path.rglob("*")` to walk arbitrary nested subfolder structures.
+    """
     images, labels, others = [], [], []
     for p in root.rglob("*"):
         if not p.is_file():
@@ -64,6 +110,12 @@ def find_files(root: Path):
 
 
 def parse_yolo_label(path: Path):
+    """
+    Parse and validate a standard YOLO-format `.txt` label file.
+
+    Format per row: `<class_id> <x_center> <y_center> <width> <height>`
+    Coordinates are normalized floats in range [0.0, 1.0].
+    """
     rows = []
     with open(path) as f:
         for line in f:
@@ -71,12 +123,14 @@ def parse_yolo_label(path: Path):
             if not line:
                 continue
             parts = line.split()
+            # YOLO format strictly expects 5 tokens per line
             if len(parts) == 5:
                 try:
                     cls_id = int(parts[0])
                     cx, cy, w, h = map(float, parts[1:])
                     rows.append((cls_id, cx, cy, w, h))
                 except ValueError:
+                    # Silently skip malformed non-numeric lines
                     pass
     return rows
 

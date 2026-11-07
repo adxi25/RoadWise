@@ -1,31 +1,41 @@
 """
-03_prepare_dataset.py — Prepare annotated pothole images for YOLO fine-tuning.
+RoadWise ML Pipeline — Step 03: Dataset Preparation & Pseudo-Labeling
+=====================================================================
 
-IMPORTANT: This dataset contains NO bounding-box annotations.
-This script provides TWO paths:
+ROLE IN ROADWISE ML LIFECYCLE:
+    This script structures and formats raw pothole imagery into the canonical YOLOv8
+    directory hierarchy required for model fine-tuning. It supports two workflows:
+        - Path A (Supervised): Consumes verified manual annotations (.txt).
+        - Path B (Semi-Supervised): Employs a pre-trained baseline model (`models/best.pt`)
+          to predict pseudo-labels across unannotated road imagery.
 
-  Path A: You have already annotated the images (YOLO TXT format).
-          The script verifies, splits and structures them for training.
+SEMI-SUPERVISED PSEUDO-LABELING (Viva Concept):
+    When acquiring fresh road imagery, manual bounding box annotation is labor-intensive.
+    Pseudo-labeling passes unannotated images through the baseline model at a tuned
+    confidence threshold (e.g., `conf=0.30`). Detections are serialized as candidate
+    YOLO `.txt` files.
+    - Risk (Confirmation Bias): If the baseline model makes systematic errors (e.g., mistaking
+      manhole covers for potholes), the fine-tuned model reinforces those errors.
+      Human-in-the-loop review of pseudo-labels is critical.
 
-  Path B: No annotations yet.
-          The script generates pseudo-labels from the baseline model.
-          YOU MUST REVIEW AND CORRECT pseudo-labels before training.
+DEFENSIVE CLASS-ID GUARD (Semantic Limitation — Viva Note):
+    The production model `models/best.pt` is a 4-class YOLOv8 detector that emits only
+    class IDs 0, 1, 2, and 3. The guard inside `generate_pseudo_labels`:
+        if cid not in (0, 1, 2, 3):
+            cid = 3
+    is a defensive fallback for edge cases where an alternative or experimental model
+    checkpoint (with more than 4 classes) is substituted at the `--model` CLI argument.
+    With the current production model this branch is UNREACHABLE during normal inference.
 
-Usage:
-  # Path A — real annotations:
-  python 03_prepare_dataset.py \
-      --image_dir /path/to/Pothole_Image_Data \
-      --label_dir /path/to/labels \
-      --output_dir datasets/roadwise_pothole \
-      --seed 42
+    LIMITATION: If a future model with 5+ classes is ever used here without updating this
+    guard, any out-of-range class ID (e.g., class 4 from a 5-class model) would be silently
+    relabeled as D40 (Pothole) regardless of its true semantic meaning, introducing label
+    noise. Any checkpoint substitution requires a corresponding taxonomy review here.
 
-  # Path B — pseudo-labels (use with caution):
-  python 03_prepare_dataset.py \
-      --image_dir /path/to/Pothole_Image_Data \
-      --output_dir datasets/roadwise_pothole \
-      --pseudo_label_model /path/to/models/best.pt \
-      --pseudo_conf 0.30 \
-      --seed 42
+DATASET SPLIT RATIOS:
+    - `dev_ratio = 0.70` (70% allocated to development, 30% held-out for final test)
+    - Within development: 85% training, 15% validation.
+    - Output: `images/{train,val,test}` and `labels/{train,val,test}` with `dataset.yaml`.
 """
 
 import argparse
@@ -90,7 +100,26 @@ def create_yolo_structure(out: Path):
 
 
 def generate_pseudo_labels(images: list, model_path: Path, conf: float, label_out: Path):
-    """Run baseline model and write YOLO .txt pseudo-labels.  Returns count written."""
+    """
+    Run baseline YOLO model over unannotated imagery and synthesize candidate YOLO label files.
+
+    SEMI-SUPERVISED SELF-TRAINING METHODOLOGY (Viva Note):
+    ------------------------------------------------------
+    1. Loads the pre-trained baseline model (`models/best.pt`).
+    2. Runs inference across unlabeled images at a conservative confidence threshold (e.g. 0.30).
+    3. Normalizes bounding box coordinates to [0, 1] relative space (`box.xywhn`).
+    4. Applies a defensive guard: any class ID not in (0, 1, 2, 3) is remapped to 3.
+       With the production `models/best.pt` (a strict 4-class model) this guard is never
+       triggered. It exists solely as a safety net for non-standard checkpoint substitution.
+    5. Saves `.txt` files matching image file stems.
+
+    RISK WARNING:
+        Pseudo-labels must be verified by a human annotator to prevent noisy labels from
+        contaminating the training pipeline.
+
+    Returns:
+        int: Number of images where at least one candidate defect bounding box was generated.
+    """
     from ultralytics import YOLO
     model = YOLO(str(model_path))
     log.warning("Generating pseudo-labels with conf=%.2f — REVIEW BEFORE TRAINING.", conf)
@@ -102,9 +131,12 @@ def generate_pseudo_labels(images: list, model_path: Path, conf: float, label_ou
         if results and results[0].boxes is not None:
             for box in results[0].boxes:
                 cid = int(box.cls[0].item())
-                # Force pothole images to class 3
+                # Defensive guard: remap any class ID outside the 4-class range (0–3) to 3.
+                # With the production models/best.pt this branch is unreachable (model only
+                # emits IDs 0–3). Guards against non-standard checkpoint substitution only.
                 if cid not in (0, 1, 2, 3):
                     cid = 3
+                # Extract normalized bounding box coordinates: (x_center, y_center, width, height)
                 x_c, y_c, w, h = box.xywhn[0].tolist()
                 lines.append(f"{cid} {x_c:.6f} {y_c:.6f} {w:.6f} {h:.6f}")
         label_path.write_text("\n".join(lines))
@@ -114,7 +146,15 @@ def generate_pseudo_labels(images: list, model_path: Path, conf: float, label_ou
 
 
 def validate_yolo_labels(label_dir: Path, image_dir: Path):
-    """Check labels match images and values are in [0,1]."""
+    """
+    Validate dataset integrity: ensures 1-to-1 label-to-image matching and bounded coordinates.
+
+    Validation Rules:
+        1. Every `.txt` label file must have a corresponding image file in `image_dir`.
+        2. Every line must contain exactly 5 space-delimited tokens.
+        3. Class ID must be within valid range [0, 3].
+        4. Coordinate values must fall within normalized unit interval [0.0, 1.0].
+    """
     errors = []
     for lp in label_dir.rglob("*.txt"):
         img_candidates = [image_dir / (lp.stem + ext) for ext in IMAGE_EXTS]
@@ -139,10 +179,14 @@ def validate_yolo_labels(label_dir: Path, image_dir: Path):
 
 def split_and_copy(image_label_pairs: list, output_dir: Path, seed: int, dev_ratio=0.7):
     """
-    Split into train/val/test and copy files.
-    dev_ratio: fraction going to train+val (the rest is test).
-    Within dev, 85% train / 15% val.
+    Execute reproducible train/val/test file copying and directory population.
+
+    PARTITION RATIOS:
+        - `dev_ratio = 0.70` (70% development, 30% held-out test).
+        - Within development partition: 85% training, 15% validation.
+        - Overall distribution: ~59.5% train, ~10.5% val, ~30% test.
     """
+    # Seed pseudo-random generator for exact dataset split reproducibility
     random.seed(seed)
     random.shuffle(image_label_pairs)
 
