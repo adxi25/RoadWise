@@ -10,13 +10,26 @@ __pycache__/
 *.db
 *.sqlite
 *.sqlite3
-# *.pt  # Model weights are now tracked (best.pt only)
-!models/best.pt
-*.pth
-.DS_Store
-results/predictions/
-results/figures/
-results/metrics/
 
-# Allow tracked model weights
+# Model weights
+*.pt
+*.pth
 !models/best.pt
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Large local raw and processed datasets (retained locally, excluded from git)
+data/raw/
+data/processed/
+data/uploads/
+data/model_debug/
+data/test_images/
+
+# Experimental and predicted image outputs
+results/
+
+# Temporary and local test dirs
+.pytest_cache/
+.backup_checkpoint/
