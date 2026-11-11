@@ -1,0 +1,8 @@
+subset,dataset,release,road_damage_class,total_samples,correct_count,correct_pct,questionable_count,questionable_pct,incorrect_count,incorrect_pct,unable_count,unable_pct,pending_count,pending_pct,acceptance_rate,retention_recommendation
+McMaster_D00_Longitudinal,McMaster,v2,D00,50,45,90.00%,5,10.00%,0,0.00%,0,0.00%,0,0.00%,90.00%,Retain with filtering (remove paving seams / slivers)
+McMaster_D10_Transverse,McMaster,v2,D10,50,49,98.00%,0,0.00%,0,0.00%,0,0.00%,1,2.00%,98.00%,Retain (clean transverse crossing)
+McMaster_D20_Alligator,McMaster,v2,D20,50,43,86.00%,5,10.00%,0,0.00%,2,4.00%,0,0.00%,86.00%,Retain with filtering (verify fatigue pattern)
+Attain_OS_V1.0_D20,Attain,OS_V1.0,D20,30,25,83.33%,2,6.67%,0,0.00%,2,6.67%,1,3.33%,83.33%,Retain (pristine polygon masks for D20)
+Attain_WS_V1.0_D20,Attain,WS_V1.0,D20,30,26,86.67%,4,13.33%,0,0.00%,0,0.00%,0,0.00%,86.67%,"Retain with filtering (standardize mixed formats, dedup)"
+Attain_WS_V2.0_D20,Attain,WS_V2.0,D20,30,27,90.00%,2,6.67%,0,0.00%,1,3.33%,0,0.00%,90.00%,Retain with filtering (clip out-of-bound bboxes)
+OVERALL_TOTAL,ALL,ALL,ALL,240,215,89.58%,18,7.50%,0,0.00%,5,2.08%,2,0.83%,89.58%,Retain selected classes with targeted forensic filtering

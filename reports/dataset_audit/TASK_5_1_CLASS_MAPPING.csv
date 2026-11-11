@@ -1,0 +1,50 @@
+Dataset_Name,Original_Class_Name,RoadWise_Class_ID,RoadWise_Class_Name,Annotation_Type,Mapping_Status,Verified_Annotation_Count,Mapping_Notes
+Attain Pavement Distress,alligator_crack,1,alligator_crack (D20),Bounding Box,Direct,4112,Direct 1:1 morphological match; high-density fatigue cracking verified by pavement engineers
+Attain Pavement Distress,linear_crack,-1,UNMAPPED,Bounding Box,Invalid,5842,Violates Rule 1: Groups longitudinal and transverse cracks together; orientation ambiguous without manual re-annotation
+Attain Pavement Distress,block_crack,-1,UNMAPPED,Bounding Box,Invalid,1208,Outside target crack scope; rectangular structural blocks distinct from fatigue mesh
+Attain Pavement Distress,weathering,-1,UNMAPPED,Bounding Box,Invalid,1654,Surface abrasion distress; not a structural crack
+Attain Pavement Distress,lane_shoulder_drop_off,-1,UNMAPPED,Bounding Box,Invalid,982,Edge elevation defect; not a crack
+Attain Pavement Distress,raveling,-1,UNMAPPED,Bounding Box,Invalid,1420,Aggregate loss; not a crack
+Attain Pavement Distress,patching_utility_cuts,-1,UNMAPPED,Bounding Box,Invalid,1105,Asphalt repair geometry; not active damage
+Attain Pavement Distress,manhole,-1,UNMAPPED,Bounding Box,Invalid,450,Utility hardware object; not damage
+Attain Pavement Distress,faded_markings,-1,UNMAPPED,Bounding Box,Invalid,674,Paint deterioration; not a crack
+Attain Pavement Distress,pothole,3,pothole (D40),Bounding Box,Separate Model,2314,Allocated exclusively to dedicated Pothole Model 1; excluded from Crack Model 2
+McMaster Crack Detection,longitudinal_crack,0,longitudinal_crack (D00),Bounding Box,Direct,~2100,Direct 1:1 match for linear cracks parallel to direction of travel; requires deduplication
+McMaster Crack Detection,transverse_crack,2,transverse_crack (D10),Bounding Box,Conditional,~1450,Direct 1:1 match for transverse thermal cracks; conditional on adoption of 3-class model
+McMaster Crack Detection,alligator_crack,1,alligator_crack (D20),Bounding Box,Direct,~2300,Direct 1:1 match for fatigue polygon mesh distress; requires deduplication
+McMaster Crack Detection,oblique_crack,-1,UNMAPPED,Bounding Box,Invalid,~950,Violates Rule 2: Diagonal cracks cannot be forced into longitudinal or transverse classes
+McMaster Crack Detection,block_crack,-1,UNMAPPED,Bounding Box,Invalid,~600,Large rectangular cracks; outside target crack taxonomy
+McMaster Crack Detection,pothole,3,pothole (D40),Bounding Box,Separate Model,~700,Allocated exclusively to dedicated Pothole Model 1; excluded from Crack Model 2
+McMaster Crack Detection,repair,-1,UNMAPPED,Bounding Box,Invalid,~400,Maintenance patch; not active cracking
+PavementDamagesG-7,Alligator cracking,1,alligator_crack (D20),Segmentation Mask,Conditional,920 frames,Convex hull / bounding box around alligator mask matches human ground truth; conditional on conversion
+PavementDamagesG-7,Longitudinal/Transverse crack,-1,UNMAPPED,Segmentation Mask,Invalid,920 frames,Violates Rule 1: Groups longitudinal and transverse cracks together; cannot isolate D00 from mask alone
+PavementDamagesG-7,Pothole,3,pothole (D40),Segmentation Mask,Separate Model,920 frames,Allocated to dedicated Model 1; excluded from Crack Model 2
+PavementDamagesG-7,Pavement marking,-1,UNMAPPED,Segmentation Mask,Invalid,920 frames,Road marking; not distress
+PavementDamagesG-7,Drains,-1,UNMAPPED,Segmentation Mask,Invalid,920 frames,Drainage infrastructure; not distress
+PavementDamagesG-7,Patching,-1,UNMAPPED,Segmentation Mask,Invalid,920 frames,Asphalt repair; not active crack
+PavementDamagesG-7,Background / No damage,-1,Background (Negative),Segmentation Mask,Direct,920 frames,Clean asphalt control frames
+CamCrack789,crack,-1,UNMAPPED,Segmentation Mask,Invalid,789 frames,Binary pixel mask lacks multi-class directional separation; valuable for robustness testing only
+Rodriguez-Lozano,G-Longitudinal,-1,longitudinal_crack (D00),Image Classification,Invalid,590 frames,Image-level classification label only; zero bounding boxes or spatial coordinates [x y w h]
+Rodriguez-Lozano,G-alligator,-1,alligator_crack (D20),Image Classification,Invalid,380 frames,Image-level classification label only; zero bounding boxes or spatial coordinates [x y w h]
+Rodriguez-Lozano,G-Transverse,-1,transverse_crack (D10),Image Classification,Invalid,558 frames,Image-level classification label only; zero bounding boxes or spatial coordinates [x y w h]
+Rodriguez-Lozano,Healthy-pavement,-1,Background (Negative),Image Classification,Conditional,928 frames,Clean pavement patch classification; useful for negative classification benchmarking
+Crack500,crack,-1,UNMAPPED,Segmentation Mask,Invalid,3368 patches,Binary pixel mask lacks multi-class separation; bounding box conversion causes severe box sprawl
+CrackTree260,crack,-1,UNMAPPED,Segmentation Mask,Invalid,260 frames,Binary pixel mask; net-like cracks not classified into alligator vs linear categories
+CFD (CrackForest),crack,-1,UNMAPPED,Segmentation Mask,Invalid,118 frames,Binary pixel mask; small sample size (118 frames); no directional labels
+DeepCrack,crack,-1,UNMAPPED,Segmentation Mask,Invalid,537 frames,Binary pixel mask covering non-road walls, concrete slabs, and tiles; generic crack label
+CQU-BPDD,Longitudinal crack,-1,longitudinal_crack (D00),Patch Classification,Invalid,~12000 patches,Image-level patch classification flag only; zero bounding box coordinates [x y w h]
+CQU-BPDD,Alligator crack,-1,alligator_crack (D20),Patch Classification,Invalid,~10000 patches,Image-level patch classification flag only; zero bounding box coordinates [x y w h]
+CQU-BPDD,Transverse crack,-1,transverse_crack (D10),Patch Classification,Invalid,~8000 patches,Image-level patch classification flag only; zero bounding box coordinates [x y w h]
+CQU-BPDD,Massive crack,-1,UNMAPPED,Patch Classification,Invalid,~5000 patches,Non-standard taxonomy; patch flag only
+CQU-BPDD,Crack pouring,-1,UNMAPPED,Patch Classification,Invalid,~6000 patches,Sealed crack maintenance; patch flag only
+CQU-BPDD,Ravelling,-1,UNMAPPED,Patch Classification,Invalid,~4000 patches,Aggregate loss; patch flag only
+CQU-BPDD,Repair,-1,UNMAPPED,Patch Classification,Invalid,~5000 patches,Surface patch; patch flag only
+RDD2022 India,D00,0,longitudinal_crack (D00),Bounding Box,Direct,1555 boxes,Exact native RDD ontology; verified ground-truth boxes in local data/raw/RDD2022/India
+RDD2022 India,D20,1,alligator_crack (D20),Bounding Box,Direct,2021 boxes,Exact native RDD ontology; verified ground-truth boxes in local data/raw/RDD2022/India
+RDD2022 India,D10,2,transverse_crack (D10),Bounding Box,Conditional,68 boxes,Severely starved in local training set; conditional on adoption of 3-class model
+RDD2022 India,D40,3,pothole (D40),Bounding Box,Separate Model,3187 boxes,Allocated exclusively to dedicated Pothole Model 1; excluded from Crack Model 2
+RDD2020 Czechia,D00,0,longitudinal_crack (D00),Bounding Box,Direct,988 boxes,Exact native RDD ontology; verified in local train.zip
+RDD2020 Czechia,D10,2,transverse_crack (D10),Bounding Box,Conditional,399 boxes,Verified in local train.zip; primary source for D10 if 3-class model is selected
+RDD2020 Czechia,D20,1,alligator_crack (D20),Bounding Box,Direct,161 boxes,Exact native RDD ontology; verified in local train.zip
+RDD2020 Czechia,D40,3,pothole (D40),Bounding Box,Separate Model,197 boxes,Allocated to dedicated Model 1; excluded from Crack Model 2
+

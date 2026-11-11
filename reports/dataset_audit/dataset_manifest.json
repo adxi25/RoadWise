@@ -1,0 +1,167 @@
+{
+  "manifest_metadata": {
+    "generated_date": "2026-11-09",
+    "task": "Task 5.1: Controlled Dataset Acquisition & Inspection",
+    "system_target": "RoadWise Decoupled Dual-Model System",
+    "format_version": "1.0"
+  },
+  "datasets": [
+    {
+      "dataset_name": "RDD2022 India Ground Truth",
+      "version": "CRDDC 2022 Official Release",
+      "original_source": "Figshare / Mendeley Data (DOI: 10.6084/m9.figshare.21431547)",
+      "archive_path": "C:\\Users\\aquad\\Downloads\\21431547.zip",
+      "working_copy_path": "data/raw/RDD2022/India",
+      "licence": "CC BY-SA 4.0",
+      "acquisition_status": "Fully Acquired and Local",
+      "image_count": 7706,
+      "annotation_count": 6831,
+      "inspection_status": "Inspected and Verified",
+      "notes": "Primary baseline benchmark; contains 1,555 D00 (Longitudinal) and 2,021 D20 (Alligator) boxes; 3,921 clean background frames"
+    },
+    {
+      "dataset_name": "Attain Pavement Distress Dataset",
+      "version": "1.0 (Feb 2025)",
+      "original_source": "Mendeley Data (DOI: 10.17632/nykrzdm74f.1)",
+      "archive_path": "Pending Manual Download (Attain.zip)",
+      "working_copy_path": "data/raw/attain (Proposed)",
+      "licence": "CC BY 4.0",
+      "acquisition_status": "Access Blocked (Manual Browser Auth Required)",
+      "image_count": 2293,
+      "annotation_count": 19761,
+      "inspection_status": "Catalog and Publication Verified",
+      "notes": "Primary source for Alligator Cracks (4,112 verified boxes); linear_crack class combines longitudinal and transverse, violating Rule 1"
+    },
+    {
+      "dataset_name": "McMaster Pavement Crack Detection",
+      "version": "Version 3 / Roboflow r4n7n",
+      "original_source": "Roboflow Universe (komalparikhceptacin/pavement-crack-detection-r4n7n)",
+      "archive_path": "Roboflow API Staged Export",
+      "working_copy_path": "data/raw/mcmaster (Proposed)",
+      "licence": "CC BY 4.0",
+      "acquisition_status": "Staged Accessible",
+      "image_count": 3114,
+      "annotation_count": 8500,
+      "inspection_status": "Catalog Verified",
+      "notes": "Explicit separate longitudinal (~2,100 boxes), transverse (~1,450 boxes), and alligator (~2,300 boxes); requires hash deduplication against offline rotations"
+    },
+    {
+      "dataset_name": "RDD2020 Czechia",
+      "version": "GRDDC 2020 / CRDDC 2022",
+      "original_source": "Mendeley Data (DOI: 10.17632/5ty2wb6gvg.1)",
+      "archive_path": "C:\\Users\\aquad\\Downloads\\train.zip (train/Czech/)",
+      "working_copy_path": "train/Czech/ inside train.zip",
+      "licence": "CC BY-SA 4.0",
+      "acquisition_status": "Fully Acquired and Local",
+      "image_count": 2829,
+      "annotation_count": 1745,
+      "inspection_status": "Inspected and Verified Directly on Disk",
+      "notes": "Local archive contains 988 D00, 399 D10 (Transverse), 161 D20, and 197 D40 boxes; primary candidate for D10 if 3-class model is selected"
+    },
+    {
+      "dataset_name": "PavementDamagesG-7",
+      "version": "1.0 (2026)",
+      "original_source": "Mendeley Data / Results in Engineering (DOI: 10.1016/j.rineng.2025.108946)",
+      "archive_path": "Pending Manual Download (PavementDamagesG-7.zip)",
+      "working_copy_path": "data/raw/pavement_damages_g7 (Proposed)",
+      "licence": "CC BY 4.0",
+      "acquisition_status": "Access Blocked (Manual Browser Auth Required)",
+      "image_count": 920,
+      "annotation_count": 920,
+      "inspection_status": "Catalog and Publication Verified",
+      "notes": "StereoLabs ZED 2i Full HD images + PNG semantic masks; Alligator cracking independently identifiable; longitudinal/transverse combined"
+    },
+    {
+      "dataset_name": "CamCrack789",
+      "version": "1.0",
+      "original_source": "Academic Research Mirror / GitHub",
+      "archive_path": "Online Git Repository",
+      "working_copy_path": "N/A (Reference Only)",
+      "licence": "Academic Research Use",
+      "acquisition_status": "Verified Reference Asset",
+      "image_count": 789,
+      "annotation_count": 789,
+      "inspection_status": "Benchmark Verified",
+      "notes": "Binary segmentation masks with extreme environmental noise (shadows, water, oil, leaves); retained as robustness benchmark"
+    },
+    {
+      "dataset_name": "Rodriguez-Lozano Labeled Crack Dataset",
+      "version": "1.0 (2020)",
+      "original_source": "GitHub (frodriguezlozano/Labeled-Crack-Dataset)",
+      "archive_path": "Online Git Repository",
+      "working_copy_path": "N/A (Reference Only)",
+      "licence": "Academic Open Source / MIT",
+      "acquisition_status": "Verified Reference Asset",
+      "image_count": 2456,
+      "annotation_count": 2456,
+      "inspection_status": "Index Verified",
+      "notes": "Image-level classification labels only; 590 longitudinal, 558 transverse, 380 alligator, 928 healthy pavement; zero bounding boxes"
+    },
+    {
+      "dataset_name": "Crack500",
+      "version": "1.0 (2016)",
+      "original_source": "Temple University / GitHub (fyangneil/pavement-crack-detection)",
+      "archive_path": "Online Git Repository",
+      "working_copy_path": "N/A (Reference Only)",
+      "licence": "Non-commercial Academic Research",
+      "acquisition_status": "Verified Reference Asset",
+      "image_count": 500,
+      "annotation_count": 3368,
+      "inspection_status": "Benchmark Verified",
+      "notes": "Binary pixel segmentation masks for semantic segmentation; bounding box conversion causes severe box sprawl; generic crack class"
+    },
+    {
+      "dataset_name": "CrackTree260",
+      "version": "1.0",
+      "original_source": "Wuhan University",
+      "archive_path": "Online Repository",
+      "working_copy_path": "N/A (Reference Only)",
+      "licence": "Academic Research Use",
+      "acquisition_status": "Verified Reference Asset",
+      "image_count": 260,
+      "annotation_count": 260,
+      "inspection_status": "Benchmark Verified",
+      "notes": "260 images with binary pixel masks; complex net-like cracks not classified into alligator vs linear categories"
+    },
+    {
+      "dataset_name": "CFD (CrackForest Dataset)",
+      "version": "1.0 (2014)",
+      "original_source": "GitHub (cuilimeng/CrackForest-dataset)",
+      "archive_path": "Online Git Repository",
+      "working_copy_path": "N/A (Reference Only)",
+      "licence": "Academic Research Use",
+      "acquisition_status": "Verified Reference Asset",
+      "image_count": 118,
+      "annotation_count": 118,
+      "inspection_status": "Benchmark Verified",
+      "notes": "Small sample size (118 iPhone captures) with MATLAB binary pixel masks; generic crack class only"
+    },
+    {
+      "dataset_name": "DeepCrack",
+      "version": "1.0 (2019)",
+      "original_source": "HUST / GitHub (yhlscut/DeepCrack)",
+      "archive_path": "Online Git Repository",
+      "working_copy_path": "N/A (Reference Only)",
+      "licence": "Academic Research Use",
+      "acquisition_status": "Verified Reference Asset",
+      "image_count": 537,
+      "annotation_count": 537,
+      "inspection_status": "Benchmark Verified",
+      "notes": "Multi-scale binary segmentation masks; includes non-road walls, concrete slabs, and tiles; generic crack label"
+    },
+    {
+      "dataset_name": "CQU-BPDD",
+      "version": "1.0 (2021)",
+      "original_source": "Chongqing University / Hugging Face",
+      "archive_path": "Online Repository",
+      "working_copy_path": "N/A (Reference Only)",
+      "licence": "CC BY-NC 4.0 (Non-Commercial)",
+      "acquisition_status": "Verified Reference Asset",
+      "image_count": 60000,
+      "annotation_count": 60000,
+      "inspection_status": "Benchmark Verified",
+      "notes": "Patch-level classification flags across 8 distress categories; zero object bounding box coordinates [x, y, w, h]"
+    }
+  ]
+}
+

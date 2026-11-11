@@ -1,0 +1,252 @@
+[
+  {
+    "filename": "0023_6_4_JPG.rf.fc59de08daa98b64af34a0314e7972ef.jpg",
+    "sha256": "66b3eb1eaac7ac0e262f8b3f29a6431f8fe26e14ec73375b843eabef22853566",
+    "sample_id": "7",
+    "source_dataset": "McMaster",
+    "release": "v2",
+    "preserved_decision": "QUESTIONABLE",
+    "target_class": "Longitudinal crack",
+    "notes": "only 2 annotations there are more small cracks"
+  },
+  {
+    "filename": "0064_1_7_JPG.rf.814e0160d560fb61fe4e368fe849686e.jpg",
+    "sha256": "f46c4b1a0473b054172ae5a9735a9dc878a80ae7abbb6eb2ee26e9e26da2564f",
+    "sample_id": "23",
+    "source_dataset": "McMaster",
+    "release": "v2",
+    "preserved_decision": "QUESTIONABLE",
+    "target_class": "Longitudinal crack",
+    "notes": "very unclear image but still finds"
+  },
+  {
+    "filename": "0090_1_7_JPG.rf.15ca88cfb41501e79d882949aeb11dbd.jpg",
+    "sha256": "cb9aa5615e0455ba172af51f7ad833547c9098ab440019df1bccfefc573c0ec9",
+    "sample_id": "24",
+    "source_dataset": "McMaster",
+    "release": "v2",
+    "preserved_decision": "QUESTIONABLE",
+    "target_class": "Longitudinal crack",
+    "notes": ""
+  },
+  {
+    "filename": "0003_4_2_JPG.rf.391ab4d6303594f83dc17f0f8f4ac68f.jpg",
+    "sha256": "bc7ca749f35469fb8b7c719f83ec587c81f918bfb8be89b50f7a511c8d506211",
+    "sample_id": "25",
+    "source_dataset": "McMaster",
+    "release": "v2",
+    "preserved_decision": "QUESTIONABLE",
+    "target_class": "Longitudinal crack",
+    "notes": "very small cracki think it can be neglect but stil good"
+  },
+  {
+    "filename": "0038_6_3_JPG.rf.1af2c56913c4a544bdab0284c6d96de9.jpg",
+    "sha256": "1b87b2c3671e079d4d722092cf9180c60ad91f013a8213e260a513e7ff411c82",
+    "sample_id": "44",
+    "source_dataset": "McMaster",
+    "release": "v2",
+    "preserved_decision": "QUESTIONABLE",
+    "target_class": "Longitudinal crack",
+    "notes": ""
+  },
+  {
+    "filename": "0180_3_7_JPG.rf.fb4c4ef9b7e4feb28d6e2fa2b8260cb6.jpg",
+    "sha256": "6a475f721f9c99e4d1ef931bcd6ef406024d66cc971a0d06444720f3a42110ce",
+    "sample_id": "59",
+    "source_dataset": "McMaster",
+    "release": "v2",
+    "preserved_decision": "PENDING",
+    "target_class": "Transverse crack",
+    "notes": ""
+  },
+  {
+    "filename": "0692_3_4_JPG.rf.69bfc8be85384714f4f0c02e015103a6.jpg",
+    "sha256": "c343e1a0e3a5792e8b4556245723d58fa807c417ed733b0930cf3f7288ba6fee",
+    "sample_id": "104",
+    "source_dataset": "McMaster",
+    "release": "v2",
+    "preserved_decision": "QUESTIONABLE",
+    "target_class": "Alligator crack",
+    "notes": "very unclear i cant seeee any cracks"
+  },
+  {
+    "filename": "0065_1_7_JPG.rf.cf1a6d184abc4e838cef7fafcdeefe0a.jpg",
+    "sha256": "a818df9230662137b7dab79c94903a95c4629735c1dbc44d39b99ba5d92db569",
+    "sample_id": "108",
+    "source_dataset": "McMaster",
+    "release": "v2",
+    "preserved_decision": "QUESTIONABLE",
+    "target_class": "Alligator crack",
+    "notes": "unclear"
+  },
+  {
+    "filename": "0051_4_4_JPG.rf.0f4a6f87440b555622c0cc6d0281b9b3.jpg",
+    "sha256": "03cb5fa9951cdf3c3a6258b8463ebacd31846497e95ad952c496ffee808411cf",
+    "sample_id": "116",
+    "source_dataset": "McMaster",
+    "release": "v2",
+    "preserved_decision": "QUESTIONABLE",
+    "target_class": "Alligator crack",
+    "notes": "its more like longitudnal crack"
+  },
+  {
+    "filename": "0720_1_3_JPG.rf.3a906de64aac8218555a6880990ad7c8.jpg",
+    "sha256": "0e084ffa158019ce17e7e69d82d605c2e92adb8559655873dc91652bba767df0",
+    "sample_id": "139",
+    "source_dataset": "McMaster",
+    "release": "v2",
+    "preserved_decision": "UNABLE_TO_DETERMINE",
+    "target_class": "Alligator crack",
+    "notes": ""
+  },
+  {
+    "filename": "0723_3_3_JPG.rf.49e9c774b7f1bca7d47d3bf007a7ba52.jpg",
+    "sha256": "d4174e5d0a8c5310d3aae061636d96eaab3480de32cf5165e5e854e6a140e26d",
+    "sample_id": "147",
+    "source_dataset": "McMaster",
+    "release": "v2",
+    "preserved_decision": "QUESTIONABLE",
+    "target_class": "Alligator crack",
+    "notes": "only 1 annotation , 1 big annotation is left"
+  },
+  {
+    "filename": "1110_1_4_JPG.rf.8537fd3480fd617a389656ec4fa1506d.jpg",
+    "sha256": "e58ba2c0389976865dfcad95cc4e39fc2194eb579a2f7e2c80fa3c69fdb80e64",
+    "sample_id": "149",
+    "source_dataset": "McMaster",
+    "release": "v2",
+    "preserved_decision": "UNABLE_TO_DETERMINE",
+    "target_class": "Alligator crack",
+    "notes": ""
+  },
+  {
+    "filename": "0696_2_4_JPG.rf.a2e0f4542282a45e19d562b5cb5c1882.jpg",
+    "sha256": "39b6199db5abc3dd285e72eaa8d905c198e47be62f5c1b08b19a53fa0b9a45b2",
+    "sample_id": "150",
+    "source_dataset": "McMaster",
+    "release": "v2",
+    "preserved_decision": "QUESTIONABLE",
+    "target_class": "Alligator crack",
+    "notes": ""
+  },
+  {
+    "filename": "Attain_SMP_OS_v1_000433.jpg",
+    "sha256": "65ee50d4382e7bd283ba6c4dddfcc7721ea0f1f6b1f95d7795440293c11d2854",
+    "sample_id": "154",
+    "source_dataset": "Attain",
+    "release": "OS_V1.0",
+    "preserved_decision": "QUESTIONABLE",
+    "target_class": "Alligator crack",
+    "notes": "unclear image but good annotation box but theres also 1 more box but theres no anotation"
+  },
+  {
+    "filename": "Attain_SMP_OS_v1_000598.jpg",
+    "sha256": "d2089d40b6de37e38ef085e4f46e9b640b180f6baf8decec36b9af6a7a46bad4",
+    "sample_id": "166",
+    "source_dataset": "Attain",
+    "release": "OS_V1.0",
+    "preserved_decision": "PENDING",
+    "target_class": "Alligator crack",
+    "notes": ""
+  },
+  {
+    "filename": "Attain_SMP_OS_v1_000418.jpg",
+    "sha256": "f34a782e5f36fde04108d0d317e856589647a354c92b7942b1ecd062856231dc",
+    "sample_id": "168",
+    "source_dataset": "Attain",
+    "release": "OS_V1.0",
+    "preserved_decision": "UNABLE_TO_DETERMINE",
+    "target_class": "Alligator crack",
+    "notes": ""
+  },
+  {
+    "filename": "Attain_SMP_OS_v1_000517.jpg",
+    "sha256": "45ce7d768655feb704beec9547eaaadbb413e8c6252f7e1b7a93b6b1c7c9817f",
+    "sample_id": "177",
+    "source_dataset": "Attain",
+    "release": "OS_V1.0",
+    "preserved_decision": "UNABLE_TO_DETERMINE",
+    "target_class": "Alligator crack",
+    "notes": ""
+  },
+  {
+    "filename": "Attain_SMP_OS_v1_000404.jpg",
+    "sha256": "58dca55de18282e6e373adbd7254170646534c9de70532d273dea5c88d794672",
+    "sample_id": "179",
+    "source_dataset": "Attain",
+    "release": "OS_V1.0",
+    "preserved_decision": "QUESTIONABLE",
+    "target_class": "Alligator crack",
+    "notes": "not only alligator crack there other annotations are also present but no name of them"
+  },
+  {
+    "filename": "Attain_SMP_WS_v1_000123.jpg",
+    "sha256": "6f1e326857b002046ac28e92571b2bff510ea6e73bc0be58c416e1f27cd722c3",
+    "sample_id": "182",
+    "source_dataset": "Attain",
+    "release": "WS_V1.0",
+    "preserved_decision": "QUESTIONABLE",
+    "target_class": "Alligator crack",
+    "notes": ""
+  },
+  {
+    "filename": "Attain_SMP_WS_v1_000649.jpg",
+    "sha256": "1d143f8383f1fb856730a7dc678619f0561dbcece7b9a90cb25594590c0e6391",
+    "sample_id": "206",
+    "source_dataset": "Attain",
+    "release": "WS_V1.0",
+    "preserved_decision": "QUESTIONABLE",
+    "target_class": "Alligator crack",
+    "notes": ""
+  },
+  {
+    "filename": "Attain_SMP_WS_v1_000608.jpg",
+    "sha256": "0f250eaa4f80d2efb353e609eb7fe78324b9505d328ef855610c1caab6e2634e",
+    "sample_id": "207",
+    "source_dataset": "Attain",
+    "release": "WS_V1.0",
+    "preserved_decision": "QUESTIONABLE",
+    "target_class": "Alligator crack",
+    "notes": ""
+  },
+  {
+    "filename": "Attain_SMP_WS_v1_000642.jpg",
+    "sha256": "fdf9e37efb6822e84da9895be86e55d25585ff92141ac64d8ea6c3b218bfc4c0",
+    "sample_id": "208",
+    "source_dataset": "Attain",
+    "release": "WS_V1.0",
+    "preserved_decision": "QUESTIONABLE",
+    "target_class": "Alligator crack",
+    "notes": ""
+  },
+  {
+    "filename": "Attain_SMP_WS_v2_000352.jpg",
+    "sha256": "49e7cebe40b9f9f6dadaaebe27f1c9d0c24767dafbadbc56623d73224c8337bc",
+    "sample_id": "230",
+    "source_dataset": "Attain",
+    "release": "WS_V2.0",
+    "preserved_decision": "UNABLE_TO_DETERMINE",
+    "target_class": "Alligator crack",
+    "notes": ""
+  },
+  {
+    "filename": "Attain_SMP_WS_v2_000508.jpg",
+    "sha256": "224095754d872b727c038695dc71838900a612e64110cde440e4d9e84c206dd9",
+    "sample_id": "235",
+    "source_dataset": "Attain",
+    "release": "WS_V2.0",
+    "preserved_decision": "QUESTIONABLE",
+    "target_class": "Alligator crack",
+    "notes": "Resolution 1479x508, negative box issue under 640px assumption, preserved QUESTIONABLE status"
+  },
+  {
+    "filename": "Attain_SMP_WS_v2_000347.jpg",
+    "sha256": "96202c30d41625cc46afacf9630aec38b369ccb23224d37a3cc4de75de50494f",
+    "sample_id": "237",
+    "source_dataset": "Attain",
+    "release": "WS_V2.0",
+    "preserved_decision": "QUESTIONABLE",
+    "target_class": "Alligator crack",
+    "notes": ""
+  }
+]

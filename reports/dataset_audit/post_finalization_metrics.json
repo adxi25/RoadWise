@@ -1,0 +1,127 @@
+{
+  "stats_a": {
+    "images": {
+      "train": 3939,
+      "val": 513,
+      "test": 522
+    },
+    "labels": {
+      "train": 3939,
+      "val": 513,
+      "test": 522
+    },
+    "boxes_by_class": {
+      "train": {
+        "D00_longitudinal": 2051,
+        "D10_transverse": 1897,
+        "D20_alligator": 3627
+      },
+      "val": {
+        "D00_longitudinal": 277,
+        "D10_transverse": 316,
+        "D20_alligator": 406
+      },
+      "test": {
+        "D00_longitudinal": 240,
+        "D10_transverse": 318,
+        "D20_alligator": 361
+      }
+    },
+    "total_boxes": {
+      "train": 7575,
+      "val": 999,
+      "test": 919
+    },
+    "sources": {
+      "train": {
+        "McMaster": 3055,
+        "Attain_OS_V1.0": 155,
+        "Attain_WS_V1.0": 342,
+        "Attain_WS_V2.0": 387
+      },
+      "test": {
+        "McMaster": 420,
+        "Attain_WS_V1.0": 27,
+        "Attain_WS_V2.0": 75
+      },
+      "val": {
+        "McMaster": 429,
+        "Attain_WS_V1.0": 42,
+        "Attain_WS_V2.0": 42
+      }
+    }
+  },
+  "stats_c": {
+    "images": {
+      "train": 2918,
+      "val": 339,
+      "test": 335
+    },
+    "labels": {
+      "train": 2918,
+      "val": 339,
+      "test": 335
+    },
+    "boxes_by_class": {
+      "train": {
+        "D00_longitudinal": 2051,
+        "D20_alligator": 3627
+      },
+      "val": {
+        "D00_longitudinal": 277,
+        "D20_alligator": 406
+      },
+      "test": {
+        "D00_longitudinal": 240,
+        "D20_alligator": 361
+      }
+    },
+    "total_boxes": {
+      "train": 5678,
+      "val": 683,
+      "test": 601
+    },
+    "sources": {
+      "train": {
+        "McMaster": 2034,
+        "Attain_OS_V1.0": 155,
+        "Attain_WS_V1.0": 342,
+        "Attain_WS_V2.0": 387
+      },
+      "test": {
+        "McMaster": 233,
+        "Attain_WS_V1.0": 27,
+        "Attain_WS_V2.0": 75
+      },
+      "val": {
+        "McMaster": 255,
+        "Attain_WS_V1.0": 42,
+        "Attain_WS_V2.0": 42
+      }
+    }
+  },
+  "guard_by_rel": {
+    "WS_V1.0": 17,
+    "WS_V2.0": 28
+  },
+  "guard_total": 45,
+  "bench_imgs": 26,
+  "bench_boxes": 102,
+  "master_splits": {
+    "train": 5690,
+    "test": 790,
+    "val": 670,
+    "guard_interval": 6,
+    "held_out_benchmark": 26
+  },
+  "master_sources": {
+    "McMaster": 6080,
+    "Attain": 1102
+  },
+  "master_total_records": 7182,
+  "preserved_checksums": {
+    "McMaster.zip": "039f7fabf95bde4b78db77a17ee0280e707690d63ee6d3b9888c31f4597a3bf5",
+    "Attain.zip": "92002d05bcfa92a4f2c4e3f1a6f019a9cc6e03446a406dd80527b35eee4520bc",
+    "models/best.pt": "f01701f0dad28b5232fb1a68f9103e579ad956bd8593ae833f9ea2b7165d350f"
+  }
+}

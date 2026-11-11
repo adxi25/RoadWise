@@ -1,4 +1,4 @@
-﻿venv/
+venv/
 .venv/
 **/node_modules/
 **/dist/
@@ -33,3 +33,5 @@ results/
 # Temporary and local test dirs
 .pytest_cache/
 .backup_checkpoint/
+scratch/
+runs/

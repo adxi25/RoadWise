@@ -1,0 +1,19 @@
+class_id,class_name,dataset_source,train_img_count,val_img_count,test_img_count,total_img_count,train_bb_count,val_bb_count,test_bb_count,total_bb_count
+0,D00 (Longitudinal Crack),RDD2022_India_Raw,1109,0,0,1109,1555,0,0,1555
+1,D10 (Transverse Crack),RDD2022_India_Raw,60,0,0,60,68,0,0,68
+2,D20 (Alligator Crack),RDD2022_India_Raw,1758,0,0,1758,2021,0,0,2021
+3,D40 (Pothole),RDD2022_India_Raw,1530,0,0,1530,3187,0,0,3187
+-1,D44 (Crosswalk Blur - Unmapped),RDD2022_India_Raw,869,0,0,869,1062,0,0,1062
+-1,D01 (Longitudinal Repair - Unmapped),RDD2022_India_Raw,118,0,0,118,179,0,0,179
+-1,D43 (White Line Blur - Unmapped),RDD2022_India_Raw,57,0,0,57,57,0,0,57
+-1,D11 (Transverse Repair - Unmapped),RDD2022_India_Raw,36,0,0,36,45,0,0,45
+-1,D50 (Manhole Cover - Unmapped),RDD2022_India_Raw,28,0,0,28,28,0,0,28
+-1,D0w0 (Typo in Annotation - Unmapped),RDD2022_India_Raw,1,0,0,1,1,0,0,1
+0,longitudinal_crack (D00),Processed_YOLO,775,167,167,1109,1085,243,227,1555
+1,transverse_crack (D10),Processed_YOLO,42,9,9,60,48,10,10,68
+2,alligator_crack (D20),Processed_YOLO,1231,262,265,1758,1412,300,309,2021
+3,pothole (D40),Processed_YOLO,1067,237,226,1530,2250,482,455,3187
+3,Pothole (Raw Unannotated),Pothole_610_Collection,0,0,0,610,0,0,0,0
+-1,Multi-class (Roboflow v3),RoadWise_Extra_Dataset,1158,85,20,1263,2393,176,36,2605
+-1,CRDDC Japan 7-Class (Roboflow v7),RoadWise_RDD_Extra,2415,689,402,3506,2415,689,402,3506
+

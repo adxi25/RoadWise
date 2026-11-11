@@ -1,0 +1,147 @@
+{
+  "rdd2022_india": {
+    "train_images": 7706,
+    "test_images": 1959,
+    "xml_files": 7706,
+    "xml_missing": [],
+    "xml_extra": [],
+    "total_bbs": 8203,
+    "class_bbs": {
+      "D40": 3187,
+      "D44": 1062,
+      "D00": 1555,
+      "D20": 2021,
+      "D01": 179,
+      "D11": 45,
+      "D10": 68,
+      "D50": 28,
+      "D43": 57,
+      "D0w0": 1
+    },
+    "class_imgs": {
+      "D40": 1530,
+      "D44": 869,
+      "D00": 1109,
+      "D20": 1758,
+      "D01": 118,
+      "D11": 36,
+      "D10": 60,
+      "D50": 28,
+      "D43": 57,
+      "D0w0": 1
+    },
+    "no_defect_train": 3921,
+    "multi_class_images": 1493,
+    "train_duplicates": 0,
+    "test_duplicates": 0,
+    "parse_errors": [],
+    "invalid_bbs": [],
+    "oob_bbs": [],
+    "unknown_classes": {
+      "D44": 1062,
+      "D01": 179,
+      "D11": 45,
+      "D50": 28,
+      "D43": 57,
+      "D0w0": 1
+    },
+    "top_resolutions": [
+      [
+        [
+          720,
+          720
+        ],
+        500
+      ]
+    ],
+    "corrupt_images": []
+  },
+  "yolo_processed": {
+    "yaml_nc": 4,
+    "yaml_names": {
+      "0": "longitudinal_crack",
+      "1": "transverse_crack",
+      "2": "alligator_crack",
+      "3": "pothole"
+    },
+    "splits": {
+      "train": {
+        "total": 5394,
+        "labels": 5394,
+        "india": 5394,
+        "other": 0,
+        "cls_bb": {
+          "3": 2250,
+          "0": 1085,
+          "2": 1412,
+          "1": 48
+        },
+        "cls_imgs": {
+          "3": 1067,
+          "0": 775,
+          "2": 1231,
+          "1": 42
+        },
+        "ph_empty": 0,
+        "ph_pos": 0,
+        "ph_bbs": 0,
+        "ph_cls": {}
+      },
+      "val": {
+        "total": 1155,
+        "labels": 1155,
+        "india": 1155,
+        "other": 0,
+        "cls_bb": {
+          "3": 482,
+          "0": 243,
+          "2": 300,
+          "1": 10
+        },
+        "cls_imgs": {
+          "3": 237,
+          "0": 167,
+          "2": 262,
+          "1": 9
+        },
+        "ph_empty": 0,
+        "ph_pos": 0,
+        "ph_bbs": 0,
+        "ph_cls": {}
+      },
+      "test": {
+        "total": 1157,
+        "labels": 1157,
+        "india": 1157,
+        "other": 0,
+        "cls_bb": {
+          "2": 309,
+          "3": 455,
+          "0": 227,
+          "1": 10
+        },
+        "cls_imgs": {
+          "2": 265,
+          "0": 167,
+          "3": 226,
+          "1": 9
+        },
+        "ph_empty": 0,
+        "ph_pos": 0,
+        "ph_bbs": 0,
+        "ph_cls": {}
+      }
+    },
+    "cross_split_leakage_count": 0,
+    "rdd_test_in_yolo": [],
+    "rdd_train_in_yolo": 7706
+  },
+  "pothole_dataset": {
+    "total_non_rdd_images": 0,
+    "positive_images": 0,
+    "empty_label_images": 0,
+    "total_pseudo_label_bbs": 0,
+    "class_distribution": {},
+    "annotation_type": "PSEUDO-LABEL (not human-verified)"
+  }
+}

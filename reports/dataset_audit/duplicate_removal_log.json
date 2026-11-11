@@ -1,0 +1,34 @@
+[
+  {
+    "sha256": "d8f07f5979f4efd6e8ad9d3be473950ef55171ad1083fa59942ff903c72b2260",
+    "retained_file": "Attain_SMP_WS_v1_000084.jpg",
+    "dropped_file": "Attain_SMP_WS_v1_000085.jpg",
+    "source_release": "Attain_SMP_WS_V1.0",
+    "annotation_check": "Identical (both empty/background)",
+    "reason": "Redundant consecutive video frame with identical visual content and empty annotation."
+  },
+  {
+    "sha256": "97d74db1c107beee676104bc177967bce1f8f3c77d4c728e5f2a1b94b005128a",
+    "retained_file": "Attain_SMP_WS_v1_000249.jpg",
+    "dropped_file": "Attain_SMP_WS_v1_000250.jpg",
+    "source_release": "Attain_SMP_WS_V1.0",
+    "annotation_check": "Non-target class (Class 9 Weathering - High)",
+    "reason": "Redundant consecutive video frame with non-target class 9 annotations."
+  },
+  {
+    "sha256": "8e27c19bb8d28a9b3429bc01a6beba2be6b33bc3fc8e03e7e97d1ec02a0a2df3",
+    "retained_file": "Attain_SMP_WS_v1_000592.jpg",
+    "dropped_file": "Attain_SMP_WS_v1_000593.jpg",
+    "source_release": "Attain_SMP_WS_V1.0",
+    "annotation_check": "Identical (both empty/background)",
+    "reason": "Redundant consecutive video frame with identical visual content and empty annotation."
+  },
+  {
+    "sha256": "89b2ce8f4b0be07d0f39fb4a4bb45e339d1b6cf4a4f89d0e2e5057f9ea11e54c",
+    "retained_file": "Attain_SMP_WS_v1_000713.jpg",
+    "dropped_file": "Attain_SMP_WS_v1_000714.jpg",
+    "source_release": "Attain_SMP_WS_V1.0",
+    "annotation_check": "Identical (both empty/background)",
+    "reason": "Redundant consecutive video frame with identical visual content and empty annotation."
+  }
+]

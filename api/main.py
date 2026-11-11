@@ -75,7 +75,11 @@ from database.database import (  # noqa: E402
     get_inspection,
     get_inspection_stats,
 )
-from detection.predict import load_model  # noqa: E402
+from detection.predict import (  # noqa: E402
+    CRACK_MODEL,
+    POTHOLE_MODEL,
+    load_model,
+)
 from pipeline.inspection_pipeline import (  # noqa: E402
     DEFAULT_CONFIDENCE,
     DEFAULT_IMGSZ,
@@ -179,31 +183,57 @@ def health_check() -> dict[str, Any]:
     Check the health of the RoadWise API service and verify model availability.
 
     SYSTEM VALIDATION CHECKS:
-        1. Checks whether `models/best.pt` exists on disk.
-        2. Tests the model loading cache via `load_model()` to confirm valid PyTorch weights.
+        1. Checks whether primary pothole model and Experiment C crack specialist model exist.
+        2. Tests model loading cache via `load_model()` to confirm valid PyTorch weights.
         3. Confirms database readiness.
 
     Returns:
-        dict: Operational readiness status and component diagnostics.
+        dict: Operational readiness status, dual-model diagnostics, and database health.
     """
-    model_exists = MODEL_PATH.exists()
-    model_status = "not_found"
+    pothole_exists = POTHOLE_MODEL.exists() or MODEL_PATH.exists()
+    pothole_path = POTHOLE_MODEL if POTHOLE_MODEL.exists() else MODEL_PATH
+    pothole_status = "not_found"
 
-    if model_exists:
+    if pothole_exists:
         try:
-            # Test model loading cache
-            load_model(MODEL_PATH)
-            model_status = "ready"
+            load_model(pothole_path)
+            pothole_status = "ready"
         except Exception as e:
-            model_status = f"error: {e}"
+            pothole_status = f"error: {e}"
+
+    crack_exists = CRACK_MODEL.exists()
+    crack_status = "not_found"
+    if crack_exists:
+        try:
+            load_model(CRACK_MODEL)
+            crack_status = "ready"
+        except Exception as e:
+            crack_status = f"error: {e}"
+
+    is_dual_model = (pothole_status == "ready") and (crack_status == "ready")
 
     return {
         "status": "healthy",
         "service": "RoadWise API",
+        "inference_mode": "dual_model" if is_dual_model else "single_model",
         "model": {
-            "path": str(MODEL_PATH),
-            "exists": model_exists,
-            "status": model_status,
+            "path": str(pothole_path),
+            "exists": pothole_exists,
+            "status": pothole_status,
+        },
+        "dual_model": {
+            "pothole_specialist": {
+                "path": str(pothole_path),
+                "exists": pothole_exists,
+                "status": pothole_status,
+                "classes": ["D40 (Pothole)"],
+            },
+            "crack_specialist": {
+                "path": str(CRACK_MODEL),
+                "exists": crack_exists,
+                "status": crack_status,
+                "classes": ["D00 (Linear Crack)", "D20 (Alligator Crack)"],
+            },
         },
         "database": {
             "path": str(BASE_DIR / "data" / "roadwise.db"),

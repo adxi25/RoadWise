@@ -9,25 +9,39 @@
 
 ---
 
+## Master Project Documentation Suite
+
+For comprehensive engineering breakdowns, faculty viva preparation, mathematical formulas, and codebase navigation, refer to the permanent documentation suite in [`docs/`](file:///c:/Users/aquad/OneDrive/Desktop/RoadWise/docs):
+
+1. **[`docs/CODEBASE_MAP.md`](file:///c:/Users/aquad/OneDrive/Desktop/RoadWise/docs/CODEBASE_MAP.md)** — **Highest Priority:** Instant "Where is X?" navigation map covering every file, function, input, output, call-flow, and feature relationship across backend and frontend.
+2. **[`docs/PROJECT_STATUS.md`](file:///c:/Users/aquad/OneDrive/Desktop/RoadWise/docs/PROJECT_STATUS.md)** — Permanent source of truth for project stage, completed/in-progress tasks, current models, test status, and next steps.
+3. **[`docs/VIVA_CODE_GUIDE.md`](file:///c:/Users/aquad/OneDrive/Desktop/RoadWise/docs/VIVA_CODE_GUIDE.md)** — Practical viva preparation guide with code walkthroughs, 60-second pitches, ML concept defenses (IoU, mAP, D20 root causes), and 15 tough examiner Q&As.
+4. **[`docs/SYSTEM_ARCHITECTURE.md`](file:///c:/Users/aquad/OneDrive/Desktop/RoadWise/docs/SYSTEM_ARCHITECTURE.md)** — Full architectural specification with Mermaid flowcharts, sequence diagrams, database schemas, and frontend component trees.
+5. **[`docs/MODEL_EXPERIMENTS.md`](file:///c:/Users/aquad/OneDrive/Desktop/RoadWise/docs/MODEL_EXPERIMENTS.md)** — Complete machine learning history tracking `roadwise_v2`, Experiment A (3-class), Experiment C (2-class), and empirical D20 error analysis.
+6. **[`docs/SCORING_METHODOLOGY.md`](file:///c:/Users/aquad/OneDrive/Desktop/RoadWise/docs/SCORING_METHODOLOGY.md)** — Complete mathematical derivations, numerical examples, overlap discounting algorithms, and context multiplier tables.
+
+---
+
 ## Table of Contents
-1. [Executive Summary & Purpose](#executive-summary--purpose)
-2. [Current Project Status (The 80% Milestone)](#current-project-status-the-80-milestone)
-3. [System Architecture & Workflow](#system-architecture--workflow)
-4. [In-Depth Data Analysis & Dataset Engineering](#in-depth-data-analysis--dataset-engineering)
-5. [Computer Vision & Model Detection Specs](#computer-vision--model-detection-specs)
-6. [Why the Current Model Primarily Detects Potholes (The Asymmetry & Training Scope)](#why-the-current-model-primarily-detects-potholes-the-asymmetry--training-scope)
-7. [Mathematical Scoring Engine](#mathematical-scoring-engine)
+1. [Master Project Documentation Suite](#master-project-documentation-suite)
+2. [Executive Summary & Purpose](#executive-summary--purpose)
+3. [Current Project Status (The 80% Milestone)](#current-project-status-the-80-milestone)
+4. [System Architecture & Workflow](#system-architecture--workflow)
+5. [In-Depth Data Analysis & Dataset Engineering](#in-depth-data-analysis--dataset-engineering)
+6. [Computer Vision & Model Detection Specs](#computer-vision--model-detection-specs)
+7. [Why the Current Model Primarily Detects Potholes (The Asymmetry & Training Scope)](#why-the-current-model-primarily-detects-potholes-the-asymmetry--training-scope)
+8. [Mathematical Scoring Engine](#mathematical-scoring-engine)
    - [Pavement Condition Score (Health Score)](#1-pavement-condition-score-health_scorepy)
    - [Risk Score & Maintenance Priority](#2-risk-score--maintenance-priority-risk_scorepy)
-8. [Database Architecture & Schema](#database-architecture--schema)
-9. [Comprehensive File & Directory Contribution Catalog](#comprehensive-file--directory-contribution-catalog)
-10. [Frontend User Interfaces](#frontend-user-interfaces)
+9. [Database Architecture & Schema](#database-architecture--schema)
+10. [Comprehensive File & Directory Contribution Catalog](#comprehensive-file--directory-contribution-catalog)
+11. [Frontend User Interfaces](#frontend-user-interfaces)
     - [Mode 1: Field Inspection Workspace](#mode-1-field-inspection-workspace)
     - [Mode 2: Authority Decision-Support Dashboard](#mode-2-authority-decision-support-dashboard)
-11. [Current Limitations](#current-limitations)
-12. [Roadmap to 100% Production Grade](#roadmap-to-100-production-grade)
-13. [Installation & Setup Guide](#installation--setup-guide)
-14. [API Reference](#api-reference)
+12. [Current Limitations](#current-limitations)
+13. [Roadmap to 100% Production Grade](#roadmap-to-100-production-grade)
+14. [Installation & Setup Guide](#installation--setup-guide)
+15. [API Reference](#api-reference)
 
 ---
 
@@ -511,7 +525,7 @@ npm run dev
 
 * **Frontend UI**: [http://localhost:5173](http://localhost:5173)
 * **Backend API Docs (Swagger UI)**: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
-* **Backend Health Check**: [http://127.0.0.1:8000/health](http://127.0.0.1:8000/health)
+* **Backend Health Check**: [http://127.0.0.1:8000/api/health](http://127.0.0.1:8000/api/health)
 
 ---
 

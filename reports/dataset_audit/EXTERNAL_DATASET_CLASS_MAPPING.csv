@@ -1,0 +1,39 @@
+dataset_name,original_class_id,original_class_name,roadwise_class_id,roadwise_class_name,mapping_status,mapping_reason,annotation_type,verification_status
+Attain_Pavement_Distress,0,linear_crack,-1,UNMAPPED,UNMAPPED,Lumps longitudinal and transverse cracks into one generic class; orientation not separated,bounding_box_voc_yolo,VERIFIED_FACT
+Attain_Pavement_Distress,1,alligator_crack,2,D20 (Alligator Crack),MAPPED,Semantically identical fatigue cracking pattern,bounding_box_voc_yolo,VERIFIED_FACT
+Attain_Pavement_Distress,2,block_crack,-1,UNMAPPED,UNMAPPED,Rectangular thermal shrinkage block cracks outside 4-class taxonomy,bounding_box_voc_yolo,VERIFIED_FACT
+Attain_Pavement_Distress,3,weathering,-1,UNMAPPED,UNMAPPED,Surface asphalt binder loss; not a crack or pothole,bounding_box_voc_yolo,VERIFIED_FACT
+Attain_Pavement_Distress,4,lane_shoulder_drop_off,-1,UNMAPPED,UNMAPPED,Elevation edge defect outside RoadWise defect ontology,bounding_box_voc_yolo,VERIFIED_FACT
+Attain_Pavement_Distress,5,raveling,-1,UNMAPPED,UNMAPPED,Aggregate loss distress outside RoadWise defect ontology,bounding_box_voc_yolo,VERIFIED_FACT
+Attain_Pavement_Distress,6,patching_utility_cuts,-1,UNMAPPED,UNMAPPED,Maintenance repair patch outside defect ontology,bounding_box_voc_yolo,VERIFIED_FACT
+Attain_Pavement_Distress,7,manhole,-1,UNMAPPED,UNMAPPED,Utility infrastructure feature; non-distress object,bounding_box_voc_yolo,VERIFIED_FACT
+Attain_Pavement_Distress,8,faded_markings,-1,UNMAPPED,UNMAPPED,Degraded road paint; non-structural surface distress,bounding_box_voc_yolo,VERIFIED_FACT
+Attain_Pavement_Distress,9,pothole,3,D40 (Pothole),MAPPED,Bowl-shaped pavement cavity matching D40 definition,bounding_box_voc_yolo,VERIFIED_FACT
+McMaster_Crack_Detection,0,alligator_crack,2,D20 (Alligator Crack),CONDITIONAL_MAPPED,Fatigue cracking network; requires inspection to filter synthetic augmentation duplicates,bounding_box_yolo,VERIFIED_FACT
+McMaster_Crack_Detection,1,block_crack,-1,UNMAPPED,UNMAPPED,Rectangular thermal shrinkage crack outside 4-class taxonomy,bounding_box_yolo,VERIFIED_FACT
+McMaster_Crack_Detection,2,longitudinal_crack,0,D00 (Longitudinal Crack),CONDITIONAL_MAPPED,Parallel wheelpath fissure; requires verification against augmentations,bounding_box_yolo,VERIFIED_FACT
+McMaster_Crack_Detection,3,oblique_crack,-1,UNMAPPED,UNMAPPED,Diagonal fracture; strict RoadWise rule prohibits mapping oblique cracks to D00 or D10,bounding_box_yolo,VERIFIED_FACT
+McMaster_Crack_Detection,4,pothole,3,D40 (Pothole),CONDITIONAL_MAPPED,Pavement hole; conditional on image source verification,bounding_box_yolo,VERIFIED_FACT
+McMaster_Crack_Detection,5,repair,-1,UNMAPPED,UNMAPPED,Asphalt patch; non-defect maintenance feature,bounding_box_yolo,VERIFIED_FACT
+McMaster_Crack_Detection,6,transverse_crack,1,D10 (Transverse Crack),CONDITIONAL_MAPPED,Perpendicular joint crack; high-value target if verified human annotations,bounding_box_yolo,VERIFIED_FACT
+Crack500,0,crack,-1,UNMAPPED,UNMAPPED,Binary segmentation mask; does not differentiate longitudinal transverse or alligator cracks,binary_segmentation_mask,VERIFIED_FACT
+Ultralytics_CrackSeg,0,crack,-1,UNMAPPED,UNMAPPED,Single generic class spanning road wall and masonry cracks; lacks orientation sub-classification,polygon_segmentation,VERIFIED_FACT
+RDD_Czech_CRDDC,0,D00,0,D00 (Longitudinal Crack),MAPPED,Native IEEE CRDDC longitudinal wheelpath crack annotation,bounding_box_pascal_voc,VERIFIED_FACT
+RDD_Czech_CRDDC,1,D10,1,D10 (Transverse Crack),MAPPED,Native IEEE CRDDC transverse perpendicular crack annotation; solves India D10 deficit,bounding_box_pascal_voc,VERIFIED_FACT
+RDD_Czech_CRDDC,2,D20,2,D20 (Alligator Crack),MAPPED,Native IEEE CRDDC alligator fatigue crack annotation,bounding_box_pascal_voc,VERIFIED_FACT
+RDD_Czech_CRDDC,3,D40,3,D40 (Pothole),MAPPED,Native IEEE CRDDC pothole cavity annotation,bounding_box_pascal_voc,VERIFIED_FACT
+RDD_Japan_CRDDC,0,D00,0,D00 (Longitudinal Crack),MAPPED,Native IEEE CRDDC longitudinal wheelpath crack annotation,bounding_box_pascal_voc,VERIFIED_FACT
+RDD_Japan_CRDDC,1,D10,1,D10 (Transverse Crack),MAPPED,Native IEEE CRDDC transverse perpendicular crack annotation; solves India D10 deficit,bounding_box_pascal_voc,VERIFIED_FACT
+RDD_Japan_CRDDC,2,D20,2,D20 (Alligator Crack),MAPPED,Native IEEE CRDDC alligator fatigue crack annotation,bounding_box_pascal_voc,VERIFIED_FACT
+RDD_Japan_CRDDC,3,D40,3,D40 (Pothole),MAPPED,Native IEEE CRDDC pothole cavity annotation,bounding_box_pascal_voc,VERIFIED_FACT
+RDD_Japan_CRDDC,4,D43,-1,UNMAPPED,UNMAPPED,Crosswalk blur; outside 4-class structural defect taxonomy,bounding_box_pascal_voc,VERIFIED_FACT
+RDD_Japan_CRDDC,5,D44,-1,UNMAPPED,UNMAPPED,White line blur; outside 4-class structural defect taxonomy,bounding_box_pascal_voc,VERIFIED_FACT
+RDD_Japan_CRDDC,6,D50,-1,UNMAPPED,UNMAPPED,Manhole / utility cover; outside 4-class structural defect taxonomy,bounding_box_pascal_voc,VERIFIED_FACT
+CQU_BPDD,0,transverse_crack,1,D10 (Transverse Crack),CONDITIONAL_MAPPED,Explicit transverse crack label but provided as patch-level classification without bounding boxes,image_patch_classification,VERIFIED_FACT
+CQU_BPDD,1,longitudinal_crack,0,D00 (Longitudinal Crack),CONDITIONAL_MAPPED,Explicit longitudinal crack label but provided as patch-level classification without bounding boxes,image_patch_classification,VERIFIED_FACT
+CQU_BPDD,2,alligator_crack,2,D20 (Alligator Crack),CONDITIONAL_MAPPED,Explicit alligator crack label but provided as patch-level classification without bounding boxes,image_patch_classification,VERIFIED_FACT
+CQU_BPDD,3,massive_crack,-1,UNMAPPED,UNMAPPED,Wide structural rupture; undefined orientation outside 4-class ontology,image_patch_classification,VERIFIED_FACT
+CQU_BPDD,4,crack_pouring,-1,UNMAPPED,UNMAPPED,Sealed crack joint repair; non-defect maintenance feature,image_patch_classification,VERIFIED_FACT
+CQU_BPDD,5,ravelling,-1,UNMAPPED,UNMAPPED,Aggregate loss; non-crack distress outside 4-class ontology,image_patch_classification,VERIFIED_FACT
+CQU_BPDD,6,repair,-1,UNMAPPED,UNMAPPED,Pavement patch; non-defect maintenance feature,image_patch_classification,VERIFIED_FACT
+

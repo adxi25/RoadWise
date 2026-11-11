@@ -1,0 +1,56 @@
+Dataset,Original_Class,Proposed_RoadWise_Class,Mapping_Confidence,Mapping_Justification,Annotation_Type,Verification_Status
+Attain Pavement Distress,alligator_crack,Alligator Crack (D20),High,Direct 1:1 morphological match representing interconnected fatigue cracking,Bounding Box (YOLO/VOC),Verified
+Attain Pavement Distress,linear_crack,UNMAPPED,None,Violates Rule 1: Groups longitudinal and transverse cracks together; cannot determine orientation without manual re-annotation,Bounding Box (YOLO/VOC),Verified Incompatible
+Attain Pavement Distress,block_crack,UNMAPPED,None,Outside target crack scope; rectangular structural blocks distinct from fatigue mesh,Bounding Box (YOLO/VOC),Verified
+Attain Pavement Distress,weathering,UNMAPPED,None,Surface abrasion distress; not a crack,Bounding Box (YOLO/VOC),Verified
+Attain Pavement Distress,lane_shoulder_drop_off,UNMAPPED,None,Edge pavement elevation defect; not a crack,Bounding Box (YOLO/VOC),Verified
+Attain Pavement Distress,raveling,UNMAPPED,None,Aggregate loss and dislodgement; not a crack,Bounding Box (YOLO/VOC),Verified
+Attain Pavement Distress,patching_utility_cuts,UNMAPPED,None,Asphalt repair geometry; not a crack,Bounding Box (YOLO/VOC),Verified
+Attain Pavement Distress,manhole,UNMAPPED,None,Utility hardware object; not road damage,Bounding Box (YOLO/VOC),Verified
+Attain Pavement Distress,faded_markings,UNMAPPED,None,Paint deterioration; not a crack,Bounding Box (YOLO/VOC),Verified
+Attain Pavement Distress,pothole,EXCLUDED_FROM_CRACK_MODEL,None,Reserved exclusively for dedicated Pothole Model 1; excluded from Crack Model 2,Bounding Box (YOLO/VOC),Verified
+McMaster Crack Detection,longitudinal_crack,Longitudinal Crack (D00),High,Direct 1:1 match for linear cracks parallel to direction of travel,Bounding Box (YOLO),Verified
+McMaster Crack Detection,transverse_crack,Transverse Crack (D10),High,Direct 1:1 match for thermal cracks perpendicular to direction of travel,Bounding Box (YOLO),Verified
+McMaster Crack Detection,alligator_crack,Alligator Crack (D20),High,Direct 1:1 match for fatigue polygon mesh distress,Bounding Box (YOLO),Verified
+McMaster Crack Detection,oblique_crack,UNMAPPED,None,Violates Rule 2: Diagonal/diagonal cracks cannot be forced into longitudinal or transverse classes,Bounding Box (YOLO),Verified
+McMaster Crack Detection,block_crack,UNMAPPED,None,Large rectangular cracks; outside target crack taxonomy,Bounding Box (YOLO),Verified
+McMaster Crack Detection,pothole,EXCLUDED_FROM_CRACK_MODEL,None,Reserved exclusively for dedicated Pothole Model 1; excluded from Crack Model 2,Bounding Box (YOLO),Verified
+McMaster Crack Detection,repair,UNMAPPED,None,Maintenance patch; not active cracking,Bounding Box (YOLO),Verified
+CRDDC RDD2020 / RDD2022,D00,Longitudinal Crack (D00),High,Exact native RDD ontology for longitudinal cracking along wheelpath/joints,Bounding Box (Pascal VOC XML),Verified
+CRDDC RDD2020 / RDD2022,D10,Transverse Crack (D10),High,Exact native RDD ontology for transverse thermal contraction cracking,Bounding Box (Pascal VOC XML),Verified
+CRDDC RDD2020 / RDD2022,D20,Alligator Crack (D20),High,Exact native RDD ontology for interconnected alligator fatigue cracking,Bounding Box (Pascal VOC XML),Verified
+CRDDC RDD2020 / RDD2022,D40,EXCLUDED_FROM_CRACK_MODEL,None,Reserved exclusively for dedicated Pothole Model 1; excluded from Crack Model 2,Bounding Box (Pascal VOC XML),Verified
+CRDDC RDD2020 / RDD2022,D43,UNMAPPED,None,White road line blur; dropped cleanly by converter,Bounding Box (Pascal VOC XML),Verified
+CRDDC RDD2020 / RDD2022,D44,UNMAPPED,None,Crosswalk blur; dropped cleanly by converter,Bounding Box (Pascal VOC XML),Verified
+CRDDC RDD2020 / RDD2022,D50,UNMAPPED,None,Manhole cover; dropped cleanly by converter,Bounding Box (Pascal VOC XML),Verified
+PaveDistress (Mendeley),Transverse Crack,Transverse Crack (D10),Medium,Semantically valid transverse crack, but captured via top-down orthogonal line-scan camera causing severe domain mismatch with dashcams,Bounding Box / Tag,Verified Incompatible
+PaveDistress (Mendeley),Longitudinal Crack,Longitudinal Crack (D00),Medium,Semantically valid longitudinal crack, but captured via top-down orthogonal line-scan camera causing severe domain mismatch with dashcams,Bounding Box / Tag,Verified Incompatible
+PaveDistress (Mendeley),Map Crack,Alligator Crack (D20),Medium,Semantically valid alligator/map crack, but top-down line-scan perspective introduces extreme domain shift,Bounding Box / Tag,Verified Incompatible
+PaveDistress (Mendeley),Patch,UNMAPPED,None,Pavement repair; outside crack taxonomy,Bounding Box / Tag,Verified Incompatible
+PaveDistress (Mendeley),Pothole,EXCLUDED_FROM_CRACK_MODEL,None,Reserved for Model 1; excluded from Crack Model 2,Bounding Box / Tag,Verified Incompatible
+PaveDistress (Mendeley),Background,Background (Negative),High,Clean defect-free asphalt control frames,Negative Image,Verified
+Crack500,crack,UNMAPPED,None,Binary segmentation masks cannot distinguish directional orientation or alligator topology; bounding box conversion creates massive overlapping bounding rectangles,Binary Pixel Mask,Rejected
+GAPs v2,Crack,UNMAPPED,None,Single generic crack class following German FGSV regulations; lumps longitudinal, transverse, and alligator cracks into one class,Bounding Box,Rejected
+GAPs v2,Pothole,EXCLUDED_FROM_CRACK_MODEL,None,Reserved for Model 1; excluded from Crack Model 2,Bounding Box,Rejected
+GAPs v2,Inlaid patch,UNMAPPED,None,Asphalt repair; not active crack,Bounding Box,Rejected
+GAPs v2,Applied patch,UNMAPPED,None,Asphalt repair; not active crack,Bounding Box,Rejected
+GAPs v2,Open joint,UNMAPPED,None,Pavement construction seam,Bounding Box,Rejected
+CFD (CrackForest),crack,UNMAPPED,None,Binary pixel mask; lacks multi-class directional separation; small sample size (118 frames),Binary Pixel Mask,Rejected
+DeepCrack,crack,UNMAPPED,None,Binary pixel mask for semantic segmentation benchmark; no bounding boxes or directional separation,Binary Pixel Mask,Rejected
+CrackTree260,crack,UNMAPPED,None,Binary pixel mask for semantic segmentation benchmark; no bounding boxes or directional separation,Binary Pixel Mask,Rejected
+EdmCrack600,crack,UNMAPPED,None,Binary pixel mask for semantic segmentation benchmark; no bounding boxes or directional separation,Binary Pixel Mask,Rejected
+Ultralytics Crack-Seg,crack,UNMAPPED,None,Instance polygon on non-road building facades, walls, and sidewalks; AGPL-3.0 viral license,Instance Polygon,Rejected
+CQU-BPDD,Transverse crack,Transverse Crack (D10),Low,Image-level patch classification flag only; lacks object bounding box coordinates [x, y, w, h],Image Classification Patch,Rejected
+CQU-BPDD,Longitudinal crack,Longitudinal Crack (D00),Low,Image-level patch classification flag only; lacks object bounding box coordinates [x, y, w, h],Image Classification Patch,Rejected
+CQU-BPDD,Alligator crack,Alligator Crack (D20),Low,Image-level patch classification flag only; lacks object bounding box coordinates [x, y, w, h],Image Classification Patch,Rejected
+CQU-BPDD,Massive crack,UNMAPPED,None,Non-standard taxonomy; patch flag only,Image Classification Patch,Rejected
+CQU-BPDD,Crack pouring,UNMAPPED,None,Sealed crack maintenance; patch flag only,Image Classification Patch,Rejected
+CQU-BPDD,Ravelling,UNMAPPED,None,Aggregate loss; patch flag only,Image Classification Patch,Rejected
+CQU-BPDD,Repair,UNMAPPED,None,Surface patch; patch flag only,Image Classification Patch,Rejected
+Roboflow Vignesh,Longitudinal crack,Longitudinal Crack (D00),Medium,Compatible bounding boxes; requires deduplication against McMaster,Bounding Box (YOLO),Verified
+Roboflow Vignesh,Transverse crack,Transverse Crack (D10),Medium,Compatible bounding boxes; requires deduplication against McMaster,Bounding Box (YOLO),Verified
+Roboflow Vignesh,Alligator crack,Alligator Crack (D20),Medium,Compatible bounding boxes; requires deduplication against McMaster,Bounding Box (YOLO),Verified
+Roboflow Mahatishri,longitudinal cracking,Longitudinal Crack (D00),Medium,Compatible bounding boxes; smaller sample volume,Bounding Box (YOLO),Verified
+Roboflow Mahatishri,transverse cracking,Transverse Crack (D10),Medium,Compatible bounding boxes; smaller sample volume,Bounding Box (YOLO),Verified
+Roboflow Mahatishri,alligator cracking,Alligator Crack (D20),Medium,Compatible bounding boxes; smaller sample volume,Bounding Box (YOLO),Verified
+

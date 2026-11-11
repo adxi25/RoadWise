@@ -26,13 +26,28 @@ Output: Tuple:
         - Annotated BGR OpenCV image numpy array (result.plot())
 """
 import argparse
+import os
 from pathlib import Path
+
+# Ensure Ultralytics operates offline without hanging on telemetry or update network checks
+os.environ.setdefault("YOLO_OFFLINE", "True")
+os.environ.setdefault("ULTRALYTICS_SETTINGS_SYNC", "False")
 
 # Base directory anchor (resolves to RoadWise repository root)
 BASE_DIR = Path(__file__).resolve().parents[2]
 
-# Active trained model checkpoint path (YOLOv8s fine-tuned on RDD2022/India)
-DEFAULT_MODEL = BASE_DIR / "models" / "best.pt"
+# Dual-Model Architecture Paths:
+# 1. Pothole Specialist: Fine-tuned YOLOv8s on RDD2022/India (detects D40 Potholes at high confidence)
+POTHOLE_MODEL = BASE_DIR / "models" / "pothole_best.pt"
+# Backward-compatibility fallback if pothole_best.pt is referenced as best.pt
+if not POTHOLE_MODEL.exists() and (BASE_DIR / "models" / "best.pt").exists():
+    POTHOLE_MODEL = BASE_DIR / "models" / "best.pt"
+
+# 2. Crack Specialist: Experiment C 2-Class YOLOv8s (detects D00 Linear & D20 Alligator Cracks)
+CRACK_MODEL = BASE_DIR / "models" / "experiment_c_best.pt"
+
+# Active default model reference
+DEFAULT_MODEL = POTHOLE_MODEL
 
 # Optimal confidence threshold calibrated for the fine-tuned roadwise_v2 model.
 # Set to 0.15 to ensure subtle pavement fissures and shadowed pothole cavities are captured.
@@ -183,32 +198,79 @@ def results_to_detections(result):
     return detections
 
 
-def detect(image_path, conf=DEFAULT_CONF, model_path=DEFAULT_MODEL, imgsz=DEFAULT_IMGSZ):
+def draw_annotations(image_path, detections):
+    """
+    Renders high-contrast bounding boxes, labels, and confidence tags onto the source image.
+    Uses distinct color coding per civil distress type:
+      - D40 (Pothole): Bright Red/Crimson
+      - D20 (Alligator Crack): Amber / Orange
+      - D00 (Linear Crack): Bright Cyan
+      - D10 (Transverse Crack): Cyan
+    """
+    import cv2
+    img = cv2.imread(str(image_path))
+    if img is None:
+        return None
+
+    h, w = img.shape[:2]
+
+    # Color palette (BGR format for OpenCV)
+    colors = {
+        "D40": (34, 34, 220),   # Red / Crimson for Potholes
+        "D20": (0, 140, 255),   # Amber / Orange for Alligator Cracks
+        "D00": (220, 200, 0),   # Cyan for Linear / Longitudinal Cracks
+        "D10": (200, 180, 0),   # Cyan for Transverse Cracks
+    }
+
+    for d in detections:
+        code = d.get("class_code", "UNK")
+        color = colors.get(code, (0, 255, 0))
+
+        # Denormalize coordinates to pixel values
+        xc, yc = d["x_center"] * w, d["y_center"] * h
+        bw, bh = d["width"] * w, d["height"] * h
+        x1 = max(0, int(xc - bw / 2))
+        y1 = max(0, int(yc - bh / 2))
+        x2 = min(w - 1, int(xc + bw / 2))
+        y2 = min(h - 1, int(yc + bh / 2))
+
+        # Draw primary bounding rectangle
+        cv2.rectangle(img, (x1, y1), (x2, y2), color, thickness=2)
+
+        # Draw label header
+        label = f"{d.get('class_name', code)} {d.get('confidence', 0.0):.2f}"
+        font = cv2.FONT_HERSHEY_SIMPLEX
+        font_scale = max(0.42, min(0.65, w / 1100))
+        (tw, th), _ = cv2.getTextSize(label, font, font_scale, 1)
+
+        # Draw filled background pill for readability
+        tag_y1 = max(0, y1 - th - 8)
+        tag_x2 = min(w - 1, x1 + tw + 8)
+        cv2.rectangle(img, (x1, tag_y1), (tag_x2, y1), color, -1)
+
+        # White text for dark tags, black for light tags
+        text_color = (255, 255, 255) if code in ("D40", "D20") else (0, 0, 0)
+        cv2.putText(
+            img, label, (x1 + 4, y1 - 4), font, font_scale, text_color, 1, cv2.LINE_AA
+        )
+
+    return img
+
+
+def detect(image_path, conf=DEFAULT_CONF, model_path=None, imgsz=DEFAULT_IMGSZ):
     """
     Execute full YOLOv8 detection pipeline on a single image file.
 
-    WHAT IT DOES:
-    -------------
-    Loads the cached neural network, processes the image at the requested canvas size,
-    extracts bounding boxes, and draws visual annotations.
+    DUAL-MODEL ARCHITECTURE:
+    ------------------------
+    When `model_path is None` (or 'dual'), RoadWise runs two specialized models:
+      1. Pothole Specialist (`models/pothole_best.pt`): Detects D40 Potholes
+      2. Crack Specialist (`models/experiment_c_best.pt`): Detects D00 & D20 Cracks
+    The detections are seamlessly merged and drawn with distinct colors.
 
-    PARAMETERS:
-    -----------
-    image_path : str or Path
-        Path to input photo (JPG, PNG, WebP).
-    conf : float, optional
-        Confidence threshold below which candidate boxes are discarded (default: 0.15).
-    model_path : str or Path, optional
-        Custom model weights path if evaluating alternative checkpoints.
-    imgsz : int, optional
-        Inference resolution in pixels (default: 640).
-
-    RETURNS:
-    --------
-    tuple:
-        (detections: list[dict], annotated_bgr: numpy.ndarray)
-        - detections: standardized dicts for database and condition scoring.
-        - annotated_bgr: OpenCV BGR image matrix with bounding boxes and labels drawn.
+    SINGLE-MODEL FALLBACK:
+    ----------------------
+    If a specific `model_path` is passed, runs that model exclusively (backward compatible).
     """
     # Defensive parameter sanitization: ensure image resolution is a positive integer
     try:
@@ -218,24 +280,63 @@ def detect(image_path, conf=DEFAULT_CONF, model_path=DEFAULT_MODEL, imgsz=DEFAUL
     if imgsz <= 0:
         imgsz = DEFAULT_IMGSZ
 
-    # Retrieve pre-loaded YOLO model from cache (avoids repeated 2-3s disk reads)
-    model = load_model(model_path)
+    # Determine execution mode: Dual-Model vs. Single-Model
+    is_dual_mode = (
+        model_path is None
+        or str(model_path).lower() in ("dual", "default")
+        or Path(model_path).resolve() == Path(POTHOLE_MODEL).resolve()
+        or Path(model_path).resolve() == Path(DEFAULT_MODEL).resolve()
+    )
 
-    # Run forward inference:
-    # 1. Letterbox resize: Pads and resizes input image to square canvas (e.g. 640x640) while preserving aspect ratio.
-    # 2. Color conversion: Converts OpenCV BGR channels to RGB tensor format normalized to [0.0, 1.0].
-    # 3. Model forward pass: Convolutions and feature pyramid network compute box coordinates and class logits.
-    # 4. Non-Maximum Suppression (NMS): Filters overlapping candidate boxes based on IoU threshold.
+    if is_dual_mode and CRACK_MODEL.exists():
+        # ----------------------------------------------------
+        # 1. Pothole Specialist Model (RDD2022 Fine-tuned)
+        # ----------------------------------------------------
+        p_path = POTHOLE_MODEL if POTHOLE_MODEL.exists() else (BASE_DIR / "models" / "best.pt")
+        pothole_model = load_model(p_path)
+        p_res = pothole_model.predict(
+            source=str(image_path),
+            conf=conf,
+            imgsz=imgsz,
+            verbose=False
+        )[0]
+        # Pothole model only contributes Potholes (D40)
+        pothole_dets = [
+            d for d in results_to_detections(p_res) if d.get("class_code") == "D40"
+        ]
+
+        # ----------------------------------------------------
+        # 2. Crack Specialist Model (Experiment C 2-Class)
+        # ----------------------------------------------------
+        crack_model = load_model(CRACK_MODEL)
+        c_res = crack_model.predict(
+            source=str(image_path),
+            conf=conf,
+            imgsz=imgsz,
+            verbose=False
+        )[0]
+        # Crack model contributes D00 (Linear) and D20 (Alligator)
+        crack_dets = results_to_detections(c_res)
+
+        # Merge detections from both specialist heads
+        all_detections = pothole_dets + crack_dets
+
+        # Render unified OpenCV visualization with distinct color badges
+        annotated_bgr = draw_annotations(image_path, all_detections)
+        if annotated_bgr is None:
+            annotated_bgr = p_res.plot()
+
+        return all_detections, annotated_bgr
+
+    # Single-model fallback
+    target_path = model_path if model_path is not None else DEFAULT_MODEL
+    model = load_model(target_path)
     result = model.predict(
         source=str(image_path),
         conf=conf,
         imgsz=imgsz,
         verbose=False
     )[0]
-
-    # Return structured metadata and rendered visualization:
-    # - results_to_detections: formats normalized dicts for DB and health_score.py
-    # - result.plot(): utilizes OpenCV to render high-contrast bounding boxes, labels, and confidence overlays (BGR format)
     return results_to_detections(result), result.plot()
 
 

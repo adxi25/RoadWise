@@ -1,0 +1,385 @@
+{
+  "total_candidates": 1011,
+  "quarantined_samples": [
+    "Attain_SMP_OS_v1_000404.jpg",
+    "Attain_SMP_OS_v1_000418.jpg",
+    "Attain_SMP_OS_v1_000433.jpg",
+    "Attain_SMP_OS_v1_000517.jpg",
+    "Attain_SMP_OS_v1_000598.jpg",
+    "Attain_SMP_WS_v1_000123.jpg",
+    "Attain_SMP_WS_v1_000608.jpg",
+    "Attain_SMP_WS_v1_000642.jpg",
+    "Attain_SMP_WS_v1_000649.jpg",
+    "Attain_SMP_WS_v2_000347.jpg",
+    "Attain_SMP_WS_v2_000352.jpg",
+    "Attain_SMP_WS_v2_000508.jpg"
+  ],
+  "guard_interval_count": 45,
+  "guard_interval_samples": [
+    {
+      "filename": "Attain_SMP_WS_v1_000620.jpg",
+      "sha256": "5c63422f02f4d58d495b0b311323789d8d3dd78f3aaa4ce6dac8d75375b899dc",
+      "release": "WS_V1.0",
+      "frame_idx": 620,
+      "boxes": 4,
+      "reason": "Temporal guard interval between Train and Val (frames 619 to 634)"
+    },
+    {
+      "filename": "Attain_SMP_WS_v1_000628.jpg",
+      "sha256": "05cc9941bd3d7be98e9bfc5452d0bfdc69b086620b3a6dea5ba0ea91e33e2eba",
+      "release": "WS_V1.0",
+      "frame_idx": 628,
+      "boxes": 1,
+      "reason": "Temporal guard interval between Train and Val (frames 619 to 634)"
+    },
+    {
+      "filename": "Attain_SMP_WS_v1_000629.jpg",
+      "sha256": "d37b10411f5f7ded60cb8a670877079d8222204dfe0f6c0b928872e8c6e3cea7",
+      "release": "WS_V1.0",
+      "frame_idx": 629,
+      "boxes": 1,
+      "reason": "Temporal guard interval between Train and Val (frames 619 to 634)"
+    },
+    {
+      "filename": "Attain_SMP_WS_v1_000630.jpg",
+      "sha256": "c0e22a7d23eb598db8e59ebe2d1ea4b32de0a145af3a1d3ccf518fd52c3728c9",
+      "release": "WS_V1.0",
+      "frame_idx": 630,
+      "boxes": 1,
+      "reason": "Temporal guard interval between Train and Val (frames 619 to 634)"
+    },
+    {
+      "filename": "Attain_SMP_WS_v1_000631.jpg",
+      "sha256": "364a35b8ae037fb54938af9db21267d6b0a5f0c323951cb7f83cdece0834b70d",
+      "release": "WS_V1.0",
+      "frame_idx": 631,
+      "boxes": 1,
+      "reason": "Temporal guard interval between Train and Val (frames 619 to 634)"
+    },
+    {
+      "filename": "Attain_SMP_WS_v1_000632.jpg",
+      "sha256": "2738464fe338a71b16c10ae47cbd71970017af31e8147d766889c2a2f1e8a67c",
+      "release": "WS_V1.0",
+      "frame_idx": 632,
+      "boxes": 1,
+      "reason": "Temporal guard interval between Train and Val (frames 619 to 634)"
+    },
+    {
+      "filename": "Attain_SMP_WS_v1_000633.jpg",
+      "sha256": "c66064aacad130cf354a2d332985374e6673f88523ff20eaf9b1c7b50872a3ae",
+      "release": "WS_V1.0",
+      "frame_idx": 633,
+      "boxes": 1,
+      "reason": "Temporal guard interval between Train and Val (frames 619 to 634)"
+    },
+    {
+      "filename": "Attain_SMP_WS_v1_000634.jpg",
+      "sha256": "77919f1de61f601387e6a03d1d680f71303a566b165b9981d2b7f970ecea6ede",
+      "release": "WS_V1.0",
+      "frame_idx": 634,
+      "boxes": 1,
+      "reason": "Temporal guard interval between Train and Val (frames 619 to 634)"
+    },
+    {
+      "filename": "Attain_SMP_WS_v1_000703.jpg",
+      "sha256": "2583dbdae819477b3eb27f04dd08886ed8775c86436597e55576105e77b0034f",
+      "release": "WS_V1.0",
+      "frame_idx": 703,
+      "boxes": 1,
+      "reason": "Temporal guard interval between Val and Test (frames 696 to 711)"
+    },
+    {
+      "filename": "Attain_SMP_WS_v1_000704.jpg",
+      "sha256": "637bfc1ba396ddbad8c34124bcce92ff28f6a3307de6e303530823413e416abe",
+      "release": "WS_V1.0",
+      "frame_idx": 704,
+      "boxes": 8,
+      "reason": "Temporal guard interval between Val and Test (frames 696 to 711)"
+    },
+    {
+      "filename": "Attain_SMP_WS_v1_000705.jpg",
+      "sha256": "cd21ef61b0d3c1d0cb859eea14520b4cbdb962301e8a923c38afc168323b3f73",
+      "release": "WS_V1.0",
+      "frame_idx": 705,
+      "boxes": 8,
+      "reason": "Temporal guard interval between Val and Test (frames 696 to 711)"
+    },
+    {
+      "filename": "Attain_SMP_WS_v1_000706.jpg",
+      "sha256": "fdce546aef1b7dfb7d86d5d76c58a71ae702d2dbdad3cc1d1802f35b59d44d5d",
+      "release": "WS_V1.0",
+      "frame_idx": 706,
+      "boxes": 8,
+      "reason": "Temporal guard interval between Val and Test (frames 696 to 711)"
+    },
+    {
+      "filename": "Attain_SMP_WS_v1_000707.jpg",
+      "sha256": "761801e31be1db3fac8f8ed1c095b052506195a07fce0c991ae3ed9c8b9547fb",
+      "release": "WS_V1.0",
+      "frame_idx": 707,
+      "boxes": 8,
+      "reason": "Temporal guard interval between Val and Test (frames 696 to 711)"
+    },
+    {
+      "filename": "Attain_SMP_WS_v1_000708.jpg",
+      "sha256": "4fcf511899defd0f6c682c43f0dfe2ebe622e24eddcc1e2fae936ea8fc6efea1",
+      "release": "WS_V1.0",
+      "frame_idx": 708,
+      "boxes": 8,
+      "reason": "Temporal guard interval between Val and Test (frames 696 to 711)"
+    },
+    {
+      "filename": "Attain_SMP_WS_v1_000709.jpg",
+      "sha256": "96221b074a637a19e8b9bee20f14cd1fbace831c8299b00bdf3e65570a53e541",
+      "release": "WS_V1.0",
+      "frame_idx": 709,
+      "boxes": 3,
+      "reason": "Temporal guard interval between Val and Test (frames 696 to 711)"
+    },
+    {
+      "filename": "Attain_SMP_WS_v1_000710.jpg",
+      "sha256": "579c8195b87f9bfc7ec2d4ec752c568222ae15a19a58669fd569ee8bb5f96771",
+      "release": "WS_V1.0",
+      "frame_idx": 710,
+      "boxes": 3,
+      "reason": "Temporal guard interval between Val and Test (frames 696 to 711)"
+    },
+    {
+      "filename": "Attain_SMP_WS_v1_000711.jpg",
+      "sha256": "575585afa5df72c8f5dc0c533802e5c9ed0955f59293dbe0745f3ec18b6a4407",
+      "release": "WS_V1.0",
+      "frame_idx": 711,
+      "boxes": 3,
+      "reason": "Temporal guard interval between Val and Test (frames 696 to 711)"
+    },
+    {
+      "filename": "Attain_SMP_WS_v2_000573.jpg",
+      "sha256": "5aa9403328ddca98d9a3b0c94dd3986e81cd9a5ea7b0f9f606a043c6dc1e31aa",
+      "release": "WS_V2.0",
+      "frame_idx": 573,
+      "boxes": 2,
+      "reason": "Temporal guard interval between Train and Val (frames 569 to 584)"
+    },
+    {
+      "filename": "Attain_SMP_WS_v2_000570.jpg",
+      "sha256": "667e108f3e68030a2b47bc65a76fe9714c7969545ee770393410ca44b9c89f8c",
+      "release": "WS_V2.0",
+      "frame_idx": 570,
+      "boxes": 2,
+      "reason": "Temporal guard interval between Train and Val (frames 569 to 584)"
+    },
+    {
+      "filename": "Attain_SMP_WS_v2_000571.jpg",
+      "sha256": "d5dbb6a6e47183eba5dd78a3290750110717639b0ff9cccf6f16fbd46c2d430f",
+      "release": "WS_V2.0",
+      "frame_idx": 571,
+      "boxes": 2,
+      "reason": "Temporal guard interval between Train and Val (frames 569 to 584)"
+    },
+    {
+      "filename": "Attain_SMP_WS_v2_000572.jpg",
+      "sha256": "53413e137a7afe0bc59cbac43fef3309921c4920605d9cb6c00b791c0869bab9",
+      "release": "WS_V2.0",
+      "frame_idx": 572,
+      "boxes": 2,
+      "reason": "Temporal guard interval between Train and Val (frames 569 to 584)"
+    },
+    {
+      "filename": "Attain_SMP_WS_v2_000578.jpg",
+      "sha256": "a817a1c805383f41e2c0e1dba06d5d5f221e7ececd0436288beb890cdd01c53d",
+      "release": "WS_V2.0",
+      "frame_idx": 578,
+      "boxes": 7,
+      "reason": "Temporal guard interval between Train and Val (frames 569 to 584)"
+    },
+    {
+      "filename": "Attain_SMP_WS_v2_000580.jpg",
+      "sha256": "5fc47dced648cea9b6ad46cbd001dc1e19a5c42281096d1816e3eb95a054dd4f",
+      "release": "WS_V2.0",
+      "frame_idx": 580,
+      "boxes": 8,
+      "reason": "Temporal guard interval between Train and Val (frames 569 to 584)"
+    },
+    {
+      "filename": "Attain_SMP_WS_v2_000576.jpg",
+      "sha256": "0df97080e0ce4f5f861190e619001c96c31b34a49e9a63d8849925323b3b0b51",
+      "release": "WS_V2.0",
+      "frame_idx": 576,
+      "boxes": 6,
+      "reason": "Temporal guard interval between Train and Val (frames 569 to 584)"
+    },
+    {
+      "filename": "Attain_SMP_WS_v2_000577.jpg",
+      "sha256": "600182736d3c6745ae0ac124c7f1a7b3fcda6c95c533ba787e2bee09309aa5f9",
+      "release": "WS_V2.0",
+      "frame_idx": 577,
+      "boxes": 6,
+      "reason": "Temporal guard interval between Train and Val (frames 569 to 584)"
+    },
+    {
+      "filename": "Attain_SMP_WS_v2_000579.jpg",
+      "sha256": "9fe9b9bfb8463ff93f90e32a43a33bc2c5626bd2081960778682dbc2fa425fe1",
+      "release": "WS_V2.0",
+      "frame_idx": 579,
+      "boxes": 6,
+      "reason": "Temporal guard interval between Train and Val (frames 569 to 584)"
+    },
+    {
+      "filename": "Attain_SMP_WS_v2_000585.jpg",
+      "sha256": "c6c02c8acd2db64dfbc6a1799be3c84328dc6df379c0d2b650da0c316a1b4753",
+      "release": "WS_V2.0",
+      "frame_idx": 585,
+      "boxes": 9,
+      "reason": "Temporal guard interval between Train and Val (frames 569 to 584)"
+    },
+    {
+      "filename": "Attain_SMP_WS_v2_000581.jpg",
+      "sha256": "7e30a776ae8994c465d1334f75dd19fb94a11c8bb1dc84c878477ef31c3f477e",
+      "release": "WS_V2.0",
+      "frame_idx": 581,
+      "boxes": 6,
+      "reason": "Temporal guard interval between Train and Val (frames 569 to 584)"
+    },
+    {
+      "filename": "Attain_SMP_WS_v2_000582.jpg",
+      "sha256": "e4101cf7c5d8d44d8f3a86c82872885fc31462c209e8ff819f80474874a02980",
+      "release": "WS_V2.0",
+      "frame_idx": 582,
+      "boxes": 6,
+      "reason": "Temporal guard interval between Train and Val (frames 569 to 584)"
+    },
+    {
+      "filename": "Attain_SMP_WS_v2_000583.jpg",
+      "sha256": "22dee44ba0a2c55f1ccf1cd59a9d35d490011a2ae62bfc3fe84a1062436f463d",
+      "release": "WS_V2.0",
+      "frame_idx": 583,
+      "boxes": 6,
+      "reason": "Temporal guard interval between Train and Val (frames 569 to 584)"
+    },
+    {
+      "filename": "Attain_SMP_WS_v2_000584.jpg",
+      "sha256": "bf90cb99652b6c20a893b6b8f7bf2bc9877868b944c1031b79254412addff713",
+      "release": "WS_V2.0",
+      "frame_idx": 584,
+      "boxes": 6,
+      "reason": "Temporal guard interval between Train and Val (frames 569 to 584)"
+    },
+    {
+      "filename": "Attain_SMP_WS_v2_000586.jpg",
+      "sha256": "1d0ae68706370d939572f38912333e7c81bec72c2ef5630c3baa1dd223fff26e",
+      "release": "WS_V2.0",
+      "frame_idx": 586,
+      "boxes": 6,
+      "reason": "Temporal guard interval between Train and Val (frames 569 to 584)"
+    },
+    {
+      "filename": "Attain_SMP_WS_v2_000587.jpg",
+      "sha256": "a105b7ffbd81218127e5edf75bce80d0a842565000b025e7a4e52ae830f7408b",
+      "release": "WS_V2.0",
+      "frame_idx": 587,
+      "boxes": 6,
+      "reason": "Temporal guard interval between Train and Val (frames 569 to 584)"
+    },
+    {
+      "filename": "Attain_SMP_WS_v2_000645.jpg",
+      "sha256": "d81fe37c9fdcdd65ad6b57a51decc349400c5daffff42ffa32d54b49f07d39c8",
+      "release": "WS_V2.0",
+      "frame_idx": 645,
+      "boxes": 1,
+      "reason": "Temporal guard interval between Val and Test (frames 641 to 656)"
+    },
+    {
+      "filename": "Attain_SMP_WS_v2_000646.jpg",
+      "sha256": "20cf8536a9bba1296623e975fce6c52312ecf77d1d9f1fbf2d2c2a82e89b5be9",
+      "release": "WS_V2.0",
+      "frame_idx": 646,
+      "boxes": 5,
+      "reason": "Temporal guard interval between Val and Test (frames 641 to 656)"
+    },
+    {
+      "filename": "Attain_SMP_WS_v2_000648.jpg",
+      "sha256": "7cfc871b6dc854a810a468353b79fc3c6f8bed0c1b8e8499884b98513655ac1c",
+      "release": "WS_V2.0",
+      "frame_idx": 648,
+      "boxes": 3,
+      "reason": "Temporal guard interval between Val and Test (frames 641 to 656)"
+    },
+    {
+      "filename": "Attain_SMP_WS_v2_000647.jpg",
+      "sha256": "a6b37222223a8a1217ec3280db3558d53ce1ba98705962758aa94c8ebf712d45",
+      "release": "WS_V2.0",
+      "frame_idx": 647,
+      "boxes": 2,
+      "reason": "Temporal guard interval between Val and Test (frames 641 to 656)"
+    },
+    {
+      "filename": "Attain_SMP_WS_v2_000656.jpg",
+      "sha256": "9edad7b90a319751af006c048146c61aecd73e931ce351e8a0f312d4a9984a3e",
+      "release": "WS_V2.0",
+      "frame_idx": 656,
+      "boxes": 5,
+      "reason": "Temporal guard interval between Val and Test (frames 641 to 656)"
+    },
+    {
+      "filename": "Attain_SMP_WS_v2_000657.jpg",
+      "sha256": "e6c9466d836b9d6bf466bede98472a3a918e88e1643d87eaaf3edddd73e777e4",
+      "release": "WS_V2.0",
+      "frame_idx": 657,
+      "boxes": 5,
+      "reason": "Temporal guard interval between Val and Test (frames 641 to 656)"
+    },
+    {
+      "filename": "Attain_SMP_WS_v2_000642.jpg",
+      "sha256": "dae969d23c2a887c01e2984d79f8f414d10ab957284d87943ad70f24a5bae83f",
+      "release": "WS_V2.0",
+      "frame_idx": 642,
+      "boxes": 1,
+      "reason": "Temporal guard interval between Val and Test (frames 642 to 657)"
+    },
+    {
+      "filename": "Attain_SMP_WS_v2_000643.jpg",
+      "sha256": "ffed21ac53e2e823c2ef589d9136ac526be27be57c3d08e85082bfe22c80b14d",
+      "release": "WS_V2.0",
+      "frame_idx": 643,
+      "boxes": 1,
+      "reason": "Temporal guard interval between Val and Test (frames 642 to 657)"
+    },
+    {
+      "filename": "Attain_SMP_WS_v2_000644.jpg",
+      "sha256": "9d9fa15e7df1457e73870363b16d3f594766ed1f4740a1e31bb658656d5496bc",
+      "release": "WS_V2.0",
+      "frame_idx": 644,
+      "boxes": 1,
+      "reason": "Temporal guard interval between Val and Test (frames 642 to 657)"
+    },
+    {
+      "filename": "Attain_SMP_WS_v2_000649.jpg",
+      "sha256": "66bba7f0b7be3fcef898c6c908dcb83dec012c621899ea26826e0002ad648eb4",
+      "release": "WS_V2.0",
+      "frame_idx": 649,
+      "boxes": 3,
+      "reason": "Temporal guard interval between Val and Test (frames 642 to 657)"
+    },
+    {
+      "filename": "Attain_SMP_WS_v2_000650.jpg",
+      "sha256": "8ef95e79004c0952ad08cdf31aff6b831d4943446888a6ca400a2034e6bb5142",
+      "release": "WS_V2.0",
+      "frame_idx": 650,
+      "boxes": 3,
+      "reason": "Temporal guard interval between Val and Test (frames 642 to 657)"
+    },
+    {
+      "filename": "Attain_SMP_WS_v2_000651.jpg",
+      "sha256": "271641ff0ac98d4c5d1ad905a521f2d7570b32104650a80686778fee98adb5d7",
+      "release": "WS_V2.0",
+      "frame_idx": 651,
+      "boxes": 3,
+      "reason": "Temporal guard interval between Val and Test (frames 642 to 657)"
+    }
+  ],
+  "retained_split_counts": {
+    "train": 884,
+    "val": 84,
+    "test": 102
+  }
+}

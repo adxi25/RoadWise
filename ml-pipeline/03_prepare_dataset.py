@@ -27,6 +27,7 @@ DEFENSIVE CLASS-ID GUARD (Semantic Limitation — Viva Note):
     checkpoint (with more than 4 classes) is substituted at the `--model` CLI argument.
     With the current production model this branch is UNREACHABLE during normal inference.
 
+
     LIMITATION: If a future model with 5+ classes is ever used here without updating this
     guard, any out-of-range class ID (e.g., class 4 from a 5-class model) would be silently
     relabeled as D40 (Pothole) regardless of its true semantic meaning, introducing label
