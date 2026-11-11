@@ -285,6 +285,18 @@ When faculty say: *"Open the file where you do X and explain it line by line"*, 
 2. **High-Resolution Scaling (960px / 1280px):** Selecting $960\text{px}$ or $1280\text{px}$ increases the input receptive canvas by $2.25\times$ to $4\times$. This preserves fine crack continuity and distant road defects.
 3. **Latency Balance:** On standard CPU inference, $640\text{px}$ takes $\sim 45\text{ms}$, while $1280\text{px}$ takes $\sim 220\text{ms}$. Exposing `imgsz` empowers users to prioritize real-time speed vs. fine-grained crack inspection.
 
+### Q22: "When should an inspector use High, Mid, or Low Confidence, and how does that correlate with the chosen Resolution (imgsz)?"
+**Answer:** In civil infrastructure inspection, a static one-size-fits-all threshold is operationally flawed. RoadWise provides a dual-axis operational calibration matrix:
+
+1. **Confidence Threshold Selection Criteria:**
+   - **High Confidence (0.25 to 0.40):** Used for **Automated Work Orders and Contractor Dispatch**. Maximizes Precision ($>85\%$). Ensures zero taxpayer money is wasted dispatching repair trucks to false alarms caused by tree shadows or tar sealant marks.
+   - **Mid Confidence (0.15 - System Default):** Used for **Standard Daily Municipal Road Monitoring**. Provides the optimal F1-score balance under ISO/IRC surveying standards, catching actionable distress without sensitivity degradation.
+   - **Low Confidence (0.05 to 0.10):** Used for **Preventive Asset Screening & Challenging Environments** (overcast lighting, wet pavement, dark asphalt, or rural roads). Maximizes Recall ($>90\%$), flagging early-stage hairline micro-cracks before moisture penetration triggers subgrade failure.
+
+2. **Resolution (imgsz) Correlation Strategy:**
+   - **640px + High/Mid Conf:** Ideal for real-time edge processing (dashcams, patrol cars at $>40\text{ km/h}$). Fast throughput ($\sim 45\text{ms}$), catches prominent potholes and wide alligator cracking.
+   - **1280px + Low/Mid Conf:** Essential for macro drone imagery or stationary forensic evaluation. Preserves distant perspective cracks ($15$–$30\text{m}$ ahead) that downsample below YOLO's stride-32 detection threshold at 640px.
+
 ---
 
 ## 9. Viva Examiner Interaction Tips (Student Checklist)
