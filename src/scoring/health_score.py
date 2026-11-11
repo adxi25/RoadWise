@@ -71,7 +71,8 @@ MIN_CONFIDENCE = 0.10
 SIZE_FLOOR = 0.40
 
 # Exponential curve steepness parameter.
-K = 2.0
+# Calibrated to 1.60 (balanced decay scale) ensuring proportionality between detected defect count and health penalty.
+K = 1.60
 
 
 # ===========================================================================
@@ -132,7 +133,10 @@ def detection_severity(det):
     weight = CLASS_WEIGHT.get(code, 0.0)
     rel_area = det["width"] * det["height"]
     size_factor = min(1.0, max(SIZE_FLOOR, rel_area / AREA_REF.get(code, 0.07)))
-    return weight * det["confidence"] * size_factor
+    # Sublinear (square-root) confidence scaling: balances physical presence without over-crushing low-confidence detections
+    conf = max(0.01, min(1.0, float(det.get("confidence", 0.50))))
+    conf_factor = math.sqrt(conf)
+    return weight * conf_factor * size_factor
 
 
 # ===========================================================================

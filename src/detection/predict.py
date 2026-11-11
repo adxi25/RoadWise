@@ -73,8 +73,8 @@ CLASS_CODE = {
 
 # Human-readable labels mapped to canonical D-codes for UI badges and database reports
 CLASS_LABEL = {
-    "D00": "Longitudinal Crack",
-    "D10": "Transverse Crack",
+    "D00": "Linear Crack",
+    "D10": "Linear Crack (Transverse)",
     "D20": "Alligator Crack",
     "D40": "Pothole",
 }

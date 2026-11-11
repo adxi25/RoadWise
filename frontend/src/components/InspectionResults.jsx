@@ -389,7 +389,7 @@ export default function InspectionResults({ result, onReset }) {
               </div>
               <div className="flex justify-between py-1 border-b border-[#DFE3E1] text-[#505E63]">
                 <span>Context Multiplier:</span>
-                <span className="text-[#114B44] font-bold">{risk.context_factor ? `${risk.context_factor.toFixed(2)}x` : '1.00x'}</span>
+                <span className="text-[#114B44] font-bold">{risk.context_multiplier ? `${risk.context_multiplier.toFixed(2)}x` : (risk.context_factor ? `${(0.6 + risk.context_factor).toFixed(2)}x` : '1.00x')}</span>
               </div>
               <div className="flex justify-between py-1 border-b border-[#DFE3E1] text-[#505E63]">
                 <span>Facility Sensitivity:</span>

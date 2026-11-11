@@ -430,10 +430,15 @@ def analyze_risk(
         f"({road_type}, {traffic} traffic, {location_sensitivity})."
     )
 
+    context_multiplier = round(
+        MULTIPLIER_MIN + (MULTIPLIER_MAX - MULTIPLIER_MIN) * context_factor, 3
+    )
+
     return {
         "health_score": health_score,
         "damage_level": damage_level,
         "context_factor": context_factor,
+        "context_multiplier": context_multiplier,
         "road_type": road_type,
         "traffic": traffic,
         "location_sensitivity": location_sensitivity,

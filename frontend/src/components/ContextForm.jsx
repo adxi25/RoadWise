@@ -412,17 +412,17 @@ export default function ContextForm({
               </div>
               <input
                 type="range"
-                min="0.10"
-                max="0.80"
+                min="0.05"
+                max="0.50"
                 step="0.05"
                 value={conf}
                 onChange={(e) => setConf(parseFloat(e.target.value))}
                 className="w-full accent-[#114B44] cursor-pointer h-1.5 bg-[#EAE7E1] rounded"
               />
               <div className="flex justify-between text-[10px] text-[#505E63] font-mono">
-                <span>0.10 (High Recall)</span>
-                <span>0.25 (Default)</span>
-                <span>0.80 (High Precision)</span>
+                <span>0.05 (High Sensitivity)</span>
+                <span>0.15 (Calibrated Default)</span>
+                <span>0.50 (High Precision)</span>
               </div>
             </div>
 

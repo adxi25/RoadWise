@@ -261,6 +261,30 @@ When faculty say: *"Open the file where you do X and explain it line by line"*, 
 2. **Visual Area (Size Factor) Proxy:** Deeper and wider cracks invariably exhibit wider surface spalling and larger bounding-box footprints on camera. The scoring engine scales damage dynamically via $\text{Size\_Factor} = \min(1.0, \max(0.40, \frac{\text{area}}{\text{AREA\_REF}}))$, meaning severe, gaping cracks deduct significantly more health than fine hairline cracks.
 3. **Citizen Reporting Triage:** In real-world civic crowdsensing, users predominantly report prominent, jarring, or hazardous road damage rather than cosmetic microscopic cracks. The system acts as a rapid triage index to prioritize the most severe complaints for municipal dispatch.
 
+### Q19: "How does operational road context affect inspection outcome? Can you demonstrate with a live case study?"
+**Answer:** RoadWise mathematically separates **physical pavement diagnosis** from **socio-economic maintenance triage**:
+- **Condition Score (0–100):** Reflects physical damage from computer vision. It is completely independent of where the road is located.
+- **Risk Score (0–100):** Multiplies physical damage by traffic volume, road classification, and facility vulnerability ($\text{Risk} = \text{Damage} \times \text{ContextMultiplier}$).
+- **Empirical Demonstration (`bad_road_2.jpg` Case Study):**
+  - Tested with 4 detections (1 central cavity + 3 alligator cracks):
+  - When classified as **Main Road + High Traffic:** Condition was **62.3**, and Risk was elevated to **100.0 (CRITICAL PRIORITY)** because high vehicular exposure on an arterial road turns potholes into immediate collision hazards.
+  - When tested as **Rural Village Road + Low Traffic:** Condition remained identical at **62.3** (the physical hole did not shrink), but Risk dropped to **73.5 (HIGH RISK)**.
+  - This proves RoadWise prevents municipal budgets from wasting emergency crews on quiet farm tracks while busy city transit corridors are in danger.
+
+### Q20: "Why does the model struggle on bare gravel beds or asphalt peeling, and what happens if an unmodeled distress class appears? How does Overlap Discounting handle it?"
+**Answer:**
+1. **Taxonomy & Dataset Boundaries:** In standard road damage benchmarks (RDD2022), the ontology is strictly limited to 4 structural distress classes (`D00, D10, D20, D40`). Pavement peeling/stripping (where asphalt washes away into flat loose gravel) is an **unmodeled class** in the training dataset.
+2. **Feature Mapping at Low Confidence:** When exposed to stripped asphalt, the neural network maps the jagged broken pavement edges to the closest geometric feature it knows (`D20` Alligator Cracks or `D40` Cavities) at lower confidence ($\sim 0.10$–$0.25$).
+3. **Overlap Discounting Defense:** If a dedicated 5th class (e.g. "Surface Stripping / Raveling") were introduced, stripping boxes would naturally overlap with cracks and potholes on the same road section. Our **Overlap Discounting Algorithm** in `src/scoring/health_score.py` prevents artificial double-counting:
+   $$\text{Effective\_Severity} = \text{Severity} \times (1.0 - \text{Overlap\_Fraction})$$
+   Any subsequent bounding box that overlaps with an already accepted defect has its marginal damage reduced proportionally by the overlapping area, ensuring total damage never exceeds the physical asphalt footprint.
+
+### Q21: "What does the 'Inference Resolution (imgsz)' setting (640px vs 960px vs 1280px) do for the user?"
+**Answer:** Modern smartphones and dashcams capture road imagery at high resolutions ($1920 \times 1080$ or $3840 \times 2160$ 4K).
+1. **The 640px Trade-off (Standard):** Downscaling a 4K image down to YOLO's native $640 \times 640$ canvas reduces pixels by over $90\%$, which can blur out thin $2\text{px}$ hairline cracks and distant fissures.
+2. **High-Resolution Scaling (960px / 1280px):** Selecting $960\text{px}$ or $1280\text{px}$ increases the input receptive canvas by $2.25\times$ to $4\times$. This preserves fine crack continuity and distant road defects.
+3. **Latency Balance:** On standard CPU inference, $640\text{px}$ takes $\sim 45\text{ms}$, while $1280\text{px}$ takes $\sim 220\text{ms}$. Exposing `imgsz` empowers users to prioritize real-time speed vs. fine-grained crack inspection.
+
 ---
 
 ## 9. Viva Examiner Interaction Tips (Student Checklist)

@@ -61,7 +61,7 @@ export default function App() {
     area: '',
   });
 
-  const [conf, setConf] = useState(0.25);
+  const [conf, setConf] = useState(0.15);
   const [imgsz, setImgsz] = useState(640);
 
   // Execution State
