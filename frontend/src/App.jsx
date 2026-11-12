@@ -35,13 +35,14 @@ import ContextForm from './components/ContextForm';
 import InspectionResults from './components/InspectionResults';
 import LoadingOverlay from './components/LoadingOverlay';
 import AuthorityDashboard from './Pages/AuthorityDashboard';
+import TrackReport from './Pages/TrackReport';
 import { checkHealth, inspectRoad } from './api/client';
 import { AlertTriangle, Layers, Cpu, Activity, ShieldCheck, FileText, CheckCircle2 } from 'lucide-react';
 import LandingPage from './Pages/LandingPage.jsx';
 
 export default function App() {
   const [showLanding, setShowLanding] = useState(true);
-  const [activeTab, setActiveTab] = useState('inspect'); // 'inspect' | 'dashboard'
+  const [activeTab, setActiveTab] = useState('inspect'); // 'inspect' | 'dashboard' | 'track'
   const [health, setHealth] = useState(null);
 
   // Form & Image State
@@ -185,7 +186,7 @@ export default function App() {
         }}
         onTrackComplaint={() => {
           setShowLanding(false);
-          setActiveTab('dashboard');
+          setActiveTab('track');
         }}
       />
     );
@@ -208,6 +209,14 @@ export default function App() {
 
         {activeTab === 'dashboard' ? (
           <AuthorityDashboard onBackToInspect={() => setActiveTab('inspect')} />
+        ) : activeTab === 'track' ? (
+          <TrackReport
+            onBackToHome={() => setShowLanding(true)}
+            onStartInspection={() => {
+              setShowLanding(false);
+              setActiveTab('inspect');
+            }}
+          />
         ) : (
           <div className="space-y-6">
 
@@ -312,7 +321,7 @@ export default function App() {
                             <span>Defect Object Detection</span>
                           </div>
                           <p className="text-xs text-[#505E63] leading-relaxed">
-                            Detects potholes (D40), alligator cracks (D20), transverse cracks (D10), and longitudinal cracks (D00).
+                            Autonomous Dual-Model detection: Potholes (D40), Alligator Cracks (D20), and unified Linear Cracks (D00).
                           </p>
                         </div>
 
@@ -350,7 +359,7 @@ export default function App() {
 
                       {/* Technical Specs Footer */}
                       <div className="p-3 rounded bg-[#F8F7F4] border border-[#DFE3E1] text-[11px] font-mono text-[#505E63] flex flex-wrap items-center justify-between gap-2">
-                        <span>Model: YOLOv8 640px</span>
+                        <span>Model: Dual-Model YOLOv8 (MS-NMS Fusion)</span>
                         <span>Backend: FastAPI + SQLite</span>
                         <span>Mode: Single Frame Inspection</span>
                       </div>
@@ -371,7 +380,9 @@ export default function App() {
       <footer className="border-t border-[#DFE3E1] bg-white py-3.5 text-xs text-[#505E63] font-mono mt-auto">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-2">
           <span>RoadWise Road Safety & Asset Inspection Platform</span>
-          <span className="text-[#79888E]">Mode 1 — Single Road Inspection</span>
+          <span className="text-[#79888E]">
+            {activeTab === 'dashboard' ? 'Mode 2 — Authority Infrastructure Dashboard' : activeTab === 'track' ? 'Mode 1 — Public Citizen Tracking Portal' : 'Mode 1 — Single Road Inspection'}
+          </span>
         </div>
       </footer>
 

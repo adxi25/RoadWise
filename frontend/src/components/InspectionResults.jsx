@@ -69,8 +69,8 @@ export default function InspectionResults({ result, onReset }) {
   const damageClassBadges = {
     D40: { label: 'Pothole', bg: 'bg-[#FFF1F2] text-[#9F1239] border-[#FECDD3]' },
     D20: { label: 'Alligator Crack', bg: 'bg-[#FFF7ED] text-[#C2410C] border-[#FED7AA]' },
-    D10: { label: 'Transverse Crack', bg: 'bg-[#FFFBEB] text-[#B45309] border-[#FDE68A]' },
-    D00: { label: 'Longitudinal Crack', bg: 'bg-[#F0FDFA] text-[#0F766E] border-[#CCFBF1]' },
+    D10: { label: 'Linear Crack (Transverse)', bg: 'bg-[#F0FDFA] text-[#0F766E] border-[#CCFBF1]' },
+    D00: { label: 'Linear Crack', bg: 'bg-[#F0FDFA] text-[#0F766E] border-[#CCFBF1]' },
   };
 
   return (
@@ -80,23 +80,36 @@ export default function InspectionResults({ result, onReset }) {
       <div className="p-4 rounded-lg bg-white border border-[#DFE3E1] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-2xs">
         <div className="space-y-1">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-[11px] font-mono text-[#505E63] font-bold">REPORT:</span>
+            <span className="text-[11px] font-mono text-[#505E63] font-bold">COMPLAINT ID:</span>
             <span className="text-xs font-mono font-bold text-[#114B44] bg-[#EBF4F2] px-2 py-0.5 rounded border border-[#CCDCD8]">
               {report_id}
             </span>
             <button
               type="button"
               onClick={handleCopyReportId}
-              className="p-1 rounded bg-[#F8F7F4] hover:bg-[#F3F1EC] border border-[#DFE3E1] text-[#505E63] hover:text-[#141D20] text-xs transition-colors focus-visible:ring-2 focus-visible:ring-[#114B44]"
-              title="Copy Report ID"
+              className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-[#F8F7F4] hover:bg-[#F3F1EC] border border-[#DFE3E1] text-[#505E63] hover:text-[#141D20] text-xs transition-colors focus-visible:ring-2 focus-visible:ring-[#114B44]"
+              title="Copy Complaint ID to clipboard"
             >
-              {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+              {copied ? (
+                <>
+                  <Check className="w-3.5 h-3.5 text-emerald-600" />
+                  <span className="text-[10px] text-emerald-700 font-semibold">Copied!</span>
+                </>
+              ) : (
+                <>
+                  <Copy className="w-3.5 h-3.5" />
+                  <span className="text-[10px]">Copy ID</span>
+                </>
+              )}
             </button>
             {inspection_id && (
               <span className="text-[11px] font-mono text-[#79888E]">
                 (Record #{inspection_id})
               </span>
             )}
+          </div>
+          <div className="text-[11px] text-[#79888E]">
+            Save this Complaint ID to track repair status anytime under <span className="font-semibold text-[#114B44]">Track Report</span> without logging in.
           </div>
 
           <div className="flex flex-wrap items-center gap-3 text-xs text-[#505E63] font-mono pt-0.5">

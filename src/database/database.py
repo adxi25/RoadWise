@@ -286,30 +286,63 @@ def get_inspection(inspection_id):
     connection = get_connection()
     cursor = connection.cursor()
 
-    # Query parent record
-    cursor.execute("""
-        SELECT
-            id,
-            report_id,
-            image_path,
-            annotated_image_path,
-            latitude,
-            longitude,
-            state,
-            city,
-            area,
-            road_type,
-            traffic_level,
-            location_sensitivity,
-            condition_score,
-            risk_score,
-            priority,
-            recommendation,
-            pdf_path,
-            created_at
-        FROM inspections
-        WHERE id = ?
-    """, (inspection_id,))
+    # Support lookup either by internal integer ID or public string report_id (e.g. RW-20261112-...)
+    is_numeric = False
+    numeric_id = None
+    try:
+        numeric_id = int(inspection_id)
+        is_numeric = True
+    except (ValueError, TypeError):
+        pass
+
+    if is_numeric:
+        cursor.execute("""
+            SELECT
+                id,
+                report_id,
+                image_path,
+                annotated_image_path,
+                latitude,
+                longitude,
+                state,
+                city,
+                area,
+                road_type,
+                traffic_level,
+                location_sensitivity,
+                condition_score,
+                risk_score,
+                priority,
+                recommendation,
+                pdf_path,
+                created_at
+            FROM inspections
+            WHERE id = ? OR report_id = ?
+        """, (numeric_id, str(inspection_id)))
+    else:
+        cursor.execute("""
+            SELECT
+                id,
+                report_id,
+                image_path,
+                annotated_image_path,
+                latitude,
+                longitude,
+                state,
+                city,
+                area,
+                road_type,
+                traffic_level,
+                location_sensitivity,
+                condition_score,
+                risk_score,
+                priority,
+                recommendation,
+                pdf_path,
+                created_at
+            FROM inspections
+            WHERE report_id = ?
+        """, (str(inspection_id),))
 
     inspection_row = cursor.fetchone()
 
@@ -341,6 +374,7 @@ def get_inspection(inspection_id):
     ]
 
     inspection = dict(zip(inspection_columns, inspection_row))
+    internal_id = inspection["id"]
 
     # Query all child detection rows linked by foreign key
     cursor.execute("""
@@ -355,7 +389,7 @@ def get_inspection(inspection_id):
             height
         FROM detections
         WHERE inspection_id = ?
-    """, (inspection_id,))
+    """, (internal_id,))
 
     detection_rows = cursor.fetchall()
 

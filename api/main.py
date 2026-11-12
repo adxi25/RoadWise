@@ -470,12 +470,78 @@ def dashboard_stats() -> dict[str, Any]:
         ) from exc
 
 
+@app.get("/api/reports/track/{tracking_id}", tags=["Citizen Tracking"])
+def track_citizen_report(
+    tracking_id: str,
+) -> dict[str, Any]:
+    """
+    Public Citizen Portal Endpoint:
+    Retrieve verified complaint status and inspection report by unique Complaint ID
+    (e.g., 'RW-20261112-233041-2705') or internal record ID without requiring citizen login.
+    """
+    cleaned_id = tracking_id.strip()
+    try:
+        inspection = get_inspection(cleaned_id)
+    except Exception as exc:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to query database: {exc}",
+        ) from exc
+
+    if inspection is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"No complaint record found matching ID '{tracking_id}'. Please check your Complaint ID.",
+        )
+
+    # Normalize image paths for web static mounts
+    if inspection.get("image_path"):
+        orig_name = Path(str(inspection["image_path"])).name
+        inspection["image_path"] = f"data/uploads/{orig_name}"
+    if inspection.get("annotated_image_path"):
+        ann_name = Path(str(inspection["annotated_image_path"])).name
+        inspection["annotated_image_path"] = f"results/predictions/{ann_name}"
+
+    # Compute citizen-facing operational workflow status based on maintenance priority
+    priority = (inspection.get("priority") or "MEDIUM").upper()
+    status_map = {
+        "CRITICAL": {
+            "status_label": "Immediate Dispatch Required",
+            "badge_color": "critical",
+            "stage": "Assigned to Emergency Municipal Repair Crew",
+            "eta": "Within 24–48 Hours",
+        },
+        "HIGH": {
+            "status_label": "Maintenance Scheduled",
+            "badge_color": "high",
+            "stage": "Scheduled in Priority Road Repair Queue",
+            "eta": "Within 3–5 Business Days",
+        },
+        "MEDIUM": {
+            "status_label": "Under Civil Engineering Review",
+            "badge_color": "medium",
+            "stage": "Queued for Periodic Maintenance Planning",
+            "eta": "Next Scheduled Road Maintenance Cycle",
+        },
+        "LOW": {
+            "status_label": "Recorded / Routine Monitoring",
+            "badge_color": "low",
+            "stage": "Road Condition Stable — Logged in Asset Database",
+            "eta": "Continuous Telemetry Monitoring",
+        },
+    }
+    inspection["tracking_status"] = status_map.get(priority, status_map["MEDIUM"])
+
+    return _to_json_safe(inspection)
+
+
 @app.get("/api/inspections/{inspection_id}", tags=["Inspections"])
 def get_inspection_detail(
-    inspection_id: int,
+    inspection_id: str,
 ) -> dict[str, Any]:
     """
     Retrieve full details for a single inspection, including all bounding box detections.
+    Supports lookup by autoincrement integer ID or unique report_id string.
     """
     try:
         inspection = get_inspection(inspection_id)

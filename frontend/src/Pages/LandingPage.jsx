@@ -98,24 +98,34 @@ export default function LandingPage({ onStartInspection, onOpenDashboard, onTrac
             </div>
 
             {/* Call to Action Controls */}
-            <div className="flex flex-col sm:flex-row gap-3 pt-2">
+            <div className="flex flex-col sm:flex-row flex-wrap gap-3 pt-2">
               <button
                 type="button"
                 onClick={onStartInspection}
                 className="inline-flex items-center justify-center gap-2 bg-[#114B44] hover:bg-[#0D3833] active:bg-[#0A2A26] text-white px-5 py-3 rounded font-semibold text-sm transition-all shadow-sm"
               >
-                <span>Launch Inspection Workspace</span>
+                <span>Report Road Damage</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
 
               <button
                 type="button"
-                onClick={onOpenDashboard}
+                onClick={onTrackComplaint}
                 className="inline-flex items-center justify-center gap-2 bg-white hover:bg-[#F3F1EC] text-[#141D20] border border-[#DFE3E1] hover:border-[#CCDCD8] px-5 py-3 rounded font-semibold text-sm transition-colors shadow-sm"
               >
-                <Activity className="w-4 h-4 text-[#114B44]" />
-                <span>Open Authority Dashboard</span>
-                <ChevronRight className="w-4 h-4 text-[#79888E]" />
+                <Search className="w-4 h-4 text-[#114B44]" />
+                <span>Track Complaint</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={onOpenDashboard}
+                className="inline-flex items-center justify-center gap-2 bg-[#F3F1EC] hover:bg-[#EAE7E1] text-[#505E63] hover:text-[#141D20] px-4 py-3 rounded font-semibold text-xs transition-colors"
+                title="Authority Access (Mode 2)"
+              >
+                <Activity className="w-3.5 h-3.5 text-[#114B44]" />
+                <span>Authority Dashboard</span>
+                <ChevronRight className="w-3.5 h-3.5 text-[#79888E]" />
               </button>
             </div>
 
@@ -254,7 +264,7 @@ export default function LandingPage({ onStartInspection, onOpenDashboard, onTrac
               </span>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               
               <div className="p-3.5 rounded border border-[#FECDD3] bg-[#FFF1F2] space-y-1">
                 <div className="flex items-center justify-between">
@@ -278,25 +288,14 @@ export default function LandingPage({ onStartInspection, onOpenDashboard, onTrac
                 </p>
               </div>
 
-              <div className="p-3.5 rounded border border-[#FDE68A] bg-[#FFFBEB] space-y-1">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-mono font-bold text-[#B45309]">D10</span>
-                  <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-[#FEF3C7] text-[#B45309] font-semibold">Weight: 1.5</span>
-                </div>
-                <h4 className="text-sm font-bold text-[#92400E]">Transverse Crack</h4>
-                <p className="text-[11px] text-[#78350F] leading-relaxed">
-                  Cross-perpendicular cracks caused by asphalt contraction or thermal expansion cycles.
-                </p>
-              </div>
-
               <div className="p-3.5 rounded border border-[#CCFBF1] bg-[#F0FDFA] space-y-1">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-mono font-bold text-[#0F766E]">D00</span>
                   <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-[#CCFBF1] text-[#0F766E] font-semibold">Weight: 1.0</span>
                 </div>
-                <h4 className="text-sm font-bold text-[#115E59]">Longitudinal Crack</h4>
+                <h4 className="text-sm font-bold text-[#115E59]">Linear Crack</h4>
                 <p className="text-[11px] text-[#134E4A] leading-relaxed">
-                  Joint or wheelpath parallel fissures requiring early sealant to prevent moisture infiltration.
+                  Unified longitudinal and transverse fissures requiring early sealant to prevent moisture infiltration.
                 </p>
               </div>
 
@@ -316,7 +315,7 @@ export default function LandingPage({ onStartInspection, onOpenDashboard, onTrac
             <span>Civic Road Infrastructure Decision-Support System</span>
           </div>
           <div className="text-[11px] font-mono text-[#79888E]">
-            Model: YOLOv8 640px · Storage: SQLite · API: FastAPI
+            Model: Dual-Model YOLOv8 (MS-NMS Fusion) · Storage: SQLite · API: FastAPI
           </div>
         </div>
       </footer>

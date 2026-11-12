@@ -192,3 +192,28 @@ export async function getDashboardStats() {
   return await res.json();
 }
 
+/**
+ * Public Citizen Portal: Track a road damage complaint by Complaint ID or record number.
+ */
+export async function trackReport(trackingId) {
+  if (!trackingId || !trackingId.trim()) {
+    throw new Error('Please enter a valid Complaint ID.');
+  }
+
+  const encodedId = encodeURIComponent(trackingId.trim());
+  const res = await fetch(`${API_BASE_URL}/api/reports/track/${encodedId}`, {
+    method: 'GET',
+    headers: { 'Accept': 'application/json' },
+  });
+
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}));
+    if (res.status === 404) {
+      throw new Error(`Complaint ID "${trackingId.trim()}" was not found. Please verify the code on your inspection confirmation.`);
+    }
+    throw new Error(errorData.detail || `Server error during tracking (${res.status})`);
+  }
+
+  return await res.json();
+}
+
