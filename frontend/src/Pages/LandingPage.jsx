@@ -192,7 +192,7 @@ export default function LandingPage({ onStartInspection, onOpenDashboard, onTrac
                   Assess
                 </h3>
                 <p className="text-xs text-[#505E63] leading-relaxed">
-                  Run YOLOv8 object detection across road distress classes (potholes D40, alligator cracking D20, transverse D10, longitudinal D00) and compute an exponential condition decay score.
+                  Run Dual-Model YOLOv8 detection across unified road distress classes (Potholes D40, Alligator Cracks D20, Linear Cracks D00) and compute an exponential condition decay score.
                 </p>
                 <div className="pt-2 text-[11px] font-mono text-[#79888E] border-t border-[#DFE3E1]/70">
                   Damage load decay + sensitive facility weighting

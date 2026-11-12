@@ -36,6 +36,7 @@ import InspectionResults from './components/InspectionResults';
 import LoadingOverlay from './components/LoadingOverlay';
 import AuthorityDashboard from './Pages/AuthorityDashboard';
 import TrackReport from './Pages/TrackReport';
+import AuthorityLoginModal from './components/AuthorityLoginModal';
 import { checkHealth, inspectRoad } from './api/client';
 import { AlertTriangle, Layers, Cpu, Activity, ShieldCheck, FileText, CheckCircle2 } from 'lucide-react';
 import LandingPage from './Pages/LandingPage.jsx';
@@ -44,6 +45,12 @@ export default function App() {
   const [showLanding, setShowLanding] = useState(true);
   const [activeTab, setActiveTab] = useState('inspect'); // 'inspect' | 'dashboard' | 'track'
   const [health, setHealth] = useState(null);
+
+  // Authority Access Control State (Mode 2)
+  const [isAuthorityAuth, setIsAuthorityAuth] = useState(() => {
+    return sessionStorage.getItem('rw_authority_auth') === 'true';
+  });
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
   // Form & Image State
   const [selectedFile, setSelectedFile] = useState(null);
@@ -173,22 +180,55 @@ export default function App() {
     }));
   };
 
+  // Authority Mode Security Gateway Handlers
+  const handleOpenAuthority = () => {
+    if (isAuthorityAuth) {
+      setShowLanding(false);
+      setActiveTab('dashboard');
+    } else {
+      setShowAuthModal(true);
+    }
+  };
+
+  const handleAuthorityLogin = (passkey) => {
+    const validKeys = ['roadwise2026', 'admin123', 'admin'];
+    if (validKeys.includes(passkey.trim().toLowerCase())) {
+      setIsAuthorityAuth(true);
+      sessionStorage.setItem('rw_authority_auth', 'true');
+      setShowAuthModal(false);
+      setShowLanding(false);
+      setActiveTab('dashboard');
+      return true;
+    }
+    return false;
+  };
+
+  const handleAuthorityLogout = () => {
+    setIsAuthorityAuth(false);
+    sessionStorage.removeItem('rw_authority_auth');
+    setActiveTab('inspect');
+  };
+
   if (showLanding) {
     return (
-      <LandingPage
-        onStartInspection={() => {
-          setShowLanding(false);
-          setActiveTab('inspect');
-        }}
-        onOpenDashboard={() => {
-          setShowLanding(false);
-          setActiveTab('dashboard');
-        }}
-        onTrackComplaint={() => {
-          setShowLanding(false);
-          setActiveTab('track');
-        }}
-      />
+      <>
+        <LandingPage
+          onStartInspection={() => {
+            setShowLanding(false);
+            setActiveTab('inspect');
+          }}
+          onOpenDashboard={handleOpenAuthority}
+          onTrackComplaint={() => {
+            setShowLanding(false);
+            setActiveTab('track');
+          }}
+        />
+        <AuthorityLoginModal
+          isOpen={showAuthModal}
+          onClose={() => setShowAuthModal(false)}
+          onLogin={handleAuthorityLogin}
+        />
+      </>
     );
   }
 
@@ -202,13 +242,15 @@ export default function App() {
         setActiveTab={setActiveTab}
         onRefreshHealth={fetchHealth}
         onHome={() => setShowLanding(true)}
+        onOpenAuthority={handleOpenAuthority}
+        onExitAuthority={handleAuthorityLogout}
       />
 
       {/* Main Container */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
 
-        {activeTab === 'dashboard' ? (
-          <AuthorityDashboard onBackToInspect={() => setActiveTab('inspect')} />
+        {activeTab === 'dashboard' && isAuthorityAuth ? (
+          <AuthorityDashboard onBackToInspect={handleAuthorityLogout} />
         ) : activeTab === 'track' ? (
           <TrackReport
             onBackToHome={() => setShowLanding(true)}
@@ -385,6 +427,13 @@ export default function App() {
           </span>
         </div>
       </footer>
+
+      {/* Authority Mode Restricted Access Modal */}
+      <AuthorityLoginModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        onLogin={handleAuthorityLogin}
+      />
 
     </div>
   );

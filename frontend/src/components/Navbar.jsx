@@ -1,7 +1,7 @@
 import React from 'react';
 import { Layers, Activity, RefreshCw, Home, Search, Shield, ArrowRight, Lock } from 'lucide-react';
 
-export default function Navbar({ health, activeTab, setActiveTab, onRefreshHealth, onHome }) {
+export default function Navbar({ health, activeTab, setActiveTab, onRefreshHealth, onHome, onOpenAuthority, onExitAuthority }) {
   const isOnline = health?.status === 'healthy';
   const modelReady = health?.model?.status === 'ready';
   const isAuthorityMode = activeTab === 'dashboard';
@@ -58,7 +58,7 @@ export default function Navbar({ health, activeTab, setActiveTab, onRefreshHealt
                 </span>
                 <button
                   type="button"
-                  onClick={() => setActiveTab('inspect')}
+                  onClick={onExitAuthority || (() => setActiveTab('inspect'))}
                   className="px-3 py-1.5 rounded text-xs font-semibold bg-white/10 hover:bg-white/20 text-white transition-all flex items-center space-x-1.5 border border-white/20"
                 >
                   <span>← Exit to Citizen Portal</span>
@@ -107,7 +107,7 @@ export default function Navbar({ health, activeTab, setActiveTab, onRefreshHealt
                 <div className="border-l border-[#DFE3E1] pl-2 ml-1 hidden sm:block">
                   <button
                     type="button"
-                    onClick={() => setActiveTab('dashboard')}
+                    onClick={onOpenAuthority || (() => setActiveTab('dashboard'))}
                     className="px-2.5 py-1.5 rounded text-xs font-semibold text-[#79888E] hover:text-[#114B44] hover:bg-[#EBF4F2] transition-colors flex items-center space-x-1 border border-transparent hover:border-[#CCDCD8]"
                     title="Access Government Authority Dashboard (Mode 2)"
                   >
