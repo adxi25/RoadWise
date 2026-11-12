@@ -69,22 +69,40 @@ if str(SRC_DIR) not in sys.path:
     sys.path.insert(0, str(SRC_DIR))
 
 # Import existing core modules (unmodified)
-from database.database import (  # noqa: E402
-    create_tables,
-    get_all_inspections,
-    get_inspection,
-    get_inspection_stats,
-)
-from detection.predict import (  # noqa: E402
-    CRACK_MODEL,
-    POTHOLE_MODEL,
-    load_model,
-)
-from pipeline.inspection_pipeline import (  # noqa: E402
-    DEFAULT_CONFIDENCE,
-    DEFAULT_IMGSZ,
-    run_inspection,
-)
+try:
+    from src.database.database import (  # noqa: E402
+        create_tables,
+        get_all_inspections,
+        get_inspection,
+        get_inspection_stats,
+    )
+    from src.detection.predict import (  # noqa: E402
+        CRACK_MODEL,
+        POTHOLE_MODEL,
+        load_model,
+    )
+    from src.pipeline.inspection_pipeline import (  # noqa: E402
+        DEFAULT_CONFIDENCE,
+        DEFAULT_IMGSZ,
+        run_inspection,
+    )
+except ImportError:
+    from database.database import (  # noqa: E402
+        create_tables,
+        get_all_inspections,
+        get_inspection,
+        get_inspection_stats,
+    )
+    from detection.predict import (  # noqa: E402
+        CRACK_MODEL,
+        POTHOLE_MODEL,
+        load_model,
+    )
+    from pipeline.inspection_pipeline import (  # noqa: E402
+        DEFAULT_CONFIDENCE,
+        DEFAULT_IMGSZ,
+        run_inspection,
+    )
 
 # Static file storage directories
 UPLOAD_DIR = BASE_DIR / "data" / "uploads"

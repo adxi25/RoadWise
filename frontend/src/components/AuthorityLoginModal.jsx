@@ -141,3 +141,4 @@ export default function AuthorityLoginModal({ isOpen, onClose, onLogin }) {
     </div>
   );
 }
+
