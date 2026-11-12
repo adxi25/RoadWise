@@ -297,6 +297,17 @@ When faculty say: *"Open the file where you do X and explain it line by line"*, 
    - **At 0.10 (Calibrated Sweet Spot):** Achieves the optimal F1-score balance under ISO/IRC civil surveying standards, reliably surfacing early-stage fissures and shadowed cavities without spurious artifacts.
 2. **Integration with Multi-Scale Fusion:** At $\text{conf} = 0.10$, the Multi-Scale Fusion engine reliably extracts distant hairline fissures from the 1280px pass and large cavity voids from the 640px pass, producing a unified, robust pavement distress diagnosis.
 
+### Q23: "How is the Citizen Experience separated from the Municipal Authority Dashboard, and how is access control enforced?"
+**Answer:** RoadWise enforces strict separation of concerns between public citizens and municipal officials:
+1. **Mode 1 — Public Citizen Portal (Friction-Free & Login-Free):**
+   - Citizens can report damage and track repair status without registration or account maintenance (`No Citizen Login`).
+   - Every verified submission is assigned a unique, immutable Complaint ID (`RW-YYYYMMDD-HHMMSS-XXXX`) stored in SQLite with mandatory GPS validation.
+   - Citizens track their individual reports under a dedicated `Track Report` page featuring a 5-stage Civic Action Progress Workflow (Submitted → AI Scored → Sent to Municipal Authority → Work Order / Dispatch → Restoration Complete).
+2. **Mode 2 — Municipal Authority Dashboard (Security Gateway):**
+   - Protected by a dedicated **Municipal Passkey Verification Gateway** (`AuthorityLoginModal.jsx`).
+   - Access to GIS dispatch maps, maintenance priority queues, municipal ward filters, and administrative telemetry requires official credential authorization.
+   - Exiting the Authority Dashboard immediately terminates the administrative session and returns the user to the public citizen interface.
+
 ---
 
 ## 9. Viva Examiner Interaction Tips (Student Checklist)
