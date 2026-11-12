@@ -36,27 +36,15 @@ export default function LandingPage({ onStartInspection, onOpenDashboard, onTrac
             </div>
           </div>
 
-          {/* Navigation Actions */}
-          <nav className="flex items-center gap-2 sm:gap-4">
-            <button
-              type="button"
-              onClick={onOpenDashboard}
-              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-[#505E63] hover:text-[#114B44] hover:bg-[#EBF4F2] rounded transition-colors"
-            >
-              <Activity className="w-3.5 h-3.5 text-[#114B44]" />
-              <span>Authority Dashboard</span>
-              <span className="text-[10px] font-mono px-1 py-0.5 rounded bg-[#EAE7E1] text-[#505E63]">
-                Mode 2
-              </span>
-            </button>
-
+          {/* Navigation Actions — clean, no duplicates */}
+          <nav className="flex items-center gap-2 sm:gap-3">
             <button
               type="button"
               onClick={onTrackComplaint}
-              className="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-[#505E63] hover:text-[#114B44] hover:bg-[#EBF4F2] rounded transition-colors"
+              className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-[#505E63] hover:text-[#114B44] hover:bg-[#EBF4F2] rounded transition-colors"
             >
               <Search className="w-3.5 h-3.5" />
-              <span>Track Report</span>
+              <span className="hidden sm:inline">Track Complaint</span>
             </button>
 
             <button
@@ -64,7 +52,7 @@ export default function LandingPage({ onStartInspection, onOpenDashboard, onTrac
               onClick={onStartInspection}
               className="inline-flex items-center gap-2 bg-[#114B44] hover:bg-[#0D3833] active:bg-[#0A2A26] px-4 py-2 text-xs sm:text-sm font-semibold text-white rounded transition-colors shadow-sm"
             >
-              <span>Start Inspection</span>
+              <span>Report Damage</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </nav>
@@ -97,12 +85,12 @@ export default function LandingPage({ onStartInspection, onOpenDashboard, onTrac
               </p>
             </div>
 
-            {/* Call to Action Controls */}
-            <div className="flex flex-col sm:flex-row flex-wrap gap-3 pt-2">
+            {/* Call to Action Controls — focused on citizen reporting, zero duplicacy */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-2">
               <button
                 type="button"
                 onClick={onStartInspection}
-                className="inline-flex items-center justify-center gap-2 bg-[#114B44] hover:bg-[#0D3833] active:bg-[#0A2A26] text-white px-5 py-3 rounded font-semibold text-sm transition-all shadow-sm"
+                className="inline-flex items-center justify-center gap-2 bg-[#114B44] hover:bg-[#0D3833] active:bg-[#0A2A26] text-white px-6 py-3.5 rounded-lg font-semibold text-sm transition-all shadow-sm"
               >
                 <span>Report Road Damage</span>
                 <ArrowRight className="w-4 h-4" />
@@ -111,21 +99,10 @@ export default function LandingPage({ onStartInspection, onOpenDashboard, onTrac
               <button
                 type="button"
                 onClick={onTrackComplaint}
-                className="inline-flex items-center justify-center gap-2 bg-white hover:bg-[#F3F1EC] text-[#141D20] border border-[#DFE3E1] hover:border-[#CCDCD8] px-5 py-3 rounded font-semibold text-sm transition-colors shadow-sm"
+                className="inline-flex items-center justify-center gap-2 bg-white hover:bg-[#F3F1EC] text-[#141D20] border border-[#CCDCD8] hover:border-[#114B44] px-5 py-3.5 rounded-lg font-semibold text-sm transition-colors shadow-2xs"
               >
                 <Search className="w-4 h-4 text-[#114B44]" />
-                <span>Track Complaint</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={onOpenDashboard}
-                className="inline-flex items-center justify-center gap-2 bg-[#F3F1EC] hover:bg-[#EAE7E1] text-[#505E63] hover:text-[#141D20] px-4 py-3 rounded font-semibold text-xs transition-colors"
-                title="Authority Access (Mode 2)"
-              >
-                <Activity className="w-3.5 h-3.5 text-[#114B44]" />
-                <span>Authority Dashboard</span>
-                <ChevronRight className="w-3.5 h-3.5 text-[#79888E]" />
+                <span>Track Existing Complaint</span>
               </button>
             </div>
 
@@ -312,10 +289,19 @@ export default function LandingPage({ onStartInspection, onOpenDashboard, onTrac
           <div className="flex items-center gap-2">
             <span className="font-semibold text-[#141D20]">RoadWise</span>
             <span className="text-[#DFE3E1]">|</span>
-            <span>Civic Road Infrastructure Decision-Support System</span>
+            <span>Civic Road Infrastructure Platform</span>
           </div>
-          <div className="text-[11px] font-mono text-[#79888E]">
-            Model: Dual-Model YOLOv8 (MS-NMS Fusion) · Storage: SQLite · API: FastAPI
+          <div className="flex items-center gap-4 text-[11px] font-mono text-[#79888E]">
+            <span>Dual-Model MS-NMS Fusion</span>
+            <span>·</span>
+            <button
+              type="button"
+              onClick={onOpenDashboard}
+              className="text-[#505E63] hover:text-[#114B44] underline font-sans flex items-center gap-1 font-semibold transition-colors"
+              title="Official access for municipal engineers and authorities"
+            >
+              <span>Authority Portal (Mode 2) 🔒</span>
+            </button>
           </div>
         </div>
       </footer>

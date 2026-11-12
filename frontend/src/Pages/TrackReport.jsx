@@ -242,6 +242,53 @@ export default function TrackReport({ onBackToHome, onStartInspection, initialCo
                 </button>
               </div>
 
+              {/* Civic Action Progress Workflow (Registered -> AI Screened -> Forwarded to Authority -> In Progress -> Complete) */}
+              {result.tracking_status?.steps && (
+                <div className="p-5 rounded-xl border border-[#DFE3E1] bg-[#FAF9F6] space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-mono uppercase tracking-wider text-[#114B44] font-bold flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-[#114B44]" />
+                      Civic Action Progress Workflow
+                    </span>
+                    <span className="text-[11px] font-mono text-[#505E63] bg-[#EAE7E1] px-2 py-0.5 rounded font-semibold">
+                      Stage {result.tracking_status.current_step + 1} of {result.tracking_status.steps.length}
+                    </span>
+                  </div>
+
+                  {/* Horizontal / Responsive Stepper */}
+                  <div className="grid grid-cols-1 sm:grid-cols-5 gap-3 pt-1">
+                    {result.tracking_status.steps.map((st, idx) => {
+                      const isDone = st.state === 'done';
+                      const isCurrent = st.state === 'current';
+                      return (
+                        <div key={idx} className="relative flex sm:flex-col items-start gap-2.5 sm:gap-2">
+                          {/* Circle indicator */}
+                          <div className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 text-xs font-bold font-mono transition-all ${
+                            isDone ? 'bg-emerald-600 text-white shadow-xs' :
+                            isCurrent ? 'bg-[#114B44] text-white ring-4 ring-[#114B44]/20 animate-pulse' :
+                            'bg-[#E5E7EB] text-[#9CA3AF]'
+                          }`}>
+                            {isDone ? '✓' : idx + 1}
+                          </div>
+
+                          {/* Text info */}
+                          <div className="space-y-0.5">
+                            <span className={`text-xs font-bold block ${
+                              isDone ? 'text-emerald-900' : isCurrent ? 'text-[#114B44]' : 'text-[#9CA3AF]'
+                            }`}>
+                              {st.title}
+                            </span>
+                            <span className="text-[10px] text-[#6B7280] leading-tight block">
+                              {st.detail}
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
               {/* Metrics & Context Columns */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 

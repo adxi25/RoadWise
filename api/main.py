@@ -504,30 +504,65 @@ def track_citizen_report(
 
     # Compute citizen-facing operational workflow status based on maintenance priority
     priority = (inspection.get("priority") or "MEDIUM").upper()
+    cond_score = float(inspection.get("condition_score") or 50.0)
+    risk_score = float(inspection.get("risk_score") or 50.0)
+    
     status_map = {
         "CRITICAL": {
-            "status_label": "Immediate Dispatch Required",
+            "status_label": "Immediate Dispatch In Progress",
             "badge_color": "critical",
-            "stage": "Assigned to Emergency Municipal Repair Crew",
+            "stage": "Forwarded to Emergency Road Maintenance Crew",
             "eta": "Within 24–48 Hours",
+            "current_step": 3,
+            "steps": [
+                {"title": "Complaint Submitted", "detail": "GPS coordinates and distress photo logged", "state": "done"},
+                {"title": "AI Severity Scoring", "detail": f"Condition: {cond_score:.1f}/100 | Severe distress flagged", "state": "done"},
+                {"title": "Sent to Municipal Authority", "detail": "Corridor assigned to Urban Asset Maintenance Portal", "state": "done"},
+                {"title": "Emergency Dispatch", "detail": "Rapid repair crew assigned (Critical Priority)", "state": "current"},
+                {"title": "Restoration Complete", "detail": "Pothole patch & seal closure inspection", "state": "pending"},
+            ],
         },
         "HIGH": {
-            "status_label": "Maintenance Scheduled",
+            "status_label": "Scheduled for Repair",
             "badge_color": "high",
-            "stage": "Scheduled in Priority Road Repair Queue",
+            "stage": "Assigned to PWD Road Maintenance Division",
             "eta": "Within 3–5 Business Days",
+            "current_step": 3,
+            "steps": [
+                {"title": "Complaint Submitted", "detail": "GPS coordinates and distress photo logged", "state": "done"},
+                {"title": "AI Severity Scoring", "detail": f"Condition: {cond_score:.1f}/100 | High Risk: {risk_score:.1f}/100", "state": "done"},
+                {"title": "Sent to Municipal Authority", "detail": "Forwarded to District Highway Division", "state": "done"},
+                {"title": "Work Order Queued", "detail": "Batch asphalt repair scheduled (High Priority)", "state": "current"},
+                {"title": "Restoration Complete", "detail": "Pavement restoration & post-work verification", "state": "pending"},
+            ],
         },
         "MEDIUM": {
             "status_label": "Under Civil Engineering Review",
             "badge_color": "medium",
             "stage": "Queued for Periodic Maintenance Planning",
-            "eta": "Next Scheduled Road Maintenance Cycle",
+            "eta": "Next Scheduled Maintenance Cycle",
+            "current_step": 2,
+            "steps": [
+                {"title": "Complaint Submitted", "detail": "GPS coordinates and distress photo logged", "state": "done"},
+                {"title": "AI Severity Scoring", "detail": f"Condition: {cond_score:.1f}/100 | Moderate wear detected", "state": "done"},
+                {"title": "Sent to Municipal Authority", "detail": "Under review by Highway Asset Planning", "state": "current"},
+                {"title": "Maintenance Scheduling", "detail": "Material & contractor assignment", "state": "pending"},
+                {"title": "Restoration Complete", "detail": "Corridor resurfacing verification", "state": "pending"},
+            ],
         },
         "LOW": {
             "status_label": "Recorded / Routine Monitoring",
             "badge_color": "low",
             "stage": "Road Condition Stable — Logged in Asset Database",
             "eta": "Continuous Telemetry Monitoring",
+            "current_step": 2,
+            "steps": [
+                {"title": "Complaint Submitted", "detail": "GPS coordinates and distress photo logged", "state": "done"},
+                {"title": "AI Severity Scoring", "detail": f"Condition: {cond_score:.1f}/100 | Minor surface wear", "state": "done"},
+                {"title": "Sent to Municipal Authority", "detail": "Logged in Central Road Asset Registry", "state": "current"},
+                {"title": "Seasonal Inspection", "detail": "Periodic road quality reassessment", "state": "pending"},
+                {"title": "Restoration Complete", "detail": "Standard lifecycle maintenance", "state": "pending"},
+            ],
         },
     }
     inspection["tracking_status"] = status_map.get(priority, status_map["MEDIUM"])
