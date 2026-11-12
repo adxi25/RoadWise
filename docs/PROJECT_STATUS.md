@@ -44,10 +44,19 @@
 - **Offline Reliability**: Environment variables configured to prevent Ultralytics telemetry blocking in isolated environments
 
 ### Backend & Scoring ✅
-- FastAPI with 5 endpoints: `GET /api/health`, `POST /api/inspections/inspect`, `GET /api/inspections`, `GET /api/inspections/{id}`, `GET /api/dashboard/stats`
+- FastAPI with 6 endpoints: `GET /api/health`, `POST /api/inspections/inspect`, `GET /api/inspections`, `GET /api/inspections/{id}`, `GET /api/dashboard/stats`, `GET /api/reports/track/{tracking_id}`
+- Public Citizen Complaint Tracking endpoint (`/api/reports/track/{tracking_id}`) supporting direct lookup by string Complaint ID (`RW-YYYYMMDD-HHMMSS-XXXX`) or database ID
+- Multi-Scale Feature Fusion (`MS-NMS`) inference pipeline (`imgsz=0`) with calibrated confidence threshold ($0.10$) and micro-box suppression
 - Condition score: exponential decay `100 * exp(-damage_load / 2.0)` with overlap discounting
 - Risk score: multiplicative model `damage_level * context_multiplier`
 - Unit testing: **31/31 automated tests passing** across `tests/test_annotation_converter.py`, `tests/test_roadwise_pipeline.py`, and `tests/test_scoring.py`
+
+### Public Citizen Portal & Mode Separation ✅
+- Clean architectural separation between **Mode 1 (Citizen Portal)** and **Mode 2 (Authority Dashboard)**
+- `TrackReport.jsx`: Dedicated citizen complaint tracking page with 5-stage Civic Action Progress Workflow (Complaint Submitted → AI Severity Scoring → Sent to Authority → Work Order / Dispatch → Restoration Complete)
+- Removed duplicate buttons across landing page and header; Authority Portal is discretely gated for municipal users
+- Mandatory GPS coordinates and automated Complaint ID generation (`RW-YYYYMMDD-HHMMSS-XXXX`) with copy-to-clipboard action
+- Updated taxonomy across UI to unified 3-class system (D40 Pothole, D20 Alligator Crack, D00 Linear Crack)
 
 ### Documentation ✅
 - `docs/PROJECT_STATUS.md` — project status and external artifacts
