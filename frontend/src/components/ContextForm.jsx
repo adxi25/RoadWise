@@ -426,39 +426,18 @@ export default function ContextForm({
               </div>
             </div>
 
-            {/* Inference Resolution (imgsz) */}
-            {setImgsz && (
-              <div className="pt-2 border-t border-[#DFE3E1] space-y-1.5">
-                <div className="flex items-center justify-between text-[11px] font-semibold text-[#141D20]">
-                  <span>Inference Resolution</span>
-                  <span className="font-mono text-[#114B44] font-bold">{imgsz} px</span>
-                </div>
-                <div className="grid grid-cols-3 gap-1.5">
-                  {[
-                    { val: 640, label: '640 px', desc: 'Standard' },
-                    { val: 960, label: '960 px', desc: 'Enhanced' },
-                    { val: 1280, label: '1280 px', desc: 'High Detail' },
-                  ].map((opt) => (
-                    <button
-                      type="button"
-                      key={opt.val}
-                      onClick={() => setImgsz(opt.val)}
-                      className={`py-1.5 px-2 rounded border text-center transition-all ${
-                        imgsz === opt.val
-                          ? 'bg-[#114B44] text-white border-[#114B44] shadow-2xs font-semibold'
-                          : 'bg-[#F8F7F4] text-[#505E63] border-[#DFE3E1] hover:bg-[#F3F1EC]'
-                      }`}
-                    >
-                      <div className="text-[11px] font-mono leading-none">{opt.label}</div>
-                      <div className={`text-[9px] mt-0.5 ${imgsz === opt.val ? 'text-white/80' : 'text-[#79888E]'}`}>{opt.desc}</div>
-                    </button>
-                  ))}
-                </div>
-                <p className="text-[10px] text-[#505E63] leading-tight">
-                  640px is the model's native training resolution. Higher resolutions scale the input canvas for large images.
-                </p>
+            {/* Autonomous Multi-Scale Feature Fusion Engine */}
+            <div className="pt-2 border-t border-[#DFE3E1] space-y-1">
+              <div className="flex items-center justify-between text-[11px] font-semibold text-[#141D20]">
+                <span>Inference Engine</span>
+                <span className="font-mono text-[#114B44] font-bold text-[10px] bg-[#E1F5E8] px-1.5 py-0.5 rounded border border-[#C2E8D0]">
+                  Multi-Scale Fusion (MS-NMS)
+                </span>
               </div>
-            )}
+              <p className="text-[10px] text-[#505E63] leading-tight">
+                Automatically evaluates and fuses 640px (macro potholes) and 1280px (hairline fissures) receptive fields with micro-clutter suppression.
+              </p>
+            </div>
           </div>
         )}
       </div>

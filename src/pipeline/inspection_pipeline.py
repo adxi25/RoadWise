@@ -104,8 +104,8 @@ SUPPORTED_EXTENSIONS = {
 
 MAX_IMAGE_SIZE_MB = 20
 
-DEFAULT_CONFIDENCE = 0.25
-DEFAULT_IMGSZ = 640
+DEFAULT_CONFIDENCE = 0.10
+DEFAULT_IMGSZ = 0  # 0 indicates Multi-Scale Feature Fusion (640px + 1280px NMS)
 
 
 # ============================================================
@@ -731,9 +731,9 @@ def run_inspection(
     except (TypeError, ValueError):
         raise ValueError("Inference image size (imgsz) must be an integer.")
 
-    if not 320 <= imgsz <= 1920:
+    if imgsz != 0 and not (320 <= imgsz <= 1920):
         raise ValueError(
-            "Inference image size (imgsz) must be between 320 and 1920 pixels."
+            "Inference image size (imgsz) must be 0 (Multi-Scale Fusion) or between 320 and 1920 pixels."
         )
 
     # --------------------------------------------------------

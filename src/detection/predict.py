@@ -50,11 +50,11 @@ CRACK_MODEL = BASE_DIR / "models" / "experiment_c_best.pt"
 DEFAULT_MODEL = POTHOLE_MODEL
 
 # Optimal confidence threshold calibrated for the fine-tuned roadwise_v2 model.
-# Set to 0.15 to ensure subtle pavement fissures and shadowed pothole cavities are captured.
-DEFAULT_CONF = 0.15
+# Set to 0.10 to ensure subtle pavement fissures and shadowed pothole cavities are captured.
+DEFAULT_CONF = 0.10
 
-# Standard inference canvas dimension (640x640). Configurable up to 1920 in pipeline.
-DEFAULT_IMGSZ = 640
+# Default inference canvas dimension: 0 indicates Multi-Scale Feature Fusion (640px + 1280px NMS).
+DEFAULT_IMGSZ = 0
 
 # Canonical Class Code Normalization Mapping:
 # Handles both newer model output names (D00, D10, etc.) and legacy English labels.
@@ -257,6 +257,61 @@ def draw_annotations(image_path, detections):
     return img
 
 
+def box_iou(b1, b2):
+    """Compute Intersection-over-Union between two normalized bounding boxes [xmin, ymin, xmax, ymax]."""
+    x1 = max(b1[0], b2[0])
+    y1 = max(b1[1], b2[1])
+    x2 = min(b1[2], b2[2])
+    y2 = min(b1[3], b2[3])
+    inter = max(0.0, x2 - x1) * max(0.0, y2 - y1)
+    a1 = (b1[2] - b1[0]) * (b1[3] - b1[1])
+    a2 = (b2[2] - b2[0]) * (b2[3] - b2[1])
+    union = a1 + a2 - inter
+    return inter / union if union > 0 else 0.0
+
+
+def fuse_multi_scale_detections(dets_640, dets_1280, iou_thresh=0.45):
+    """
+    Fuse detections from 640px and 1280px passes using Non-Maximum Suppression (NMS).
+    Filters micro-clutter from 1280px while preserving fine linear crack fissures.
+    """
+    filtered_1280 = []
+    for d in dets_1280:
+        area = d["width"] * d["height"]
+        is_linear = d.get("class_code") in ("D00", "D10")
+        # Keep if significant area OR if it's a linear crack (hairline fissure)
+        if area >= 0.005 or is_linear:
+            filtered_1280.append(d)
+
+    combined = sorted(
+        dets_640 + filtered_1280,
+        key=lambda x: x.get("confidence", 0.0),
+        reverse=True,
+    )
+    kept = []
+    for d in combined:
+        box_d = [
+            d["x_center"] - d["width"] / 2.0,
+            d["y_center"] - d["height"] / 2.0,
+            d["x_center"] + d["width"] / 2.0,
+            d["y_center"] + d["height"] / 2.0,
+        ]
+        suppressed = False
+        for k in kept:
+            box_k = [
+                k["x_center"] - k["width"] / 2.0,
+                k["y_center"] - k["height"] / 2.0,
+                k["x_center"] + k["width"] / 2.0,
+                k["y_center"] + k["height"] / 2.0,
+            ]
+            if box_iou(box_d, box_k) > iou_thresh:
+                suppressed = True
+                break
+        if not suppressed:
+            kept.append(d)
+    return kept
+
+
 def detect(image_path, conf=DEFAULT_CONF, model_path=None, imgsz=DEFAULT_IMGSZ):
     """
     Execute full YOLOv8 detection pipeline on a single image file.
@@ -268,17 +323,35 @@ def detect(image_path, conf=DEFAULT_CONF, model_path=None, imgsz=DEFAULT_IMGSZ):
       2. Crack Specialist (`models/experiment_c_best.pt`): Detects D00 & D20 Cracks
     The detections are seamlessly merged and drawn with distinct colors.
 
+    MULTI-SCALE FUSION MODE:
+    ------------------------
+    When `imgsz == 0` (or 'fusion'), executes multi-scale inference across 640px
+    and 1280px canvases and fuses predictions via NMS.
+
     SINGLE-MODEL FALLBACK:
     ----------------------
     If a specific `model_path` is passed, runs that model exclusively (backward compatible).
     """
-    # Defensive parameter sanitization: ensure image resolution is a positive integer
+    # Defensive parameter sanitization: check for multi-scale fusion request (imgsz == 0)
+    is_fusion = False
     try:
-        imgsz = int(imgsz)
+        val = int(imgsz)
+        if val == 0:
+            is_fusion = True
+        else:
+            imgsz = val if val > 0 else DEFAULT_IMGSZ
     except (TypeError, ValueError):
-        imgsz = DEFAULT_IMGSZ
-    if imgsz <= 0:
-        imgsz = DEFAULT_IMGSZ
+        if str(imgsz).lower() in ("0", "fusion", "auto"):
+            is_fusion = True
+        else:
+            imgsz = DEFAULT_IMGSZ
+
+    if is_fusion:
+        dets_640, _ = detect(image_path, conf=conf, model_path=model_path, imgsz=640)
+        dets_1280, _ = detect(image_path, conf=conf, model_path=model_path, imgsz=1280)
+        fused_dets = fuse_multi_scale_detections(dets_640, dets_1280)
+        annotated_bgr = draw_annotations(image_path, fused_dets)
+        return fused_dets, annotated_bgr
 
     # Determine execution mode: Dual-Model vs. Single-Model
     is_dual_mode = (

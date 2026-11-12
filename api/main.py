@@ -272,11 +272,11 @@ async def inspect_road(
     area: Optional[str] = Form(None, description="Optional Area / Neighborhood name"),
     conf: Optional[float] = Form(
         DEFAULT_CONFIDENCE,
-        description="YOLO confidence threshold (0.05 to 0.95, default: 0.25)",
+        description="YOLO confidence threshold (0.05 to 0.50, default: 0.10)",
     ),
     imgsz: Optional[int] = Form(
         DEFAULT_IMGSZ,
-        description="YOLO inference image size in pixels (default: 640)",
+        description="YOLO inference image size in pixels (0 for Multi-Scale Fusion, default: 0)",
     ),
 ) -> dict[str, Any]:
     """
@@ -306,8 +306,8 @@ async def inspect_road(
     if imgsz is not None:
         try:
             target_imgsz = int(imgsz)
-            if not 320 <= target_imgsz <= 1920:
-                raise ValueError("imgsz must be between 320 and 1920 pixels.")
+            if target_imgsz != 0 and not (320 <= target_imgsz <= 1920):
+                raise ValueError("imgsz must be 0 (Multi-Scale Fusion) or between 320 and 1920 pixels.")
         except (TypeError, ValueError) as val_err:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
