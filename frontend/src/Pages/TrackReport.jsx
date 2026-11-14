@@ -13,7 +13,11 @@ import {
   Check, 
   ExternalLink,
   Layers,
-  FileText
+  FileText,
+  Printer,
+  Truck,
+  Building2,
+  ShieldCheck,
 } from 'lucide-react';
 import { trackReport, getImageUrl } from '../api/client';
 import PriorityBadge from '../components/PriorityBadge';
@@ -289,6 +293,41 @@ export default function TrackReport({ onBackToHome, onStartInspection, initialCo
                 </div>
               )}
 
+              {/* Official Municipal Action & Dispatch Notes (Closed-Loop Feedback) */}
+              {(result.official_remarks || result.assigned_crew) && (
+                <div className="p-4 sm:p-5 rounded-xl border-2 border-[#CCDCD8] bg-[#FAF9F6] space-y-2.5 shadow-2xs">
+                  <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#DFE3E1] pb-2">
+                    <div className="flex items-center gap-2">
+                      <Truck className="w-4 h-4 text-[#114B44]" />
+                      <span className="text-xs font-mono uppercase tracking-wider text-[#114B44] font-bold">
+                        Official Municipal Action & Crew Dispatch Note
+                      </span>
+                    </div>
+                    {result.assigned_crew && (
+                      <span className="text-[11px] font-mono text-[#141D20] bg-white border border-[#CCDCD8] px-2.5 py-0.5 rounded font-semibold">
+                        Assigned Unit: {result.assigned_crew}
+                      </span>
+                    )}
+                  </div>
+                  {result.official_remarks ? (
+                    <p className="text-xs sm:text-sm text-[#141D20] leading-relaxed font-sans bg-white p-3 rounded-lg border border-[#DFE3E1]">
+                      "{result.official_remarks}"
+                    </p>
+                  ) : (
+                    <p className="text-xs text-[#505E63] italic">
+                      Work order approved. Maintenance crew assigned for road restoration.
+                    </p>
+                  )}
+                  <div className="flex items-center justify-between text-[10px] text-[#79888E] font-mono pt-1">
+                    <span>Verified closed-loop dispatch telemetry from Municipal Roadworks Authority.</span>
+                    <span className="text-emerald-700 font-semibold flex items-center gap-1">
+                      <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                      Live Verified Status
+                    </span>
+                  </div>
+                </div>
+              )}
+
               {/* Metrics & Context Columns */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 
@@ -400,29 +439,124 @@ export default function TrackReport({ onBackToHome, onStartInspection, initialCo
             {/* Bottom Actions */}
             <div className="p-4 sm:p-6 bg-[#F8F7F4] border-t border-[#DFE3E1] flex flex-wrap items-center justify-between gap-3">
               <span className="text-xs text-[#505E63]">
-                Need to report another road?
+                Need an official physical or PDF record for municipal follow-up?
               </span>
               <div className="flex items-center gap-2">
                 <button
                   type="button"
                   onClick={() => window.print()}
-                  className="px-3 py-1.5 rounded border border-[#CCDCD8] bg-white hover:bg-[#F3F1EC] text-xs font-semibold text-[#141D20] transition-colors"
+                  className="px-3.5 py-1.5 rounded border border-[#CCDCD8] bg-white hover:bg-[#F3F1EC] text-xs font-semibold text-[#141D20] transition-colors inline-flex items-center gap-1.5 shadow-2xs cursor-pointer"
                 >
-                  Print Receipt
+                  <Printer className="w-3.5 h-3.5 text-[#114B44]" />
+                  <span>Print Acknowledgement Slip</span>
                 </button>
                 <button
                   type="button"
                   onClick={onStartInspection}
-                  className="px-4 py-1.5 rounded bg-[#114B44] hover:bg-[#0D3833] text-xs font-semibold text-white transition-colors"
+                  className="px-4 py-1.5 rounded bg-[#114B44] hover:bg-[#0D3833] text-xs font-semibold text-white transition-colors cursor-pointer"
                 >
                   Start New Inspection
                 </button>
+              </div>
+            </div>
+
+            {/* Dedicated Printable Government Acknowledgement Slip (Rendered on print) */}
+            <div id="roadwise-printable-slip" className="hidden print:block p-8 bg-white text-black font-sans">
+              <div className="border-2 border-black p-6 space-y-4">
+                {/* Gov / Civic Header */}
+                <div className="border-b-2 border-black pb-3 text-center space-y-1">
+                  <div className="text-[11px] font-bold tracking-widest uppercase font-mono">
+                    PUBLIC WORKS & HIGHWAYS INFRASTRUCTURE DEPARTMENT
+                  </div>
+                  <div className="text-lg font-black uppercase tracking-tight">
+                    ROAD DAMAGE COMPLAINT ACKNOWLEDGEMENT SLIP
+                  </div>
+                  <div className="text-[10px] font-mono text-gray-700">
+                    RoadWise AI Pavement Quality Monitoring & Maintenance Dispatch Network
+                  </div>
+                </div>
+
+                {/* Grievance Telemetry Grid */}
+                <div className="grid grid-cols-2 gap-4 text-xs font-mono border-b border-black pb-3">
+                  <div>
+                    <span className="text-gray-600 block text-[10px]">COMPLAINT TRACKING ID</span>
+                    <strong className="text-sm font-black">{result.report_id}</strong>
+                  </div>
+                  <div>
+                    <span className="text-gray-600 block text-[10px]">FILING DATE & TIME</span>
+                    <strong>{result.created_at ? new Date(result.created_at).toLocaleString() : 'N/A'}</strong>
+                  </div>
+                  <div>
+                    <span className="text-gray-600 block text-[10px]">MAINTENANCE PRIORITY</span>
+                    <strong className="text-sm uppercase">{result.priority || 'STANDARD'}</strong>
+                  </div>
+                  <div>
+                    <span className="text-gray-600 block text-[10px]">LIFECYCLE STATUS</span>
+                    <strong className="text-sm uppercase">{result.tracking_status?.status_label || result.status || 'RECORDED'}</strong>
+                  </div>
+                </div>
+
+                {/* Technical Pavement Telemetry */}
+                <div className="space-y-1 text-xs font-mono border-b border-black pb-3">
+                  <div className="text-[10px] font-bold text-gray-600 uppercase">SURFACE CONDITION TELEMETRY</div>
+                  <div className="grid grid-cols-3 gap-2">
+                    <div>Condition: <strong>{Number(result.condition_score).toFixed(1)}/100</strong></div>
+                    <div>Risk Score: <strong>{Number(result.risk_score).toFixed(1)}/100</strong></div>
+                    <div>Defects Detected: <strong>{result.detections?.length || 0}</strong></div>
+                  </div>
+                  <div className="pt-1">
+                    GPS Coordinates: <strong>{result.latitude ? `${Number(result.latitude).toFixed(6)}° N, ${Number(result.longitude).toFixed(6)}° E` : 'Coordinates Recorded'}</strong>
+                  </div>
+                  <div>
+                    Road Class: <strong>{result.road_type?.replace(/_/g, ' ').toUpperCase() || 'MAIN ROAD'}</strong> | Traffic: <strong>{result.traffic_level?.toUpperCase() || 'HIGH'}</strong>
+                  </div>
+                  {(result.area || result.city) && (
+                    <div>Location: <strong>{[result.area, result.city, result.state].filter(Boolean).join(', ')}</strong></div>
+                  )}
+                </div>
+
+                {/* Official Remarks & Crew */}
+                <div className="text-xs font-mono space-y-1 border-b border-black pb-3">
+                  <div className="text-[10px] font-bold text-gray-600 uppercase">OFFICIAL MUNICIPAL DISPATCH NOTES</div>
+                  <div>Assigned Contractor / Crew: <strong>{result.assigned_crew || 'Civil Engineering Operations Unit'}</strong></div>
+                  <div>Remarks: <em>{result.official_remarks || result.recommendation || 'Grievance registered for field pavement restoration.'}</em></div>
+                </div>
+
+                {/* Footer Notice */}
+                <div className="flex justify-between items-end text-[9px] font-mono text-gray-600 pt-1">
+                  <div>
+                    <p>• Computer-generated acknowledgement under automated road distress telemetry.</p>
+                    <p>• Citizens may track live updates at any time using Complaint ID: {result.report_id}.</p>
+                  </div>
+                  <div className="text-right">
+                    <span className="border border-black px-2 py-1 font-bold">DIGITALLY VERIFIED</span>
+                  </div>
+                </div>
               </div>
             </div>
           </section>
         )}
 
       </main>
+
+      <style>{`
+        @media print {
+          body * {
+            visibility: hidden;
+          }
+          #roadwise-printable-slip, #roadwise-printable-slip * {
+            visibility: visible;
+          }
+          #roadwise-printable-slip {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            margin: 0;
+            padding: 20px;
+          }
+        }
+      `}</style>
     </div>
   );
 }

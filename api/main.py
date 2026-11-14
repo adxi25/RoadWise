@@ -58,6 +58,7 @@ from typing import Any, Optional
 from fastapi import FastAPI, File, Form, HTTPException, Query, UploadFile, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from pydantic import BaseModel
 
 # ---------------------------------------------------------------------------
 # Path configuration to access existing src/ modules
@@ -75,6 +76,8 @@ try:
         get_all_inspections,
         get_inspection,
         get_inspection_stats,
+        update_inspection_status,
+        get_nearby_inspections,
     )
     from src.detection.predict import (  # noqa: E402
         CRACK_MODEL,
@@ -92,6 +95,8 @@ except ImportError:
         get_all_inspections,
         get_inspection,
         get_inspection_stats,
+        update_inspection_status,
+        get_nearby_inspections,
     )
     from detection.predict import (  # noqa: E402
         CRACK_MODEL,
@@ -583,9 +588,115 @@ def track_citizen_report(
             ],
         },
     }
-    inspection["tracking_status"] = status_map.get(priority, status_map["MEDIUM"])
+    # Closed-Loop Status: If official municipal status has been updated in Mode 2, use it!
+    db_status = (inspection.get("status") or "UNDER_REVIEW").upper()
+    crew_tag = f" ({inspection['assigned_crew']})" if inspection.get("assigned_crew") else ""
+
+    if db_status == "RESOLVED":
+        inspection["tracking_status"] = {
+            "status_label": "Restoration Completed",
+            "badge_color": "low",
+            "stage": "Pavement Repair Verified & Closed by Municipal Authority",
+            "eta": "Resolved / Corridor Restored",
+            "current_step": 4,
+            "steps": [
+                {"title": "Complaint Submitted", "detail": "GPS coordinates and distress photo logged", "state": "done"},
+                {"title": "AI Severity Scoring", "detail": f"Condition: {cond_score:.1f}/100 | Severity Calibrated", "state": "done"},
+                {"title": "Municipal Review", "detail": "Work order processed by Highway Division", "state": "done"},
+                {"title": "Repair Completed", "detail": f"Field crew resolved defect{crew_tag}", "state": "done"},
+                {"title": "Restoration Complete", "detail": "Pavement restoration certified & closed", "state": "done"},
+            ],
+        }
+    elif db_status == "REPAIR_CREW_DISPATCHED":
+        inspection["tracking_status"] = {
+            "status_label": "Repair Crew Dispatched",
+            "badge_color": "critical",
+            "stage": f"Municipal Patch Crew Active{crew_tag}",
+            "eta": "Active Field Operations Underway",
+            "current_step": 3,
+            "steps": [
+                {"title": "Complaint Submitted", "detail": "GPS coordinates and distress photo logged", "state": "done"},
+                {"title": "AI Severity Scoring", "detail": f"Condition: {cond_score:.1f}/100 | Severity Calibrated", "state": "done"},
+                {"title": "Sent to Authority", "detail": "Corridor assigned for rapid repair", "state": "done"},
+                {"title": "Field Dispatch", "detail": f"Patch crew deployed on corridor{crew_tag}", "state": "current"},
+                {"title": "Restoration Complete", "detail": "Pending post-patch inspection verification", "state": "pending"},
+            ],
+        }
+    elif db_status == "WORK_ORDER_ISSUED":
+        inspection["tracking_status"] = {
+            "status_label": "Work Order Issued",
+            "badge_color": "high",
+            "stage": f"Work Order Issued{crew_tag}",
+            "eta": "Scheduled within 24–48 Hours",
+            "current_step": 3,
+            "steps": [
+                {"title": "Complaint Submitted", "detail": "GPS coordinates and distress photo logged", "state": "done"},
+                {"title": "AI Severity Scoring", "detail": f"Condition: {cond_score:.1f}/100 | High Priority Calibrated", "state": "done"},
+                {"title": "Sent to Authority", "detail": "Approved by Public Works Division", "state": "done"},
+                {"title": "Work Order Queued", "detail": f"Contractor batch scheduled{crew_tag}", "state": "current"},
+                {"title": "Restoration Complete", "detail": "Awaiting physical road resurfacing", "state": "pending"},
+            ],
+        }
+    else:
+        inspection["tracking_status"] = status_map.get(priority, status_map["MEDIUM"])
 
     return _to_json_safe(inspection)
+
+
+class StatusUpdateRequest(BaseModel):
+    status: str
+    official_remarks: Optional[str] = None
+    assigned_crew: Optional[str] = None
+
+
+@app.patch("/api/inspections/{inspection_id}/status", tags=["Authority Workflow"])
+def patch_inspection_status(
+    inspection_id: str,
+    payload: StatusUpdateRequest,
+) -> dict[str, Any]:
+    """
+    Closed-Loop Municipal Action:
+    Allows authorized municipal personnel to update inspection status, assign repair crews,
+    and log official remarks that are immediately visible to citizens tracking their complaint.
+    """
+    valid_statuses = {"UNDER_REVIEW", "WORK_ORDER_ISSUED", "REPAIR_CREW_DISPATCHED", "RESOLVED"}
+    clean_status = payload.status.strip().upper()
+    if clean_status not in valid_statuses:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Invalid status '{payload.status}'. Must be one of: {list(valid_statuses)}",
+        )
+    updated = update_inspection_status(
+        inspection_id,
+        clean_status,
+        official_remarks=payload.official_remarks,
+        assigned_crew=payload.assigned_crew,
+    )
+    if updated is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Inspection with ID {inspection_id} not found.",
+        )
+    return _to_json_safe(updated)
+
+
+@app.get("/api/inspections/nearby", tags=["GIS & Corridor"])
+def query_nearby_inspections(
+    latitude: float = Query(..., ge=-90, le=90),
+    longitude: float = Query(..., ge=-180, le=180),
+    radius_meters: float = Query(150.0, gt=0, le=2000),
+    exclude_id: Optional[str] = Query(None),
+) -> list[dict[str, Any]]:
+    """
+    Query existing road defect inspections on the same corridor within `radius_meters`.
+    """
+    nearby = get_nearby_inspections(
+        latitude=latitude,
+        longitude=longitude,
+        radius_meters=radius_meters,
+        exclude_id=exclude_id,
+    )
+    return [_to_json_safe(item) for item in nearby]
 
 
 @app.get("/api/inspections/{inspection_id}", tags=["Inspections"])

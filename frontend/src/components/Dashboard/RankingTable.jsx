@@ -39,6 +39,7 @@ import {
   Calendar,
   AlertTriangle,
   Compass,
+  Download,
 } from 'lucide-react';
 
 const ROAD_TYPE_LABELS = {
@@ -56,6 +57,13 @@ const PRIORITY_BADGES = {
   LOW: 'bg-[#ECFDF5] border-[#A7F3D0] text-[#065F46]',
 };
 
+const STATUS_BADGES = {
+  UNDER_REVIEW: { label: 'Under Review', color: 'bg-[#F3F4F6] text-[#4B5563] border-[#D1D5DB]' },
+  WORK_ORDER_ISSUED: { label: 'Work Order', color: 'bg-[#FEFCE8] text-[#854D0E] border-[#FEF08A]' },
+  REPAIR_CREW_DISPATCHED: { label: 'Dispatched', color: 'bg-[#EFF6FF] text-[#1E40AF] border-[#BFDBFE]' },
+  RESOLVED: { label: 'Resolved', color: 'bg-[#ECFDF5] text-[#065F46] border-[#A7F3D0]' },
+};
+
 export default function RankingTable({
   inspections = [],
   onSelectInspection,
@@ -64,6 +72,7 @@ export default function RankingTable({
   // Filter States
   const [searchQuery, setSearchQuery] = useState('');
   const [priorityFilter, setPriorityFilter] = useState('ALL');
+  const [statusFilter, setStatusFilter] = useState('ALL');
   const [roadTypeFilter, setRoadTypeFilter] = useState('ALL');
   const [locationFilter, setLocationFilter] = useState('ALL');
   const [sortBy, setSortBy] = useState('risk_desc'); // 'risk_desc' | 'risk_asc' | 'condition_asc' | 'condition_desc' | 'date_desc' | 'date_asc'
@@ -99,6 +108,13 @@ export default function RankingTable({
     if (priorityFilter !== 'ALL') {
       list = list.filter(
         i => (i.priority || '').toUpperCase() === priorityFilter.toUpperCase()
+      );
+    }
+
+    // Lifecycle Status Filter
+    if (statusFilter !== 'ALL') {
+      list = list.filter(
+        i => (i.status || 'UNDER_REVIEW').toUpperCase() === statusFilter.toUpperCase()
       );
     }
 
@@ -169,7 +185,7 @@ export default function RankingTable({
     });
 
     return list;
-  }, [inspections, priorityFilter, roadTypeFilter, locationFilter, searchQuery, sortBy]);
+  }, [inspections, priorityFilter, statusFilter, roadTypeFilter, locationFilter, searchQuery, sortBy]);
 
   // Total pages
   const totalPages = Math.max(1, Math.ceil(filteredAndSortedInspections.length / pageSize));
@@ -183,6 +199,7 @@ export default function RankingTable({
   const hasActiveFilters =
     searchQuery.trim() !== '' ||
     priorityFilter !== 'ALL' ||
+    statusFilter !== 'ALL' ||
     roadTypeFilter !== 'ALL' ||
     locationFilter !== 'ALL' ||
     sortBy !== 'risk_desc';
@@ -190,10 +207,73 @@ export default function RankingTable({
   const handleResetFilters = () => {
     setSearchQuery('');
     setPriorityFilter('ALL');
+    setStatusFilter('ALL');
     setRoadTypeFilter('ALL');
     setLocationFilter('ALL');
     setSortBy('risk_desc');
     setCurrentPage(1);
+  };
+
+  const handleExportCSV = () => {
+    if (!filteredAndSortedInspections.length) return;
+
+    const headers = [
+      'Report ID',
+      'Priority',
+      'Condition Score',
+      'Risk Score',
+      'Status',
+      'Road Type',
+      'Traffic Level',
+      'Sensitivity',
+      'Area',
+      'City',
+      'State',
+      'Latitude',
+      'Longitude',
+      'Assigned Crew',
+      'Official Remarks',
+      'Date Logged',
+    ];
+
+    const escapeCsv = (str) => {
+      if (str === null || str === undefined) return '""';
+      const s = String(str).replace(/"/g, '""');
+      return `"${s}"`;
+    };
+
+    const rows = filteredAndSortedInspections.map((item) => [
+      escapeCsv(item.report_id || `RW-${item.id}`),
+      escapeCsv(item.priority || 'LOW'),
+      item.condition_score !== null && item.condition_score !== undefined ? Number(item.condition_score).toFixed(1) : '',
+      item.risk_score !== null && item.risk_score !== undefined ? Number(item.risk_score).toFixed(1) : '',
+      escapeCsv(item.status || 'UNDER_REVIEW'),
+      escapeCsv(item.road_type || ''),
+      escapeCsv(item.traffic_level || ''),
+      escapeCsv(item.location_sensitivity || ''),
+      escapeCsv(item.area || ''),
+      escapeCsv(item.city || ''),
+      escapeCsv(item.state || ''),
+      item.latitude !== null && item.latitude !== undefined ? Number(item.latitude).toFixed(6) : '',
+      item.longitude !== null && item.longitude !== undefined ? Number(item.longitude).toFixed(6) : '',
+      escapeCsv(item.assigned_crew || ''),
+      escapeCsv(item.official_remarks || ''),
+      escapeCsv(item.created_at || ''),
+    ]);
+
+    const csvContent = [headers.join(','), ...rows.map((r) => r.join(','))].join('\r\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute(
+      'download',
+      `roadwise_priority_triage_queue_${new Date().toISOString().slice(0, 10)}.csv`
+    );
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   const formatDate = (dateStr) => {
@@ -235,6 +315,16 @@ export default function RankingTable({
             <span className="text-[11px] font-mono text-[#505E63] bg-white border border-[#DFE3E1] px-2.5 py-1 rounded">
               Showing <strong>{filteredAndSortedInspections.length}</strong> of <strong>{inspections.length}</strong> records
             </span>
+            <button
+              type="button"
+              onClick={handleExportCSV}
+              disabled={filteredAndSortedInspections.length === 0}
+              className="inline-flex items-center space-x-1.5 px-3 py-1 rounded text-[11px] font-mono font-semibold text-[#114B44] bg-white border border-[#CCDCD8] hover:bg-[#EBF4F2] transition-colors cursor-pointer shadow-2xs disabled:opacity-50"
+              title="Download filtered road maintenance triage queue as CSV"
+            >
+              <Download className="w-3.5 h-3.5" />
+              <span>Export CSV</span>
+            </button>
             {hasActiveFilters && (
               <button
                 type="button"
@@ -249,7 +339,7 @@ export default function RankingTable({
         </div>
 
         {/* Filter Controls Row */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5 pt-1">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-2 pt-1">
           {/* Search Input */}
           <div className="relative">
             <Search className="w-3.5 h-3.5 text-[#79888E] absolute left-3 top-1/2 -translate-y-1/2" />
@@ -280,6 +370,24 @@ export default function RankingTable({
               <option value="HIGH">High Priority</option>
               <option value="MEDIUM">Medium Priority</option>
               <option value="LOW">Low Priority</option>
+            </select>
+          </div>
+
+          {/* Lifecycle Status Filter */}
+          <div>
+            <select
+              value={statusFilter}
+              onChange={(e) => {
+                setStatusFilter(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="w-full py-1.5 px-2.5 rounded bg-white border border-[#DFE3E1] text-xs text-[#141D20] focus:outline-none focus:border-[#114B44]"
+            >
+              <option value="ALL">All Lifecycle Statuses</option>
+              <option value="UNDER_REVIEW">Under Review</option>
+              <option value="WORK_ORDER_ISSUED">Work Order Issued</option>
+              <option value="REPAIR_CREW_DISPATCHED">Crew Dispatched</option>
+              <option value="RESOLVED">Resolved</option>
             </select>
           </div>
 
@@ -355,6 +463,7 @@ export default function RankingTable({
               <th className="py-2.5 px-3 text-right">Condition</th>
               <th className="py-2.5 px-3 text-right">Risk Score</th>
               <th className="py-2.5 px-3 text-center">Priority</th>
+              <th className="py-2.5 px-3 text-center">Lifecycle Status</th>
               <th className="py-2.5 px-3 text-center">Detections</th>
               <th className="py-2.5 px-3 text-right">Actions</th>
             </tr>
@@ -362,7 +471,7 @@ export default function RankingTable({
           <tbody className="divide-y divide-[#DFE3E1]">
             {paginatedInspections.length === 0 ? (
               <tr>
-                <td colSpan="10" className="py-12 text-center text-[#505E63]">
+                <td colSpan="11" className="py-12 text-center text-[#505E63]">
                   <div className="max-w-xs mx-auto space-y-2">
                     <AlertTriangle className="w-6 h-6 text-[#79888E] mx-auto" />
                     <p className="font-semibold text-xs text-[#141D20]">No matching inspection records found</p>
@@ -470,6 +579,21 @@ export default function RankingTable({
                       >
                         {priority}
                       </span>
+                    </td>
+
+                    {/* Lifecycle Status */}
+                    <td className="py-3 px-3 text-center">
+                      {(() => {
+                        const stKey = (item.status || 'UNDER_REVIEW').toUpperCase();
+                        const stConfig = STATUS_BADGES[stKey] || STATUS_BADGES.UNDER_REVIEW;
+                        return (
+                          <span
+                            className={`inline-block px-2 py-0.5 rounded border text-[10px] font-semibold font-mono whitespace-nowrap ${stConfig.color}`}
+                          >
+                            {stConfig.label}
+                          </span>
+                        );
+                      })()}
                     </td>
 
                     {/* Detections */}

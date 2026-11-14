@@ -272,6 +272,14 @@ export default function AuthorityDashboard({ onBackToInspect }) {
         <InspectionDetailModal
           inspection={selectedInspection}
           onClose={() => setSelectedInspection(null)}
+          onStatusUpdated={(updated) => {
+            setInspections((prev) =>
+              prev.map((i) => (i.id === updated.id ? { ...i, ...updated } : i))
+            );
+            setSelectedInspection((prev) =>
+              prev && prev.id === updated.id ? { ...prev, ...updated } : prev
+            );
+          }}
         />
       )}
 

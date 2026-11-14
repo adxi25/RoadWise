@@ -13,8 +13,12 @@ import {
   CheckCircle2,
   Maximize2,
   FileText,
+  Truck,
+  Check,
+  Send,
+  Clock,
 } from 'lucide-react';
-import { getInspectionById, getImageUrl } from '../../api/client';
+import { getInspectionById, getImageUrl, updateInspectionStatus } from '../../api/client';
 
 const PRIORITY_BADGES = {
   CRITICAL: 'bg-[#FEF2F2] border-[#FECDD3] text-[#991B1B]',
@@ -47,13 +51,21 @@ const SENSITIVITY_LABELS = {
   none: 'Standard / None',
 };
 
-export default function InspectionDetailModal({ inspection, onClose }) {
+export default function InspectionDetailModal({ inspection, onClose, onStatusUpdated }) {
   const [detail, setDetail] = useState(inspection);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [activeImageTab, setActiveImageTab] = useState('annotated'); // 'annotated' | 'original'
   const [annotatedImgError, setAnnotatedImgError] = useState(false);
   const [originalImgError, setOriginalImgError] = useState(false);
+
+  // Status & Dispatch Management State
+  const [statusVal, setStatusVal] = useState(inspection?.status || 'UNDER_REVIEW');
+  const [remarksVal, setRemarksVal] = useState(inspection?.official_remarks || '');
+  const [crewVal, setCrewVal] = useState(inspection?.assigned_crew || '');
+  const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
+  const [statusSuccessMsg, setStatusSuccessMsg] = useState(null);
+  const [statusErrorMsg, setStatusErrorMsg] = useState(null);
 
   useEffect(() => {
     if (!inspection?.id) return;
@@ -66,6 +78,9 @@ export default function InspectionDetailModal({ inspection, onClose }) {
       .then((data) => {
         if (isMounted) {
           setDetail(data);
+          if (data.status) setStatusVal(data.status);
+          if (data.official_remarks) setRemarksVal(data.official_remarks);
+          if (data.assigned_crew) setCrewVal(data.assigned_crew);
         }
       })
       .catch((err) => {
@@ -82,6 +97,46 @@ export default function InspectionDetailModal({ inspection, onClose }) {
       isMounted = false;
     };
   }, [inspection?.id]);
+
+  const handleUpdateStatus = async (e) => {
+    e.preventDefault();
+    if (!detail?.id) return;
+
+    setIsUpdatingStatus(true);
+    setStatusSuccessMsg(null);
+    setStatusErrorMsg(null);
+
+    try {
+      const updated = await updateInspectionStatus(detail.id, {
+        status: statusVal,
+        official_remarks: remarksVal,
+        assigned_crew: crewVal,
+      });
+
+      setDetail((prev) => ({
+        ...prev,
+        status: statusVal,
+        official_remarks: remarksVal,
+        assigned_crew: crewVal,
+      }));
+
+      setStatusSuccessMsg('Municipal action & crew dispatch updated successfully.');
+      if (onStatusUpdated) {
+        onStatusUpdated({
+          id: detail.id,
+          status: statusVal,
+          official_remarks: remarksVal,
+          assigned_crew: crewVal,
+        });
+      }
+      setTimeout(() => setStatusSuccessMsg(null), 4000);
+    } catch (err) {
+      console.error('Failed to update status:', err);
+      setStatusErrorMsg(err.message || 'Failed to submit status update.');
+    } finally {
+      setIsUpdatingStatus(false);
+    }
+  };
 
   // Close on ESC key
   useEffect(() => {
@@ -322,6 +377,106 @@ export default function InspectionDetailModal({ inspection, onClose }) {
               </div>
             </div>
 
+          </div>
+
+          {/* Official Municipal Action & Dispatch Panel */}
+          <div className="p-4 rounded-lg bg-[#FAF9F6] border-2 border-[#CCDCD8] space-y-3.5 shadow-2xs">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 border-b border-[#DFE3E1] pb-2">
+              <div className="flex items-center space-x-2 text-xs font-bold text-[#141D20] font-mono uppercase tracking-wider">
+                <Truck className="w-4 h-4 text-[#114B44]" />
+                <span>Official Municipal Action & Crew Dispatch</span>
+              </div>
+              <span className="text-[11px] font-mono text-[#114B44] font-semibold bg-[#EBF4F2] px-2 py-0.5 rounded border border-[#CCDCD8]">
+                Mode 2 ⇄ Mode 1 Closed Loop
+              </span>
+            </div>
+
+            <form onSubmit={handleUpdateStatus} className="space-y-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {/* Status Dropdown */}
+                <div>
+                  <label className="block text-[11px] font-semibold text-[#141D20] mb-1 font-mono uppercase tracking-wider">
+                    Inspection Lifecycle Status
+                  </label>
+                  <select
+                    value={statusVal}
+                    onChange={(e) => setStatusVal(e.target.value)}
+                    className="w-full px-3 py-2 rounded bg-white border border-[#DFE3E1] text-[#141D20] text-xs font-semibold focus-visible:ring-2 focus-visible:ring-[#114B44] cursor-pointer"
+                  >
+                    <option value="UNDER_REVIEW">UNDER REVIEW (Intake & Screening)</option>
+                    <option value="WORK_ORDER_ISSUED">WORK ORDER ISSUED (Approved for Repair)</option>
+                    <option value="REPAIR_CREW_DISPATCHED">REPAIR CREW DISPATCHED (Field Maintenance En Route)</option>
+                    <option value="RESOLVED">RESOLVED (Pavement Repaired & Verified)</option>
+                  </select>
+                </div>
+
+                {/* Assigned Crew */}
+                <div>
+                  <label className="block text-[11px] font-semibold text-[#141D20] mb-1 font-mono uppercase tracking-wider">
+                    Assigned Maintenance Unit / Contractor
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Zone 4 Quick Patch Unit - Van #12"
+                    value={crewVal}
+                    onChange={(e) => setCrewVal(e.target.value)}
+                    className="w-full px-3 py-2 rounded bg-white border border-[#DFE3E1] text-[#141D20] text-xs focus-visible:ring-2 focus-visible:ring-[#114B44] placeholder:text-[#A3B1AC]"
+                  />
+                </div>
+              </div>
+
+              {/* Official Remarks */}
+              <div>
+                <label className="block text-[11px] font-semibold text-[#141D20] mb-1 font-mono uppercase tracking-wider">
+                  Official Remarks & Public Action Notice (Visible to Citizen)
+                </label>
+                <textarea
+                  rows={2}
+                  placeholder="e.g. Work order #WO-4182 approved. Hot-mix asphalt patch scheduled for tonight's engineering shift."
+                  value={remarksVal}
+                  onChange={(e) => setRemarksVal(e.target.value)}
+                  className="w-full px-3 py-2 rounded bg-white border border-[#DFE3E1] text-[#141D20] text-xs focus-visible:ring-2 focus-visible:ring-[#114B44] placeholder:text-[#A3B1AC] resize-none"
+                />
+              </div>
+
+              {/* Feedback messages */}
+              {statusSuccessMsg && (
+                <div className="p-2.5 rounded bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs flex items-center space-x-2">
+                  <Check className="w-3.5 h-3.5 text-emerald-700 shrink-0" />
+                  <span className="font-medium">{statusSuccessMsg}</span>
+                </div>
+              )}
+              {statusErrorMsg && (
+                <div className="p-2.5 rounded bg-rose-50 border border-rose-200 text-rose-900 text-xs flex items-center space-x-2">
+                  <AlertTriangle className="w-3.5 h-3.5 text-rose-700 shrink-0" />
+                  <span className="font-medium">{statusErrorMsg}</span>
+                </div>
+              )}
+
+              {/* Action Buttons */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-1">
+                <span className="text-[11px] text-[#505E63] font-mono">
+                  Updates reflect instantly in public Mode 1 citizen tracking.
+                </span>
+                <button
+                  type="submit"
+                  disabled={isUpdatingStatus}
+                  className="px-4 py-1.5 rounded bg-[#114B44] hover:bg-[#0D3833] text-white text-xs font-semibold inline-flex items-center space-x-1.5 shadow-2xs transition-colors cursor-pointer disabled:opacity-50"
+                >
+                  {isUpdatingStatus ? (
+                    <>
+                      <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      <span>Updating...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Send className="w-3.5 h-3.5" />
+                      <span>Save Action & Dispatch</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
           </div>
 
           {/* Defect Detection Breakdown */}

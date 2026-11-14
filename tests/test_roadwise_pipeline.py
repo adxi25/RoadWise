@@ -77,3 +77,47 @@ def test_get_dashboard_stats():
     assert "total_inspections" in data
     assert "avg_condition_score" in data
 
+
+def test_status_lifecycle_and_nearby_inspections():
+    """Verify closed-loop status update and spatial proximity queries."""
+    from src.database.database import (
+        get_all_inspections,
+        update_inspection_status,
+        get_nearby_inspections,
+        get_inspection,
+    )
+
+    inspections = get_all_inspections()
+    if not inspections:
+        return
+
+    target = inspections[0]
+    target_id = target["id"]
+
+    # Test status update — returns the updated inspection dict
+    updated = update_inspection_status(
+        target_id,
+        status="WORK_ORDER_ISSUED",
+        official_remarks="Priority quick patch scheduled for tonight.",
+        assigned_crew="Test Maintenance Crew Alpha",
+    )
+    assert updated is not None
+    assert isinstance(updated, dict)
+    assert updated.get("status") == "WORK_ORDER_ISSUED"
+
+    record = get_inspection(target_id)
+    assert record["status"] == "WORK_ORDER_ISSUED"
+    assert record["assigned_crew"] == "Test Maintenance Crew Alpha"
+    assert "Priority quick patch" in record["official_remarks"]
+
+    # Test nearby spatial query if record has GPS
+    if record.get("latitude") and record.get("longitude"):
+        nearby = get_nearby_inspections(
+            latitude=record["latitude"],
+            longitude=record["longitude"],
+            radius_meters=1000.0,
+        )
+        assert isinstance(nearby, list)
+        assert any(item["id"] == target_id for item in nearby)
+
+

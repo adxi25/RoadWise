@@ -10,6 +10,7 @@ import {
   AlertTriangle,
   Play
 } from 'lucide-react';
+import MiniMapPicker from './MiniMapPicker';
 
 export default function ContextForm({
   context,
@@ -338,6 +339,30 @@ export default function ContextForm({
             </div>
           </div>
         )}
+
+        {/* Interactive Leaflet Mini-Map Pin Drop & Reverse Geocoding */}
+        <MiniMapPicker
+          latitude={context.latitude}
+          longitude={context.longitude}
+          onLocationChange={(lat, lng) => {
+            setContext(prev => ({
+              ...prev,
+              latitude: lat,
+              longitude: lng,
+              accuracy: prev.accuracy || 10,
+            }));
+            setGeoStatus('success');
+            setGeoError(null);
+          }}
+          onAddressResolved={({ city, state, area }) => {
+            setContext(prev => ({
+              ...prev,
+              city: city || prev.city,
+              state: state || prev.state,
+              area: area || prev.area,
+            }));
+          }}
+        />
 
         {/* Administrative Region Inputs (Supplementary Context Only) */}
         <div className="pt-2 border-t border-[#DFE3E1] space-y-1.5">

@@ -40,6 +40,7 @@ KEY VIVA QUESTIONS & CONCEPTS:
          transaction. If any box insertion fails, `connection.rollback()` is invoked so partial data is never committed.
 """
 
+import math
 import sqlite3
 from pathlib import Path
 
@@ -151,6 +152,18 @@ def create_tables():
         CREATE INDEX IF NOT EXISTS idx_detections_inspection
         ON detections(inspection_id)
     """)
+
+    # Safe migration: ensure closed-loop municipal workflow columns exist
+    for col_name, col_type in [
+        ("status", "TEXT DEFAULT 'UNDER_REVIEW'"),
+        ("official_remarks", "TEXT"),
+        ("assigned_crew", "TEXT"),
+        ("updated_at", "TIMESTAMP"),
+    ]:
+        try:
+            cursor.execute(f"ALTER TABLE inspections ADD COLUMN {col_name} {col_type}")
+        except sqlite3.OperationalError:
+            pass  # Column already exists
 
     connection.commit()
     connection.close()
@@ -315,7 +328,11 @@ def get_inspection(inspection_id):
                 priority,
                 recommendation,
                 pdf_path,
-                created_at
+                created_at,
+                status,
+                official_remarks,
+                assigned_crew,
+                updated_at
             FROM inspections
             WHERE id = ? OR report_id = ?
         """, (numeric_id, str(inspection_id)))
@@ -339,7 +356,11 @@ def get_inspection(inspection_id):
                 priority,
                 recommendation,
                 pdf_path,
-                created_at
+                created_at,
+                status,
+                official_remarks,
+                assigned_crew,
+                updated_at
             FROM inspections
             WHERE report_id = ?
         """, (str(inspection_id),))
@@ -370,7 +391,11 @@ def get_inspection(inspection_id):
         "priority",
         "recommendation",
         "pdf_path",
-        "created_at"
+        "created_at",
+        "status",
+        "official_remarks",
+        "assigned_crew",
+        "updated_at",
     ]
 
     inspection = dict(zip(inspection_columns, inspection_row))
@@ -454,6 +479,10 @@ def get_all_inspections():
             i.recommendation,
             i.pdf_path,
             i.created_at,
+            i.status,
+            i.official_remarks,
+            i.assigned_crew,
+            i.updated_at,
             COUNT(d.id) AS detection_count
         FROM inspections i
         LEFT JOIN detections d ON i.id = d.inspection_id
@@ -482,6 +511,10 @@ def get_all_inspections():
         "recommendation",
         "pdf_path",
         "created_at",
+        "status",
+        "official_remarks",
+        "assigned_crew",
+        "updated_at",
         "detection_count"
     ]
 
@@ -552,6 +585,102 @@ def get_inspection_stats():
         "avg_risk_score": round(row[6], 2) if row[6] is not None else 0.0,
         "valid_gps_count": row[7] or 0,
     }
+
+
+def update_inspection_status(inspection_id, status, official_remarks=None, assigned_crew=None):
+    """
+    Update the closed-loop municipal action status and official remarks for a road inspection.
+    Supports lookup by autoincrement integer ID or public report_id string.
+
+    Returns the updated inspection dict or None if not found.
+    """
+    connection = get_connection()
+    cursor = connection.cursor()
+
+    is_numeric = False
+    numeric_id = None
+    try:
+        numeric_id = int(inspection_id)
+        is_numeric = True
+    except (ValueError, TypeError):
+        pass
+
+    where_clause = "WHERE id = ? OR report_id = ?" if is_numeric else "WHERE report_id = ?"
+    params = (status, official_remarks, assigned_crew, numeric_id, str(inspection_id)) if is_numeric else (status, official_remarks, assigned_crew, str(inspection_id))
+
+    cursor.execute(f"""
+        UPDATE inspections
+        SET status = ?,
+            official_remarks = ?,
+            assigned_crew = ?,
+            updated_at = CURRENT_TIMESTAMP
+        {where_clause}
+    """, params)
+
+    connection.commit()
+    connection.close()
+
+    return get_inspection(inspection_id)
+
+
+def get_nearby_inspections(latitude, longitude, radius_meters=150.0, exclude_id=None):
+    """
+    Find nearby road defect inspections within `radius_meters` using the Haversine formula.
+    Used for corridor defect density detection in Mode 1 and Mode 2.
+    """
+    if latitude is None or longitude is None:
+        return []
+
+    connection = get_connection()
+    cursor = connection.cursor()
+
+    cursor.execute("""
+        SELECT
+            id, report_id, latitude, longitude, road_type, priority, condition_score, created_at, status
+        FROM inspections
+        WHERE latitude IS NOT NULL AND longitude IS NOT NULL
+    """)
+    rows = cursor.fetchall()
+    connection.close()
+
+    nearby = []
+    r_earth = 6371000.0  # Earth radius in meters
+    lat1_rad = math.radians(float(latitude))
+    lon1_rad = math.radians(float(longitude))
+
+    for row in rows:
+        row_id, rep_id, r_lat, r_lon, r_type, r_pri, r_cond, r_time, r_stat = row
+        if exclude_id and (str(row_id) == str(exclude_id) or str(rep_id) == str(exclude_id)):
+            continue
+        try:
+            lat2_rad = math.radians(float(r_lat))
+            lon2_rad = math.radians(float(r_lon))
+            dlat = lat2_rad - lat1_rad
+            dlon = lon2_rad - lon1_rad
+
+            a = math.sin(dlat / 2)**2 + math.cos(lat1_rad) * math.cos(lat2_rad) * math.sin(dlon / 2)**2
+            c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+            dist = r_earth * c
+
+            if dist <= radius_meters:
+                nearby.append({
+                    "id": row_id,
+                    "report_id": rep_id,
+                    "latitude": r_lat,
+                    "longitude": r_lon,
+                    "distance_meters": round(dist, 1),
+                    "road_type": r_type,
+                    "priority": r_pri,
+                    "condition_score": r_cond,
+                    "status": r_stat or "UNDER_REVIEW",
+                    "created_at": r_time,
+                })
+        except Exception:
+            continue
+
+    # Sort closest first
+    nearby.sort(key=lambda x: x["distance_meters"])
+    return nearby
 
 
 if __name__ == "__main__":

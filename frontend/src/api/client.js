@@ -9,17 +9,14 @@
  *   deserializes JSON responses, and normalizes server-side file paths into web URLs.
  *
  * BACKEND ENDPOINTS CONSUMED:
- *   - GET  /api/health              -> checkHealth()
- *   - POST /api/inspections/inspect -> inspectRoad(formData)
- *   - GET  /api/inspections         -> getInspections(filters)
- *   - GET  /api/inspections/{id}    -> getInspectionById(id)
- *   - GET  /api/dashboard/stats     -> getDashboardStats()
- *
- * STATIC ASSET NORMALIZATION (Viva Key Point):
- *   The backend stores images on disk under `data/uploads/` and `results/predictions/`.
- *   Because browsers cannot load local filesystem paths (`file://` or `C:\...`),
- *   `getImageUrl()` converts Windows/POSIX disk paths into valid HTTP URLs accessible
- *   via FastAPI's StaticFiles mount points (`http://127.0.0.1:8000/data/uploads/...`).
+ *   - GET   /api/health                  -> checkHealth()
+ *   - POST  /api/inspections/inspect     -> inspectRoad(formData)
+ *   - GET   /api/inspections             -> getInspections(filters)
+ *   - GET   /api/inspections/{id}        -> getInspectionById(id)
+ *   - PATCH /api/inspections/{id}/status -> updateInspectionStatus(id, payload)
+ *   - GET   /api/inspections/nearby      -> getNearbyInspections(lat, lon, radius)
+ *   - GET   /api/dashboard/stats         -> getDashboardStats()
+ *   - GET   /api/reports/track/{id}      -> trackReport(trackingId)
  */
 
 const API_BASE_URL = (
@@ -28,12 +25,6 @@ const API_BASE_URL = (
 
 /**
  * Resolve image paths into absolute backend static URLs.
- * Correctly handles:
- * - absolute Windows paths (e.g. C:\...\data\uploads\...)
- * - relative data/uploads paths
- * - relative results/predictions paths
- * - already valid http/https URLs
- * - filenames
  */
 export function getImageUrl(pathStr) {
   if (!pathStr) return '';
@@ -42,7 +33,6 @@ export function getImageUrl(pathStr) {
   const trimmed = pathStr.trim();
   if (!trimmed) return '';
 
-  // If already a valid absolute URL, data URI, or blob URL, return directly
   if (
     trimmed.startsWith('http://') ||
     trimmed.startsWith('https://') ||
@@ -52,10 +42,8 @@ export function getImageUrl(pathStr) {
     return trimmed;
   }
 
-  // Normalize all Windows backslashes to forward slashes
   const normalized = trimmed.replace(/\\/g, '/');
 
-  // If path contains data/uploads or results/predictions (Windows or POSIX paths)
   if (normalized.includes('data/uploads/')) {
     const filename = normalized.split('data/uploads/').pop().replace(/^\/+/, '');
     return `${API_BASE_URL}/data/uploads/${filename}`;
@@ -66,7 +54,6 @@ export function getImageUrl(pathStr) {
     return `${API_BASE_URL}/results/predictions/${filename}`;
   }
 
-  // Also handle paths like uploads/filename or predictions/filename
   if (normalized.includes('uploads/')) {
     const filename = normalized.split('uploads/').pop().replace(/^\/+/, '');
     return `${API_BASE_URL}/data/uploads/${filename}`;
@@ -77,11 +64,9 @@ export function getImageUrl(pathStr) {
     return `${API_BASE_URL}/results/predictions/${filename}`;
   }
 
-  // Extract filename from any remaining absolute (e.g. C:/path/file.jpg) or relative path
   const filename = normalized.split('/').pop().replace(/^\/+/, '');
   if (!filename) return '';
 
-  // Annotated files belong in results/predictions, original uploads belong in data/uploads
   if (filename.includes('_annotated')) {
     return `${API_BASE_URL}/results/predictions/${filename}`;
   }
@@ -176,6 +161,54 @@ export async function getInspectionById(id) {
 }
 
 /**
+ * Update inspection status, assigned crew, and official remarks (Mode 2 Authority Action).
+ */
+export async function updateInspectionStatus(inspectionId, { status, official_remarks, assigned_crew }) {
+  const res = await fetch(`${API_BASE_URL}/api/inspections/${inspectionId}/status`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    },
+    body: JSON.stringify({
+      status,
+      official_remarks: official_remarks || null,
+      assigned_crew: assigned_crew || null,
+    }),
+  });
+
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}));
+    throw new Error(errorData.detail || `Failed to update inspection status: ${res.statusText}`);
+  }
+
+  return await res.json();
+}
+
+/**
+ * Query existing road defect inspections on the same corridor within `radiusMeters`.
+ */
+export async function getNearbyInspections(latitude, longitude, radiusMeters = 150) {
+  if (latitude == null || longitude == null) return [];
+  const params = new URLSearchParams({
+    latitude: String(latitude),
+    longitude: String(longitude),
+    radius_meters: String(radiusMeters),
+  });
+
+  const res = await fetch(`${API_BASE_URL}/api/inspections/nearby?${params.toString()}`, {
+    method: 'GET',
+    headers: { 'Accept': 'application/json' },
+  });
+
+  if (!res.ok) {
+    return [];
+  }
+
+  return await res.json();
+}
+
+/**
  * Fetch aggregate metrics for Mode 2 Authority Dashboard.
  */
 export async function getDashboardStats() {
@@ -216,4 +249,3 @@ export async function trackReport(trackingId) {
 
   return await res.json();
 }
-

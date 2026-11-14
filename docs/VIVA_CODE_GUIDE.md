@@ -1,7 +1,7 @@
 # RoadWise — Comprehensive Faculty Viva & Technical Code Guide
 **Target Audience:** Final Year B.Tech CSE Project Evaluation / Technical Viva  
 **Project Name:** RoadWise (Autonomous Road Distress Detection, Condition Telemetry & Maintenance Prioritization)  
-**Last Updated:** 2026-11-11  
+**Last Updated:** 2026-11-15  
 
 ---
 
@@ -320,3 +320,63 @@ When faculty say: *"Open the file where you do X and explain it line by line"*, 
    - Test an image in Mode 1 and show the inspection appear in the Mode 2 Dashboard.
 4. **Refer to the Documentation:** Mention that full mathematical derivations and system schemas are codified in `docs/SCORING_METHODOLOGY.md` and `docs/SYSTEM_ARCHITECTURE.md`.
 
+
+---
+
+### Q24: "If two citizens upload photos of the same pothole — or potholes 50 metres apart — what happens? Do you get duplicate entries?"
+
+**Answer:** RoadWise uses a **Corridor Defect Telemetry model** — explicitly *not* a spatial deduplication or merging model. Here is the exact engineering reasoning:
+
+1. **Every Report is Independently Registered (No Merging):**
+   - Each submission that passes GPS validation and YOLOv8 inference is assigned a unique, immutable `RW-...` Complaint ID and stored with its own condition score, risk score, annotated image, and detection set.
+   - Even if two inspections are photographed 20 metres apart, they remain **distinct database rows** — they may represent genuinely different defects taken at different timestamps with different lighting/angles producing different detection telemetry.
+
+2. **Spatial Proximity is Used as Context, Not Deduplication:**
+   - The backend exposes `GET /api/inspections/nearby` powered by the **Haversine formula** (`R = 6,371,000 m`) to query all inspections within a configurable radius (default: 150 m).
+   - In Mode 1's report form, an interactive Leaflet mini-map shows existing nearby defects when a citizen pins a location, displaying a **Corridor Density Alert** ("2 defects logged within 150m along this road corridor — your report is filed independently").
+   - In Mode 2, the `RankingTable` shows a **Lifecycle Status** badge per inspection, letting authorities see multiple independent reports on the same stretch and prioritize the entire corridor together.
+
+3. **Why This is Correct Civil Engineering Practice:**
+   - India's PWD/NHAI road repair scheduling is corridor-based (100m–300m sections). Two potholes 50m apart are both legitimate work order items — merging them would suppress valid telemetry.
+   - Multiple citizen reports on the same stretch *increase* aggregate corridor urgency, which is exactly the intended behavior for a civic grievance telemetry system.
+
+4. **Code Reference:** `src/database/database.py` → `get_nearby_inspections()` using Haversine distance; `frontend/src/components/MiniMapPicker.jsx` → `checkCorridorDensity()`.
+
+---
+
+### Q25: "How does the Closed-Loop Municipal Action Workflow operate between Mode 1 and Mode 2?"
+
+**Answer:** RoadWise implements a full **closed-loop civic feedback cycle** connecting citizen reports to authority dispatch in real time:
+
+**Step 1 — Citizen Reports (Mode 1 → Database):**
+- Citizen submits image via `POST /api/inspections/inspect` → pipeline runs YOLOv8 → assigns `RW-...` ID.
+- Record stored in SQLite with `status = 'UNDER_REVIEW'` by default.
+
+**Step 2 — Authority Acts (Mode 2):**
+- `RankingTable` loads all inspections ordered by `risk_score DESC`.
+- Authority clicks a row → `InspectionDetailModal` opens → **Official Municipal Action & Crew Dispatch Panel** appears.
+- Authority selects one of 4 lifecycle states:
+
+  | Status | Meaning |
+  |---|---|
+  | `UNDER_REVIEW` | Intake & screening by PWD officer |
+  | `WORK_ORDER_ISSUED` | Tender approved, funds allocated |
+  | `REPAIR_CREW_DISPATCHED` | Field crew en route |
+  | `RESOLVED` | Pavement restored and verified |
+
+- Authority enters crew/contractor name and official public remarks → **"Save Action & Dispatch"** → `PATCH /api/inspections/{id}/status` → SQLite `UPDATE` writes `status`, `official_remarks`, `assigned_crew`, `updated_at`.
+
+**Step 3 — Citizen Sees Update Immediately (Mode 1):**
+- Citizen enters `RW-...` ID in Track Report → `GET /api/reports/track/{tracking_id}` reads updated `status`.
+- **5-stage Civic Action Progress Workflow stepper** jumps to the correct stage with pulse animation.
+- An **Official Municipal Action Card** shows verbatim official remarks and assigned crew name.
+
+**Step 4 — Physical Evidence & Export:**
+- **Print Acknowledgement Slip** → government-formatted physical/PDF receipt via `@media print` CSS isolation containing Complaint ID, GPS, condition/risk scores, status, remarks, digital stamp.
+- **Export CSV** → `RankingTable` downloads `roadwise_priority_triage_queue_<date>.csv` for field contractor briefing.
+
+**Code References:**
+- `api/main.py` → `PATCH /api/inspections/{id}/status`, `GET /api/reports/track/{tracking_id}`
+- `src/database/database.py` → `update_inspection_status()`, `get_inspection()`
+- `InspectionDetailModal.jsx` → `handleUpdateStatus()` | `RankingTable.jsx` → `handleExportCSV()`
+- `TrackReport.jsx` → 5-stage stepper, Official Remarks card, Print Acknowledgement Slip
