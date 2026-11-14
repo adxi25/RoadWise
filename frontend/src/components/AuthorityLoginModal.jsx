@@ -32,7 +32,7 @@ export default function AuthorityLoginModal({ isOpen, onClose, onLogin }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fadeIn">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fadeIn">
       <div 
         className="w-full max-w-md bg-white rounded-2xl shadow-2xl border border-[#DFE3E1] overflow-hidden"
         role="dialog"

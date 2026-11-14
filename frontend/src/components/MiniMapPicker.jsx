@@ -98,7 +98,8 @@ export default function MiniMapPicker({
     try {
       setCorridorLoading(true);
       const res = await getNearbyInspections(lat, lng, 150.0);
-      setNearbyDefects(res?.nearby || []);
+      const list = Array.isArray(res) ? res : (res?.nearby || []);
+      setNearbyDefects(list);
     } catch (err) {
       console.warn('Failed to query corridor density:', err);
       setNearbyDefects([]);
@@ -211,20 +212,22 @@ export default function MiniMapPicker({
 
   // Synchronize pin position when parent coordinates change (e.g. from browser GPS button)
   useEffect(() => {
-    if (!mapInstanceRef.current || !markerRef.current) return;
     if (latitude === null || longitude === null) return;
 
     const lat = Number(latitude);
     const lng = Number(longitude);
     if (isNaN(lat) || isNaN(lng)) return;
 
-    const currentPos = markerRef.current.getLatLng();
-    const dist = Math.abs(currentPos.lat - lat) + Math.abs(currentPos.lng - lng);
-    if (dist > 0.00005) {
-      markerRef.current.setLatLng([lat, lng]);
-      mapInstanceRef.current.flyTo([lat, lng], 16, { animate: true, duration: 0.8 });
-      checkCorridorDensity(lat, lng);
+    if (markerRef.current && mapInstanceRef.current) {
+      const currentPos = markerRef.current.getLatLng();
+      const dist = Math.abs(currentPos.lat - lat) + Math.abs(currentPos.lng - lng);
+      if (dist > 0.00002) {
+        markerRef.current.setLatLng([lat, lng]);
+        mapInstanceRef.current.flyTo([lat, lng], 16, { animate: true, duration: 0.6 });
+      }
     }
+
+    checkCorridorDensity(lat, lng);
   }, [latitude, longitude, checkCorridorDensity]);
 
   return (
@@ -247,8 +250,8 @@ export default function MiniMapPicker({
         </span>
       </div>
 
-      {/* Leaflet Map Frame */}
-      <div className="relative rounded-lg overflow-hidden border border-[#CCDCD8] shadow-2xs h-48 bg-[#EAE7E1]">
+      {/* Leaflet Map Frame (isolated stacking context to prevent poking through modals) */}
+      <div className="relative rounded-lg overflow-hidden border border-[#CCDCD8] shadow-2xs h-48 bg-[#EAE7E1] isolate z-0">
         <div ref={mapContainerRef} className="w-full h-full" />
       </div>
 

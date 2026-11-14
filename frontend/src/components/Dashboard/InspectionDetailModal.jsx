@@ -181,7 +181,7 @@ export default function InspectionDetailModal({ inspection, onClose, onStatusUpd
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-black/50 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5">
+    <div className="fixed inset-0 z-[9999] overflow-y-auto bg-black/50 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5">
       <div
         className="relative bg-white w-full max-w-4xl rounded-lg border border-[#DFE3E1] shadow-xl overflow-hidden flex flex-col max-h-[92vh] animate-in fade-in zoom-in-95 duration-150"
         onClick={(e) => e.stopPropagation()}

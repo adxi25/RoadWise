@@ -459,101 +459,114 @@ export default function TrackReport({ onBackToHome, onStartInspection, initialCo
                 </button>
               </div>
             </div>
-
-            {/* Dedicated Printable Government Acknowledgement Slip (Rendered on print) */}
-            <div id="roadwise-printable-slip" className="hidden print:block p-8 bg-white text-black font-sans">
-              <div className="border-2 border-black p-6 space-y-4">
-                {/* Gov / Civic Header */}
-                <div className="border-b-2 border-black pb-3 text-center space-y-1">
-                  <div className="text-[11px] font-bold tracking-widest uppercase font-mono">
-                    PUBLIC WORKS & HIGHWAYS INFRASTRUCTURE DEPARTMENT
-                  </div>
-                  <div className="text-lg font-black uppercase tracking-tight">
-                    ROAD DAMAGE COMPLAINT ACKNOWLEDGEMENT SLIP
-                  </div>
-                  <div className="text-[10px] font-mono text-gray-700">
-                    RoadWise AI Pavement Quality Monitoring & Maintenance Dispatch Network
-                  </div>
-                </div>
-
-                {/* Grievance Telemetry Grid */}
-                <div className="grid grid-cols-2 gap-4 text-xs font-mono border-b border-black pb-3">
-                  <div>
-                    <span className="text-gray-600 block text-[10px]">COMPLAINT TRACKING ID</span>
-                    <strong className="text-sm font-black">{result.report_id}</strong>
-                  </div>
-                  <div>
-                    <span className="text-gray-600 block text-[10px]">FILING DATE & TIME</span>
-                    <strong>{result.created_at ? new Date(result.created_at).toLocaleString() : 'N/A'}</strong>
-                  </div>
-                  <div>
-                    <span className="text-gray-600 block text-[10px]">MAINTENANCE PRIORITY</span>
-                    <strong className="text-sm uppercase">{result.priority || 'STANDARD'}</strong>
-                  </div>
-                  <div>
-                    <span className="text-gray-600 block text-[10px]">LIFECYCLE STATUS</span>
-                    <strong className="text-sm uppercase">{result.tracking_status?.status_label || result.status || 'RECORDED'}</strong>
-                  </div>
-                </div>
-
-                {/* Technical Pavement Telemetry */}
-                <div className="space-y-1 text-xs font-mono border-b border-black pb-3">
-                  <div className="text-[10px] font-bold text-gray-600 uppercase">SURFACE CONDITION TELEMETRY</div>
-                  <div className="grid grid-cols-3 gap-2">
-                    <div>Condition: <strong>{Number(result.condition_score).toFixed(1)}/100</strong></div>
-                    <div>Risk Score: <strong>{Number(result.risk_score).toFixed(1)}/100</strong></div>
-                    <div>Defects Detected: <strong>{result.detections?.length || 0}</strong></div>
-                  </div>
-                  <div className="pt-1">
-                    GPS Coordinates: <strong>{result.latitude ? `${Number(result.latitude).toFixed(6)}° N, ${Number(result.longitude).toFixed(6)}° E` : 'Coordinates Recorded'}</strong>
-                  </div>
-                  <div>
-                    Road Class: <strong>{result.road_type?.replace(/_/g, ' ').toUpperCase() || 'MAIN ROAD'}</strong> | Traffic: <strong>{result.traffic_level?.toUpperCase() || 'HIGH'}</strong>
-                  </div>
-                  {(result.area || result.city) && (
-                    <div>Location: <strong>{[result.area, result.city, result.state].filter(Boolean).join(', ')}</strong></div>
-                  )}
-                </div>
-
-                {/* Official Remarks & Crew */}
-                <div className="text-xs font-mono space-y-1 border-b border-black pb-3">
-                  <div className="text-[10px] font-bold text-gray-600 uppercase">OFFICIAL MUNICIPAL DISPATCH NOTES</div>
-                  <div>Assigned Contractor / Crew: <strong>{result.assigned_crew || 'Civil Engineering Operations Unit'}</strong></div>
-                  <div>Remarks: <em>{result.official_remarks || result.recommendation || 'Grievance registered for field pavement restoration.'}</em></div>
-                </div>
-
-                {/* Footer Notice */}
-                <div className="flex justify-between items-end text-[9px] font-mono text-gray-600 pt-1">
-                  <div>
-                    <p>• Computer-generated acknowledgement under automated road distress telemetry.</p>
-                    <p>• Citizens may track live updates at any time using Complaint ID: {result.report_id}.</p>
-                  </div>
-                  <div className="text-right">
-                    <span className="border border-black px-2 py-1 font-bold">DIGITALLY VERIFIED</span>
-                  </div>
-                </div>
-              </div>
-            </div>
           </section>
         )}
 
       </main>
 
+      {/* Dedicated Printable Government Acknowledgement Slip (Rendered strictly on print) */}
+      {result && (
+        <div id="roadwise-printable-slip" className="hidden print:block bg-white text-black font-sans">
+          <div className="border-2 border-black p-6 space-y-3.5">
+            {/* Gov / Civic Header */}
+            <div className="border-b-2 border-black pb-2.5 text-center space-y-0.5">
+              <div className="text-[11px] font-bold tracking-widest uppercase font-mono">
+                PUBLIC WORKS & HIGHWAYS INFRASTRUCTURE DEPARTMENT
+              </div>
+              <div className="text-lg font-black uppercase tracking-tight">
+                ROAD DAMAGE COMPLAINT ACKNOWLEDGEMENT SLIP
+              </div>
+              <div className="text-[10px] font-mono text-gray-700">
+                RoadWise AI Pavement Quality Monitoring & Maintenance Dispatch Network
+              </div>
+            </div>
+
+            {/* Grievance Telemetry Grid */}
+            <div className="grid grid-cols-2 gap-3 text-xs font-mono border-b border-black pb-2.5">
+              <div>
+                <span className="text-gray-600 block text-[10px]">COMPLAINT TRACKING ID</span>
+                <strong className="text-sm font-black">{result.report_id}</strong>
+              </div>
+              <div>
+                <span className="text-gray-600 block text-[10px]">FILING DATE & TIME</span>
+                <strong>{result.created_at ? new Date(result.created_at).toLocaleString() : 'N/A'}</strong>
+              </div>
+              <div>
+                <span className="text-gray-600 block text-[10px]">MAINTENANCE PRIORITY</span>
+                <strong className="text-sm uppercase">{result.priority || 'STANDARD'}</strong>
+              </div>
+              <div>
+                <span className="text-gray-600 block text-[10px]">LIFECYCLE STATUS</span>
+                <strong className="text-sm uppercase">{result.tracking_status?.status_label || result.status || 'RECORDED'}</strong>
+              </div>
+            </div>
+
+            {/* Technical Pavement Telemetry */}
+            <div className="space-y-1 text-xs font-mono border-b border-black pb-2.5">
+              <div className="text-[10px] font-bold text-gray-600 uppercase">SURFACE CONDITION TELEMETRY</div>
+              <div className="grid grid-cols-3 gap-2">
+                <div>Condition: <strong>{Number(result.condition_score).toFixed(1)}/100</strong></div>
+                <div>Risk Score: <strong>{Number(result.risk_score).toFixed(1)}/100</strong></div>
+                <div>Defects Detected: <strong>{result.detections?.length || 0}</strong></div>
+              </div>
+              <div className="pt-0.5">
+                GPS Coordinates: <strong>{result.latitude ? `${Number(result.latitude).toFixed(6)}° N, ${Number(result.longitude).toFixed(6)}° E` : 'Coordinates Recorded'}</strong>
+              </div>
+              <div>
+                Road Class: <strong>{result.road_type?.replace(/_/g, ' ').toUpperCase() || 'MAIN ROAD'}</strong> | Traffic: <strong>{result.traffic_level?.toUpperCase() || 'HIGH'}</strong>
+              </div>
+              {(result.area || result.city) && (
+                <div>Location: <strong>{[result.area, result.city, result.state].filter(Boolean).join(', ')}</strong></div>
+              )}
+            </div>
+
+            {/* Official Remarks & Crew */}
+            <div className="text-xs font-mono space-y-1 border-b border-black pb-2.5">
+              <div className="text-[10px] font-bold text-gray-600 uppercase">OFFICIAL MUNICIPAL DISPATCH NOTES</div>
+              <div>Assigned Contractor / Crew: <strong>{result.assigned_crew || 'Civil Engineering Operations Unit'}</strong></div>
+              <div>Remarks: <em>{result.official_remarks || result.recommendation || 'Grievance registered for field pavement restoration.'}</em></div>
+            </div>
+
+            {/* Footer Notice */}
+            <div className="flex justify-between items-end text-[9px] font-mono text-gray-600 pt-0.5">
+              <div>
+                <p>• Computer-generated acknowledgement under automated road distress telemetry.</p>
+                <p>• Citizens may track live updates at any time using Complaint ID: {result.report_id}.</p>
+              </div>
+              <div className="text-right">
+                <span className="border border-black px-2 py-0.5 font-bold">DIGITALLY VERIFIED</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <style>{`
         @media print {
-          body * {
-            visibility: hidden;
+          @page {
+            size: A4 portrait;
+            margin: 10mm;
           }
-          #roadwise-printable-slip, #roadwise-printable-slip * {
-            visibility: visible;
+          html, body {
+            background: white !important;
+            height: auto !important;
+            min-height: auto !important;
+          }
+          header, main, button {
+            display: none !important;
           }
           #roadwise-printable-slip {
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 100%;
-            margin: 0;
-            padding: 20px;
+            display: block !important;
+            visibility: visible !important;
+            position: static !important;
+            width: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            page-break-after: avoid !important;
+            break-after: avoid !important;
+          }
+          #roadwise-printable-slip * {
+            visibility: visible !important;
           }
         }
       `}</style>
