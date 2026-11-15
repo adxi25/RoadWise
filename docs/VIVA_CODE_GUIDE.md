@@ -403,17 +403,23 @@ When faculty say: *"Open the file where you do X and explain it line by line"*, 
 
 ---
 
-### Q27: "Why did you add an Interactive Draggable Mini-Map in Mode 1 instead of relying only on device GPS? How does this help during college viva evaluation?"
+### Q27: "Why did you add an Interactive Draggable Mini-Map in Mode 1? What are its 3 Core Pillars?"
 
-**Answer:** The interactive Leaflet mini-map pin drop solves two critical real-world problems and is essential for academic evaluation:
+**Answer:** The interactive Leaflet mini-map (`MiniMapPicker.jsx`) is engineered around **Three Core Architectural Pillars**:
 
-1. **The College Viva Evaluation Problem:**
-   - If the system only used live browser GPS, an evaluator or student testing multiple different road damage photos from the **same classroom or desk** would have all reports forced onto the exact same indoor coordinates.
-   - The draggable pin allows the demonstrator to micro-position pins 50m–100m apart along a simulated road stretch, demonstrating how distinct defects along a corridor behave without leaving the room.
-2. **Real-World Carriageway Positioning:**
-   - In real life, citizens photograph road distress from the safety of a sidewalk, pedestrian footpath, or vehicle shoulder. Device GPS records where the *person was standing*, not where the *pothole is on the carriageway*. The draggable pin allows citizens to fine-tune the pin to the exact lane defect.
-3. **Automated Reverse-Geocoding:**
-   - Moving the pin invokes OpenStreetMap Nominatim reverse-geocoding (debounced at 500ms), automatically populating **City, State, and Area/Ward** without requiring tedious manual typing on mobile screens.
+1. **Pillar 1 — Location Correctness & Carriageway Micro-Positioning:**
+   - Standard device GPS only records where the citizen is *standing* (typically on a pedestrian footpath, roadside shop, or vehicle shoulder), which can be 15–30 metres off the actual pavement defect.
+   - The draggable pin allows citizens to micro-position the crosshair precisely over the damaged lane.
+   - Moving the pin automatically calls OpenStreetMap Nominatim reverse-geocoding (debounced at 500ms) to auto-fill **City, State, and Area/Ward** without manual typing.
+
+2. **Pillar 2 — Corridor Defect Telemetry & Citizen Consensus (*"Kitne log same road stretch par bol rahe hain"*):**
+   - The moment the pin moves, the mini-map executes a Haversine proximity query (`/api/inspections/nearby`) across a 150-metre radius.
+   - It reveals **real-time corridor density**: telling the citizen and authority how many prior complaints exist along this identical road corridor, converting isolated complaints into **collective road corridor priority telemetry**.
+
+3. **Pillar 3 — Anti-Spoofing 1.0 km Geofenced Safezone Boundary:**
+   - Once the citizen clicks *"Use My Current Location"*, the system locks a **1.0 km Geofence Safezone Circle** around their device's verified hardware GPS.
+   - Citizens have full freedom to micro-adjust their pin along their local road stretch, but if anyone tries to drop a pin beyond 1,000 metres (e.g., in an unexpected neighborhood or another city), the mathematical clamping vector restricts the marker to the 1.0 km perimeter.
+   - **Evaluator Bonus:** When testing in a classroom without device GPS, the map permits full unconstrained pin placement so students can demonstrate distinct simulated road corridors from a single desk.
 
 ---
 
