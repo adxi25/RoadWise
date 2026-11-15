@@ -97,6 +97,12 @@ export default function MiniMapPicker({
   const mapInstanceRef = useRef(null);
   const markerRef = useRef(null);
   const geofenceCircleRef = useRef(null);
+  const deviceGpsOriginRef = useRef(deviceGpsOrigin);
+
+  // Keep live ref updated to prevent stale closures in Leaflet event listeners
+  useEffect(() => {
+    deviceGpsOriginRef.current = deviceGpsOrigin;
+  }, [deviceGpsOrigin]);
 
   // Default fallback coordinates (Bengaluru central coordinates)
   const defaultLat = 12.9716;
@@ -110,6 +116,34 @@ export default function MiniMapPicker({
   const [corridorLoading, setCorridorLoading] = useState(false);
   const [geofenceInfo, setGeofenceInfo] = useState(null);
   const debounceTimerRef = useRef(null);
+
+  // Clamping helper: guarantees pin strictly stays inside GEOFENCE_RADIUS_METERS from origin
+  const clampToGeofence = useCallback((lat, lng) => {
+    const origin = deviceGpsOriginRef.current;
+    if (!origin || origin.lat === null || origin.lng === null || isNaN(Number(origin.lat)) || isNaN(Number(origin.lng))) {
+      return { lat, lng, clamped: false, distanceMeters: 0 };
+    }
+
+    const dist = getHaversineDistanceMeters(origin.lat, origin.lng, lat, lng);
+    if (dist > GEOFENCE_RADIUS_METERS) {
+      const ratio = GEOFENCE_RADIUS_METERS / dist;
+      const clampedLat = parseFloat((origin.lat + (lat - origin.lat) * ratio).toFixed(6));
+      const clampedLng = parseFloat((origin.lng + (lng - origin.lng) * ratio).toFixed(6));
+      return {
+        lat: clampedLat,
+        lng: clampedLng,
+        clamped: true,
+        distanceMeters: GEOFENCE_RADIUS_METERS,
+      };
+    }
+
+    return {
+      lat,
+      lng,
+      clamped: false,
+      distanceMeters: Math.round(dist),
+    };
+  }, []);
 
   // Check nearby corridor defects
   const checkCorridorDensity = useCallback(async (lat, lng) => {
@@ -157,41 +191,22 @@ export default function MiniMapPicker({
 
   // Unified position update handler with geofence protection
   const handlePositionUpdate = useCallback((newLat, newLng) => {
-    let lat = parseFloat(Number(newLat).toFixed(6));
-    let lng = parseFloat(Number(newLng).toFixed(6));
+    const check = clampToGeofence(newLat, newLng);
+    const lat = check.lat;
+    const lng = check.lng;
 
-    // Geofence enforcement: If device origin is active, constrain to 1.0 km radius
-    if (deviceGpsOrigin && deviceGpsOrigin.lat && deviceGpsOrigin.lng) {
-      const dist = getHaversineDistanceMeters(
-        deviceGpsOrigin.lat,
-        deviceGpsOrigin.lng,
-        lat,
-        lng
-      );
-
-      if (dist > GEOFENCE_RADIUS_METERS) {
-        // Clamping along the vector from device origin to target point
-        const ratio = GEOFENCE_RADIUS_METERS / dist;
-        lat = parseFloat((deviceGpsOrigin.lat + (lat - deviceGpsOrigin.lat) * ratio).toFixed(6));
-        lng = parseFloat((deviceGpsOrigin.lng + (lng - deviceGpsOrigin.lng) * ratio).toFixed(6));
-
-        if (markerRef.current) {
-          markerRef.current.setLatLng([lat, lng]);
-        }
-        setGeofenceInfo({
-          active: true,
-          clamped: true,
-          distanceMeters: GEOFENCE_RADIUS_METERS,
-        });
-      } else {
-        setGeofenceInfo({
-          active: true,
-          clamped: false,
-          distanceMeters: Math.round(dist),
-        });
-      }
+    if (deviceGpsOriginRef.current) {
+      setGeofenceInfo({
+        active: true,
+        clamped: check.clamped,
+        distanceMeters: check.distanceMeters,
+      });
     } else {
       setGeofenceInfo(null);
+    }
+
+    if (markerRef.current) {
+      markerRef.current.setLatLng([lat, lng]);
     }
 
     if (onLocationChange) {
@@ -206,7 +221,12 @@ export default function MiniMapPicker({
       checkCorridorDensity(lat, lng);
       reverseGeocode(lat, lng);
     }, 500);
-  }, [deviceGpsOrigin, onLocationChange, checkCorridorDensity, reverseGeocode]);
+  }, [clampToGeofence, onLocationChange, checkCorridorDensity, reverseGeocode]);
+
+  const handlePositionUpdateRef = useRef(handlePositionUpdate);
+  useEffect(() => {
+    handlePositionUpdateRef.current = handlePositionUpdate;
+  });
 
   // Initialize Leaflet map
   useEffect(() => {
@@ -236,14 +256,24 @@ export default function MiniMapPicker({
       offset: [0, -32],
     });
 
-    marker.on('dragend', () => {
+    // Real-time clamping WHILE dragging (prevents pin from physically leaving circle)
+    marker.on('drag', () => {
       const pos = marker.getLatLng();
-      handlePositionUpdate(pos.lat, pos.lng);
+      const check = clampToGeofence(pos.lat, pos.lng);
+      if (check.clamped) {
+        marker.setLatLng([check.lat, check.lng]);
+      }
     });
 
+    // Finalize on drag end
+    marker.on('dragend', () => {
+      const pos = marker.getLatLng();
+      handlePositionUpdateRef.current(pos.lat, pos.lng);
+    });
+
+    // Clamp and place on map click
     map.on('click', (e) => {
-      marker.setLatLng(e.latlng);
-      handlePositionUpdate(e.latlng.lat, e.latlng.lng);
+      handlePositionUpdateRef.current(e.latlng.lat, e.latlng.lng);
     });
 
     mapInstanceRef.current = map;
@@ -301,11 +331,22 @@ export default function MiniMapPicker({
       } else {
         geofenceCircleRef.current.setLatLng([deviceGpsOrigin.lat, deviceGpsOrigin.lng]);
       }
+
+      // Initialize geofence badge status
+      if (latitude !== null && longitude !== null) {
+        const dist = getHaversineDistanceMeters(deviceGpsOrigin.lat, deviceGpsOrigin.lng, Number(latitude), Number(longitude));
+        setGeofenceInfo({
+          active: true,
+          clamped: dist > GEOFENCE_RADIUS_METERS,
+          distanceMeters: Math.min(GEOFENCE_RADIUS_METERS, Math.round(dist)),
+        });
+      }
     } else {
       if (geofenceCircleRef.current) {
         geofenceCircleRef.current.remove();
         geofenceCircleRef.current = null;
       }
+      setGeofenceInfo(null);
     }
   }, [deviceGpsOrigin]);
 
