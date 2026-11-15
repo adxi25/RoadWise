@@ -19,8 +19,23 @@
 
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import L from 'leaflet';
-import { MapPin, Navigation, Compass, AlertCircle, Info, CheckCircle2 } from 'lucide-react';
+import { MapPin, Navigation, Compass, AlertCircle, Info, CheckCircle2, ShieldCheck, ShieldAlert } from 'lucide-react';
 import { getNearbyInspections } from '../api/client';
+
+function getHaversineDistanceMeters(lat1, lon1, lat2, lon2) {
+  const R = 6371000;
+  const toRad = (deg) => (deg * Math.PI) / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
+const GEOFENCE_RADIUS_METERS = 1000; // 1.0 km maximum pin variance from verified device GPS
 
 function createDraggablePinIcon() {
   const html = `
@@ -74,12 +89,14 @@ function createDraggablePinIcon() {
 export default function MiniMapPicker({
   latitude,
   longitude,
+  deviceGpsOrigin = null,
   onLocationChange,
   onAddressResolved,
 }) {
   const mapContainerRef = useRef(null);
   const mapInstanceRef = useRef(null);
   const markerRef = useRef(null);
+  const geofenceCircleRef = useRef(null);
 
   // Default fallback coordinates (Bengaluru central coordinates)
   const defaultLat = 12.9716;
@@ -91,6 +108,7 @@ export default function MiniMapPicker({
   const [nearbyDefects, setNearbyDefects] = useState([]);
   const [isReverseGeocoding, setIsReverseGeocoding] = useState(false);
   const [corridorLoading, setCorridorLoading] = useState(false);
+  const [geofenceInfo, setGeofenceInfo] = useState(null);
   const debounceTimerRef = useRef(null);
 
   // Check nearby corridor defects
@@ -137,10 +155,44 @@ export default function MiniMapPicker({
     }
   }, [onAddressResolved]);
 
-  // Unified position update handler
+  // Unified position update handler with geofence protection
   const handlePositionUpdate = useCallback((newLat, newLng) => {
-    const lat = parseFloat(Number(newLat).toFixed(6));
-    const lng = parseFloat(Number(newLng).toFixed(6));
+    let lat = parseFloat(Number(newLat).toFixed(6));
+    let lng = parseFloat(Number(newLng).toFixed(6));
+
+    // Geofence enforcement: If device origin is active, constrain to 1.0 km radius
+    if (deviceGpsOrigin && deviceGpsOrigin.lat && deviceGpsOrigin.lng) {
+      const dist = getHaversineDistanceMeters(
+        deviceGpsOrigin.lat,
+        deviceGpsOrigin.lng,
+        lat,
+        lng
+      );
+
+      if (dist > GEOFENCE_RADIUS_METERS) {
+        // Clamping along the vector from device origin to target point
+        const ratio = GEOFENCE_RADIUS_METERS / dist;
+        lat = parseFloat((deviceGpsOrigin.lat + (lat - deviceGpsOrigin.lat) * ratio).toFixed(6));
+        lng = parseFloat((deviceGpsOrigin.lng + (lng - deviceGpsOrigin.lng) * ratio).toFixed(6));
+
+        if (markerRef.current) {
+          markerRef.current.setLatLng([lat, lng]);
+        }
+        setGeofenceInfo({
+          active: true,
+          clamped: true,
+          distanceMeters: GEOFENCE_RADIUS_METERS,
+        });
+      } else {
+        setGeofenceInfo({
+          active: true,
+          clamped: false,
+          distanceMeters: Math.round(dist),
+        });
+      }
+    } else {
+      setGeofenceInfo(null);
+    }
 
     if (onLocationChange) {
       onLocationChange(lat, lng);
@@ -154,7 +206,7 @@ export default function MiniMapPicker({
       checkCorridorDensity(lat, lng);
       reverseGeocode(lat, lng);
     }, 500);
-  }, [onLocationChange, checkCorridorDensity, reverseGeocode]);
+  }, [deviceGpsOrigin, onLocationChange, checkCorridorDensity, reverseGeocode]);
 
   // Initialize Leaflet map
   useEffect(() => {
@@ -230,6 +282,33 @@ export default function MiniMapPicker({
     checkCorridorDensity(lat, lng);
   }, [latitude, longitude, checkCorridorDensity]);
 
+  // Manage 1.0 km geofence circle overlay on Leaflet map
+  useEffect(() => {
+    if (!mapInstanceRef.current) return;
+
+    if (deviceGpsOrigin && deviceGpsOrigin.lat && deviceGpsOrigin.lng) {
+      if (!geofenceCircleRef.current) {
+        const circle = L.circle([deviceGpsOrigin.lat, deviceGpsOrigin.lng], {
+          radius: GEOFENCE_RADIUS_METERS,
+          color: '#114B44',
+          weight: 1.5,
+          dashArray: '5, 5',
+          fillColor: '#114B44',
+          fillOpacity: 0.05,
+        }).addTo(mapInstanceRef.current);
+        circle.bindTooltip('1.0 km Local Corridor Safezone', { permanent: false, direction: 'top' });
+        geofenceCircleRef.current = circle;
+      } else {
+        geofenceCircleRef.current.setLatLng([deviceGpsOrigin.lat, deviceGpsOrigin.lng]);
+      }
+    } else {
+      if (geofenceCircleRef.current) {
+        geofenceCircleRef.current.remove();
+        geofenceCircleRef.current = null;
+      }
+    }
+  }, [deviceGpsOrigin]);
+
   return (
     <div className="space-y-2 pt-1">
       {/* Mini-Map Header & Instructions */}
@@ -254,6 +333,29 @@ export default function MiniMapPicker({
       <div className="relative rounded-lg overflow-hidden border border-[#CCDCD8] shadow-2xs h-48 bg-[#EAE7E1] isolate z-0">
         <div ref={mapContainerRef} className="w-full h-full" />
       </div>
+
+      {/* Geofence Telemetry Banner (Anti-Spoofing Perimeter) */}
+      {geofenceInfo && geofenceInfo.active && (
+        <div className={`p-2 rounded flex items-center justify-between text-[11px] font-mono border ${
+          geofenceInfo.clamped 
+            ? 'bg-[#FEF2F2] border-[#FECDD3] text-[#991B1B]'
+            : 'bg-[#EBF4F2] border-[#CCDCD8] text-[#114B44]'
+        }`}>
+          <div className="flex items-center gap-1.5 font-semibold">
+            {geofenceInfo.clamped ? (
+              <ShieldAlert className="w-3.5 h-3.5 text-rose-600 shrink-0" />
+            ) : (
+              <ShieldCheck className="w-3.5 h-3.5 text-[#114B44] shrink-0" />
+            )}
+            <span>
+              {geofenceInfo.clamped 
+                ? 'Geofence Clamped (1.0 km max boundary from your device)' 
+                : `Corridor Geofence: ${geofenceInfo.distanceMeters}m from device GPS fix`}
+            </span>
+          </div>
+          <span className="text-[10px] opacity-80">1.0 km Safezone Active</span>
+        </div>
+      )}
 
       {/* Corridor Density Alert Banner (Haversine Proximity Feedback) */}
       {nearbyDefects.length > 0 ? (

@@ -24,6 +24,7 @@ export default function ContextForm({
   canAnalyze,
 }) {
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [deviceGpsOrigin, setDeviceGpsOrigin] = useState(null);
   const [geoStatus, setGeoStatus] = useState(
     context.latitude !== null && context.longitude !== null ? 'success' : 'idle'
   );
@@ -119,6 +120,7 @@ export default function ContextForm({
           accuracy: acc,
         }));
 
+        setDeviceGpsOrigin({ lat, lng });
         setGeoStatus('success');
         setGeoError(null);
       },
@@ -158,6 +160,7 @@ export default function ContextForm({
       longitude: null,
       accuracy: null,
     }));
+    setDeviceGpsOrigin(null);
     setGeoStatus('idle');
     setGeoError(null);
   };
@@ -344,6 +347,7 @@ export default function ContextForm({
         <MiniMapPicker
           latitude={context.latitude}
           longitude={context.longitude}
+          deviceGpsOrigin={deviceGpsOrigin}
           onLocationChange={(lat, lng) => {
             setContext(prev => ({
               ...prev,

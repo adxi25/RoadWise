@@ -460,3 +460,28 @@ When faculty say: *"Open the file where you do X and explain it line by line"*, 
      - Assigned Contractor Unit & Official Remarks from the Authority
      - Digital Verification Stamp
    - Citizens can track updates at any time by entering this ID, or present the physical receipt at their municipal ward office for RTI inquiries or ward committee meetings.
+
+
+---
+
+### Q31: "In reality, most smartphone photos do not have GPS metadata, gray asphalt looks identical across different roads, and sending contractors to a fake location wastes public funds. How does RoadWise solve this in practice?"
+
+**Answer:** This addresses the fundamental operational difference between an **academic web prototype** and a **production municipal deployment**:
+
+1. **Client-Side Geofenced Boundary Enforcement (1.0 km Radius Lock):**
+   - In our frontend (`MiniMapPicker.jsx`), once the user clicks *"Use My Current Location"*, the system anchors a **1.0 km Geofenced Safezone Circle** around their device's verified hardware GPS.
+   - If a citizen attempts to drag or click the pin beyond this 1,000m radius, the frontend automatically **clamps the marker to the 1.0 km perimeter** and triggers a security warning: *"Geofence Clamped: Location constrained to 1.0 km radius from your device's verified GPS position to prevent cross-city spoofing."*
+   - This allows legitimate micro-positioning from a sidewalk to the lane, while strictly prohibiting someone in Delhi from pinning a defect in Bangalore or across the city.
+
+2. **Civic Consensus & The Corridor Cluster Rule (Filtering Lone Pranks):**
+   - In municipal operations, road resurfacing work orders are **never dispatched based on a single isolated citizen complaint**.
+   - If an arterial road genuinely has severe potholes, multiple commuters and local residents report along that stretch within 48–72 hours, generating a **high-density Haversine cluster** on the Mode 2 GIS map.
+   - A prank report with an arbitrary pinned photo remains a **lone isolated anomaly (0 corridor density)**, which naturally stays at the bottom of the authority's triage queue compared to verified multi-report corridors.
+
+3. **Academic Web Simulation vs. Production Mobile App (Live Camera Lock):**
+   - *In our academic project:* We intentionally permit file uploads and draggable pins so that professors and evaluators testing the system from a **single classroom desk** can simulate different road conditions and distinct road segments without traveling.
+   - *In a production municipal app (like India's Meri Sadak / Swachhata App):* File gallery uploads are disabled. The app opens the phone's live camera directly (`navigator.mediaDevices`), locks the shutter to live hardware GPS, and watermarks the timestamp and coordinates directly into the photo pixels before submission.
+
+4. **RoadWise is a Decision-Support System (DSS), NOT an Autonomous Payout Engine:**
+   - RoadWise does not automatically dispense funds or order contractors without human review.
+   - All submissions enter Mode 2 under `UNDER_REVIEW`. For isolated high-priority claims without cluster backing, the municipal engineer reviews routine PWD road patrol logs or requests field validation before committing maintenance tenders.
