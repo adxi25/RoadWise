@@ -491,3 +491,30 @@ When faculty say: *"Open the file where you do X and explain it line by line"*, 
 4. **RoadWise is a Decision-Support System (DSS), NOT an Autonomous Payout Engine:**
    - RoadWise does not automatically dispense funds or order contractors without human review.
    - All submissions enter Mode 2 under `UNDER_REVIEW`. For isolated high-priority claims without cluster backing, the municipal engineer reviews routine PWD road patrol logs or requests field validation before committing maintenance tenders.
+
+---
+
+### Q32: "How does RoadWise assign road repair tasks to specific wards, zones, and local contractors? How does jurisdictional routing work?"
+
+**Answer:** In actual municipal administration (such as Municipal Corporations or State PWDs), a single city or district is divided hierarchically into **Zones $\rightarrow$ Divisions $\rightarrow$ Administrative Wards** (for example, *Dadri Division, Ward 14*). A repair van in South Delhi cannot be dispatched to fix a road in East Delhi. RoadWise handles task assignment and administrative routing through a **3-Step Practical Workflow**:
+
+1. **Step 1 — Automated Administrative Ward Tagging (OSM Nominatim Reverse-Geocoding):**
+   - When a citizen takes a photo or drops a mini-map pin, the backend/frontend reverse-geocodes the decimal coordinates via OpenStreetMap Nominatim.
+   - It automatically extracts and records the **City, State, and Area/Ward/Road** (e.g., *"Dadri, Uttar Pradesh, Delhi Eastern Peripheral Expressway"*).
+   - This attaches official administrative jurisdiction to the defect without requiring the citizen to know or manually select their municipal ward number.
+
+2. **Step 2 — Mode 2 Zonal Authority Triage & Crew Allocation:**
+   - In the Mode 2 Authority Dashboard, the municipal division engineer opens the **Inspection Detail Modal**.
+   - Under the **Authority Action Panel**, the engineer selects the lifecycle status (e.g., changing from `UNDER_REVIEW` to `WORK_ORDER_ISSUED` or `REPAIR_CREW_DISPATCHED`).
+   - The engineer types the **Assigned Contractor / Crew** (e.g., *"PWD Ward-4 Bituminous Cold-Mix Unit 2"* or *"L&T Maintenance Gang C"*) and records official engineering remarks.
+   - This updates the central SQLite database and immediately reflects on the citizen's **Track Report** page in real time.
+
+3. **Step 3 — Field Execution Queue Handover (Contractor CSV Triage Export):**
+   - Municipal maintenance trucks operate offline in the field without constant web connectivity.
+   - The division engineer clicks **"Export CSV"** on the Mode 2 Ranking Table, which downloads `roadwise_priority_triage_queue_<date>.csv`.
+   - This spreadsheet serves as the official daily **Work Order Slip** given to the repair truck driver, containing the exact GPS latitude/longitude, road type, defect breakdown, priority score, and assigned crew name.
+
+4. **How Enterprise Government Portals Expand This (Viva Bonus Point):**
+   - *"In a large-scale municipal deployment (like Delhi PWD or BBMP Bengaluru), the backend would store GIS polygon shapefiles (GeoJSON) of all 200+ municipal ward boundaries.*
+   - *Using a spatial Point-in-Polygon (PIP) query, any incoming complaint $(lat, lng)$ would be automatically routed directly into the specific login dashboard of that ward's Junior Engineer (JE), while RoadWise's central dashboard provides the overarching city-wide multi-factor priority triage."*
+
