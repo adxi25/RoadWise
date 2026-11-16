@@ -42,8 +42,7 @@ import { AlertTriangle, Layers, Cpu, Activity, ShieldCheck, FileText, CheckCircl
 import LandingPage from './Pages/LandingPage.jsx';
 
 export default function App() {
-  const [showLanding, setShowLanding] = useState(true);
-  const [activeTab, setActiveTab] = useState('inspect'); // 'inspect' | 'dashboard' | 'track'
+  const [activeTab, setActiveTab] = useState('home'); // 'home' | 'inspect' | 'dashboard' | 'track'
   const [health, setHealth] = useState(null);
 
   // Authority Access Control State (Mode 2)
@@ -183,7 +182,6 @@ export default function App() {
   // Authority Mode Security Gateway Handlers
   const handleOpenAuthority = () => {
     if (isAuthorityAuth) {
-      setShowLanding(false);
       setActiveTab('dashboard');
     } else {
       setShowAuthModal(true);
@@ -196,7 +194,6 @@ export default function App() {
       setIsAuthorityAuth(true);
       sessionStorage.setItem('rw_authority_auth', 'true');
       setShowAuthModal(false);
-      setShowLanding(false);
       setActiveTab('dashboard');
       return true;
     }
@@ -209,57 +206,39 @@ export default function App() {
     setActiveTab('inspect');
   };
 
-  if (showLanding) {
-    return (
-      <>
-        <LandingPage
-          onStartInspection={() => {
-            setShowLanding(false);
-            setActiveTab('inspect');
-          }}
-          onOpenDashboard={handleOpenAuthority}
-          onTrackComplaint={() => {
-            setShowLanding(false);
-            setActiveTab('track');
-          }}
-        />
-        <AuthorityLoginModal
-          isOpen={showAuthModal}
-          onClose={() => setShowAuthModal(false)}
-          onLogin={handleAuthorityLogin}
-        />
-      </>
-    );
-  }
-
   return (
     <div className="min-h-screen flex flex-col bg-[#F8F7F4] text-[#141D20] font-sans selection:bg-[#114B44] selection:text-white">
 
-      {/* Top Navigation */}
+      {/* Unified Global Top Navigation (Persistent across ALL pages) */}
       <Navbar
         health={health}
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         onRefreshHealth={fetchHealth}
-        onHome={() => setShowLanding(true)}
+        onHome={() => setActiveTab('home')}
         onOpenAuthority={handleOpenAuthority}
         onExitAuthority={handleAuthorityLogout}
       />
 
-      {/* Main Container */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
-
-        {activeTab === 'dashboard' && isAuthorityAuth ? (
+      {/* Screen Views */}
+      {activeTab === 'home' ? (
+        <LandingPage
+          onStartInspection={() => setActiveTab('inspect')}
+          onOpenDashboard={handleOpenAuthority}
+          onTrackComplaint={() => setActiveTab('track')}
+        />
+      ) : activeTab === 'dashboard' && isAuthorityAuth ? (
+        <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <AuthorityDashboard onBackToInspect={handleAuthorityLogout} />
-        ) : activeTab === 'track' ? (
-          <TrackReport
-            onBackToHome={() => setShowLanding(true)}
-            onStartInspection={() => {
-              setShowLanding(false);
-              setActiveTab('inspect');
-            }}
-          />
-        ) : (
+        </main>
+      ) : activeTab === 'track' ? (
+        <TrackReport
+          onBackToHome={() => setActiveTab('home')}
+          onStartInspection={() => setActiveTab('inspect')}
+        />
+      ) : (
+        /* Mode 1: Road Inspection Workspace */
+        <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="space-y-6">
 
             {/* Error Banner */}
@@ -414,19 +393,20 @@ export default function App() {
             )}
 
           </div>
-        )}
+        </main>
+      )}
 
-      </main>
-
-      {/* Technical Civic Footer */}
-      <footer className="border-t border-[#DFE3E1] bg-white py-3.5 text-xs text-[#505E63] font-mono mt-auto">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-2">
-          <span>RoadWise Road Safety & Asset Inspection Platform</span>
-          <span className="text-[#79888E]">
-            {activeTab === 'dashboard' ? 'Mode 2 — Authority Infrastructure Dashboard' : activeTab === 'track' ? 'Mode 1 — Public Citizen Tracking Portal' : 'Mode 1 — Single Road Inspection'}
-          </span>
-        </div>
-      </footer>
+      {/* Technical Civic Footer (Only on non-landing views) */}
+      {activeTab !== 'home' && (
+        <footer className="border-t border-[#DFE3E1] bg-white py-3.5 text-xs text-[#505E63] font-mono mt-auto">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-2">
+            <span>RoadWise Road Safety & Asset Inspection Platform</span>
+            <span className="text-[#79888E]">
+              {activeTab === 'dashboard' ? 'Mode 2 — Authority Infrastructure Dashboard' : activeTab === 'track' ? 'Mode 1 — Public Citizen Tracking Portal' : 'Mode 1 — Single Road Inspection'}
+            </span>
+          </div>
+        </footer>
+      )}
 
       {/* Authority Mode Restricted Access Modal */}
       <AuthorityLoginModal

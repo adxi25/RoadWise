@@ -89,40 +89,8 @@ export default function TrackReport({ onBackToHome, onStartInspection, initialCo
   return (
     <div className="min-h-screen bg-[#F8F7F4] text-[#141D20] font-sans selection:bg-[#114B44] selection:text-white pb-16">
       
-      {/* Header Bar */}
-      <header className="border-b border-[#DFE3E1] bg-white sticky top-0 z-30 shadow-2xs">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 h-15 flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <button
-              type="button"
-              onClick={onBackToHome}
-              className="p-1.5 -ml-1.5 rounded hover:bg-[#F3F1EC] text-[#505E63] hover:text-[#114B44] transition-colors"
-              title="Return to Home"
-            >
-              <ArrowLeft className="w-4 h-4" />
-            </button>
-            <div className="flex items-center space-x-2">
-              <span className="w-2 h-2 rounded-full bg-[#114B44]" />
-              <h1 className="text-sm sm:text-base font-bold text-[#141D20]">
-                Track Road Damage Complaint
-              </h1>
-            </div>
-          </div>
-
-          <div className="flex items-center space-x-2">
-            <button
-              type="button"
-              onClick={onStartInspection}
-              className="text-xs font-semibold px-3 py-1.5 rounded bg-[#114B44] hover:bg-[#0D3833] text-white transition-colors"
-            >
-              Report New Damage
-            </button>
-          </div>
-        </div>
-      </header>
-
       {/* Main Content Area */}
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 pt-8 sm:pt-12 space-y-6">
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6">
         
         {/* Search Hero Card */}
         <section className="bg-white rounded-xl border border-[#DFE3E1] p-6 sm:p-8 shadow-xs space-y-6">

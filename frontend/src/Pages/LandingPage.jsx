@@ -9,67 +9,27 @@ import {
   MapPin,
   Cpu,
   FileText,
-  Search
+  Search,
+  CheckCircle2,
+  ShieldCheck,
+  Compass
 } from 'lucide-react';
-import heroRoadImage from '../assets/hero_road_annotated.jpg';
 
 export default function LandingPage({ onStartInspection, onOpenDashboard, onTrackComplaint }) {
   return (
     <div className="min-h-screen bg-[#F8F7F4] text-[#141D20] flex flex-col font-sans selection:bg-[#114B44] selection:text-white">
       
-      {/* 1. Global Navigation Bar */}
-      <header className="sticky top-0 z-40 border-b border-[#DFE3E1] bg-[#F8F7F4]/90 backdrop-blur-md">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8 h-16">
-          
-          {/* Identity */}
-          <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded bg-[#114B44] text-xs font-bold tracking-wider text-white font-mono shadow-sm">
-              RW
-            </div>
-            <div className="flex flex-col">
-              <span className="text-base font-bold tracking-tight text-[#141D20] font-sans">
-                RoadWise
-              </span>
-              <span className="text-[11px] text-[#505E63] font-mono leading-none">
-                Civic Road Infrastructure Telemetry
-              </span>
-            </div>
-          </div>
-
-          {/* Navigation Actions — clean, no duplicates */}
-          <nav className="flex items-center gap-2 sm:gap-3">
-            <button
-              type="button"
-              onClick={onTrackComplaint}
-              className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-[#505E63] hover:text-[#114B44] hover:bg-[#EBF4F2] rounded transition-colors"
-            >
-              <Search className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Track Complaint</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={onStartInspection}
-              className="inline-flex items-center gap-2 bg-[#114B44] hover:bg-[#0D3833] active:bg-[#0A2A26] px-4 py-2 text-xs sm:text-sm font-semibold text-white rounded transition-colors shadow-sm"
-            >
-              <span>Report Damage</span>
-              <ArrowRight className="w-4 h-4" />
-            </button>
-          </nav>
-        </div>
-      </header>
-
-      {/* 2. Hero Section */}
+      {/* 1. Hero Section */}
       <main className="flex-1">
-        <section className="mx-auto grid max-w-7xl items-center gap-10 px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:grid-cols-12 lg:gap-12">
+        <section className="mx-auto grid max-w-7xl items-center gap-10 px-4 sm:px-6 lg:px-8 py-10 sm:py-14 lg:grid-cols-12 lg:gap-12">
           
           {/* Left Column: Headline, Narrative, and Primary Controls */}
           <div className="lg:col-span-7 space-y-6">
             
             {/* System Status Tag */}
-            <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded bg-[#EBF4F2] border border-[#CCDCD8] text-[11px] font-mono text-[#114B44] font-semibold tracking-wide">
-              <span className="h-2 w-2 rounded-full bg-[#114B44]" />
-              <span>DECISION-SUPPORT TELEMETRY PLATFORM</span>
+            <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded bg-[#EBF4F2] border border-[#CCDCD8] text-[11px] font-mono text-[#114B44] font-semibold tracking-wide shadow-2xs">
+              <span className="h-2 w-2 rounded-full bg-[#114B44] animate-pulse" />
+              <span>AUTONOMOUS PAVEMENT DISTRESS TELEMETRY</span>
             </div>
 
             {/* Core Headline */}
@@ -80,17 +40,17 @@ export default function LandingPage({ onStartInspection, onOpenDashboard, onTrac
               </h1>
               <p className="text-base sm:text-lg text-[#505E63] leading-relaxed max-w-2xl pt-2">
                 Turn pavement condition photography into structured technical inspection telemetry.
-                RoadWise combines real-time YOLOv8 damage detection with exponential condition scoring
-                and contextual traffic factors to calculate transparent maintenance priorities.
+                RoadWise combines real-time YOLOv8 damage detection with exponential condition scoring,
+                1.0 km geofenced anti-spoofing, and contextual traffic factors to calculate transparent maintenance priorities.
               </p>
             </div>
 
-            {/* Call to Action Controls — focused on citizen reporting, zero duplicacy */}
+            {/* Call to Action Controls */}
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-2">
               <button
                 type="button"
                 onClick={onStartInspection}
-                className="inline-flex items-center justify-center gap-2 bg-[#114B44] hover:bg-[#0D3833] active:bg-[#0A2A26] text-white px-6 py-3.5 rounded-lg font-semibold text-sm transition-all shadow-sm"
+                className="inline-flex items-center justify-center gap-2 bg-[#114B44] hover:bg-[#0D3833] active:bg-[#0A2A26] text-white px-6 py-3.5 rounded-lg font-semibold text-sm transition-all shadow-sm cursor-pointer"
               >
                 <span>Report Road Damage</span>
                 <ArrowRight className="w-4 h-4" />
@@ -99,48 +59,124 @@ export default function LandingPage({ onStartInspection, onOpenDashboard, onTrac
               <button
                 type="button"
                 onClick={onTrackComplaint}
-                className="inline-flex items-center justify-center gap-2 bg-white hover:bg-[#F3F1EC] text-[#141D20] border border-[#CCDCD8] hover:border-[#114B44] px-5 py-3.5 rounded-lg font-semibold text-sm transition-colors shadow-2xs"
+                className="inline-flex items-center justify-center gap-2 bg-white hover:bg-[#F3F1EC] text-[#141D20] border border-[#CCDCD8] hover:border-[#114B44] px-5 py-3.5 rounded-lg font-semibold text-sm transition-colors shadow-2xs cursor-pointer"
               >
                 <Search className="w-4 h-4 text-[#114B44]" />
                 <span>Track Existing Complaint</span>
               </button>
             </div>
 
-            {/* Explicit Prototype & Human-Review Disclaimer */}
+            {/* Decision-Support System Assurance */}
             <div className="pt-2 flex items-start gap-2.5 text-xs text-[#62737A] border-t border-[#DFE3E1]">
               <ShieldAlert className="w-4 h-4 text-[#114B44] flex-shrink-0 mt-0.5" />
               <p className="leading-relaxed">
-                <strong className="text-[#141D20] font-semibold">Decision-Support Prototype:</strong> All damage classifications, condition indexes, and maintenance recommendations are algorithmic estimates designed for infrastructure triage and require qualified engineering field verification.
+                <strong className="text-[#141D20] font-semibold">Civic Decision-Support Platform:</strong> Standardized AI distress analysis, multi-factor risk prioritization, and closed-loop municipal dispatch telemetry.
               </p>
             </div>
 
           </div>
 
-          {/* Right Column: Authentic Infrastructure Hero Visual with AI Telemetry Overlay */}
+          {/* Right Column: Interactive Real-Time AI Telemetry Console (Replaces Flat Image) */}
           <div className="lg:col-span-5">
-            <div className="relative rounded-lg border border-[#DFE3E1] bg-white p-2.5 shadow-sm overflow-hidden">
+            <div className="relative rounded-2xl border border-[#1D3632] bg-[#0E1E1C] p-5 shadow-2xl text-white font-sans overflow-hidden">
               
-              {/* Local Road Asset */}
-              <div className="relative rounded overflow-hidden bg-[#141D20] aspect-[4/4.7] max-h-[500px] flex items-center justify-center">
-                <img
-                  src={heroRoadImage}
-                  alt="Real civic road inspection sample"
-                  className="w-full h-full object-cover"
-                />
+              {/* Terminal Top Bar */}
+              <div className="flex items-center justify-between pb-3.5 border-b border-white/10">
+                <div className="flex items-center space-x-2">
+                  <div className="w-2.5 h-2.5 rounded-full bg-rose-500/80" />
+                  <div className="w-2.5 h-2.5 rounded-full bg-amber-500/80" />
+                  <div className="w-2.5 h-2.5 rounded-full bg-emerald-500/80" />
+                  <span className="text-[11px] font-mono text-emerald-400 pl-1 font-semibold tracking-wide">
+                    ROADWISE TELEMETRY CONSOLE
+                  </span>
+                </div>
+                <div className="flex items-center gap-1.5 text-[10px] font-mono bg-emerald-950/80 text-emerald-300 px-2 py-0.5 rounded border border-emerald-800">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  <span>Dual-Model Active</span>
+                </div>
+              </div>
 
-                {/* Illustrative image label — no fabricated detection results */}
-                <div className="absolute top-3 left-3 rounded border border-white/20 bg-[#0D3833]/85 px-3 py-2 text-[10px] font-mono text-white">
-                  Illustrative road imagery
+              {/* Dual Specialist Architecture Cards */}
+              <div className="grid grid-cols-2 gap-2 pt-4 pb-3">
+                <div className="p-2.5 rounded-lg bg-white/5 border border-white/10 space-y-1">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-mono text-emerald-400 font-bold">HEAD 01</span>
+                    <span className="text-[9px] font-mono px-1 rounded bg-emerald-950 text-emerald-300 border border-emerald-800">YOLOv8s</span>
+                  </div>
+                  <div className="text-xs font-semibold text-white">Pothole Specialist (D40)</div>
+                  <div className="text-[10px] text-slate-400 font-mono">Weight: 4.0 • Cavity Voids</div>
+                </div>
+                <div className="p-2.5 rounded-lg bg-white/5 border border-white/10 space-y-1">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-mono text-teal-400 font-bold">HEAD 02</span>
+                    <span className="text-[9px] font-mono px-1 rounded bg-teal-950 text-teal-300 border border-teal-800">Exp-C 2-Class</span>
+                  </div>
+                  <div className="text-xs font-semibold text-white">Crack Specialist (D00/D20)</div>
+                  <div className="text-[10px] text-slate-400 font-mono">Weight: 1.0–2.5 • Fatigue Fissures</div>
+                </div>
+              </div>
+
+              {/* Simulated Real-World Telemetry Diagnostic Frame */}
+              <div className="p-3.5 rounded-xl bg-black/40 border border-white/10 space-y-2.5">
+                <div className="flex items-center justify-between text-[11px] font-mono">
+                  <span className="text-slate-400">SAMPLE INSPECTION TELEMETRY</span>
+                  <span className="text-emerald-400 font-bold">RW-20261116-SYS</span>
                 </div>
 
+                {/* Metric Gauges Row */}
+                <div className="grid grid-cols-3 gap-2 text-center pt-0.5">
+                  <div className="p-2 rounded bg-white/5 border border-white/5">
+                    <div className="text-[10px] font-mono text-slate-400">SURFACE HEALTH</div>
+                    <div className="text-base font-bold font-mono text-amber-400">54.2<span className="text-[10px] text-slate-400">/100</span></div>
+                    <div className="text-[9px] text-slate-400 font-mono">Degraded Surface</div>
+                  </div>
+                  <div className="p-2 rounded bg-white/5 border border-white/5">
+                    <div className="text-[10px] font-mono text-slate-400">CONTEXT WEIGHT</div>
+                    <div className="text-base font-bold font-mono text-teal-300">1.45×</div>
+                    <div className="text-[9px] text-slate-400 font-mono">Arterial • High Traffic</div>
+                  </div>
+                  <div className="p-2 rounded bg-white/5 border border-white/5">
+                    <div className="text-[10px] font-mono text-slate-400">CALCULATED RISK</div>
+                    <div className="text-base font-bold font-mono text-rose-400">78.6<span className="text-[10px] text-slate-400">/100</span></div>
+                    <div className="text-[9px] text-rose-300 font-mono font-bold">CRITICAL</div>
+                  </div>
+                </div>
+
+                {/* Active Geospatial & Corridor Rules */}
+                <div className="space-y-1.5 pt-1 text-[10px] font-mono">
+                  <div className="flex items-center justify-between text-slate-300 bg-white/5 px-2.5 py-1.5 rounded">
+                    <span className="flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                      <span>1.0 km Anti-Spoofing Safezone</span>
+                    </span>
+                    <span className="text-emerald-400 font-semibold">Hardware GPS Locked</span>
+                  </div>
+                  <div className="flex items-center justify-between text-slate-300 bg-white/5 px-2.5 py-1.5 rounded">
+                    <span className="flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                      <span>150m Haversine Corridor Telemetry</span>
+                    </span>
+                    <span className="text-amber-400 font-semibold">Aggregate Corridor Cluster</span>
+                  </div>
+                </div>
               </div>
 
-              {/* Visual Caption */}
-              <div className="pt-2 px-1 flex items-center justify-between text-[11px] font-mono text-[#505E63]">
-                  <span>Road inspection example</span>
-                  <span>Live results appear after inspection</span>
+              {/* Priority Spectrum Indicator */}
+              <div className="pt-3 space-y-1.5">
+                <div className="flex items-center justify-between text-[10px] font-mono text-slate-400">
+                  <span>AUTOMATED TRIAGE SPECTRUM</span>
+                  <span>4-TIER BANDING</span>
+                </div>
+                <div className="grid grid-cols-4 gap-1 text-center text-[10px] font-mono font-bold">
+                  <div className="py-1 rounded bg-rose-500/20 text-rose-300 border border-rose-500/30">CRITICAL</div>
+                  <div className="py-1 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">HIGH</div>
+                  <div className="py-1 rounded bg-yellow-500/20 text-yellow-300 border border-yellow-500/30">MEDIUM</div>
+                  <div className="py-1 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">LOW</div>
+                </div>
               </div>
 
+              {/* Subtle decorative glow in bottom corner */}
+              <div className="absolute -bottom-10 -right-10 w-36 h-36 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none" />
             </div>
           </div>
 
@@ -289,19 +325,14 @@ export default function LandingPage({ onStartInspection, onOpenDashboard, onTrac
           <div className="flex items-center gap-2">
             <span className="font-semibold text-[#141D20]">RoadWise</span>
             <span className="text-[#DFE3E1]">|</span>
-            <span>Civic Road Infrastructure Platform</span>
+            <span>Civic Pavement Telemetry & Maintenance Prioritization Platform</span>
           </div>
-          <div className="flex items-center gap-4 text-[11px] font-mono text-[#79888E]">
+          <div className="flex items-center gap-3 text-[11px] font-mono text-[#79888E]">
             <span>Dual-Model MS-NMS Fusion</span>
             <span>·</span>
-            <button
-              type="button"
-              onClick={onOpenDashboard}
-              className="text-[#505E63] hover:text-[#114B44] underline font-sans flex items-center gap-1 font-semibold transition-colors"
-              title="Official access for municipal engineers and authorities"
-            >
-              <span>Authority Portal (Mode 2) 🔒</span>
-            </button>
+            <span>1.0 km Geofenced Telemetry</span>
+            <span>·</span>
+            <span>150m Corridor Clustering</span>
           </div>
         </div>
       </footer>

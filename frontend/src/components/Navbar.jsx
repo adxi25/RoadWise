@@ -70,11 +70,15 @@ export default function Navbar({ health, activeTab, setActiveTab, onRefreshHealt
                 <button
                   type="button"
                   onClick={onHome}
-                  className="px-2.5 py-1.5 rounded text-xs font-semibold text-[#505E63] hover:text-[#114B44] hover:bg-[#F3F1EC] transition-colors flex items-center space-x-1.5 focus-visible:ring-2 focus-visible:ring-[#114B44]"
-                  title="Return to Home Landing"
+                  className={`px-3 py-1.5 rounded text-xs font-semibold transition-all flex items-center space-x-1.5 focus-visible:ring-2 focus-visible:ring-[#114B44] ${
+                    activeTab === 'home'
+                      ? 'bg-[#114B44] text-white shadow-xs'
+                      : 'text-[#505E63] hover:text-[#114B44] hover:bg-[#F3F1EC]'
+                  }`}
+                  title="Return to Home Overview"
                 >
                   <Home className="w-3.5 h-3.5" />
-                  <span className="hidden md:inline">Home</span>
+                  <span>Home</span>
                 </button>
 
                 <button
@@ -103,16 +107,19 @@ export default function Navbar({ health, activeTab, setActiveTab, onRefreshHealt
                   <span>Track Report</span>
                 </button>
 
-                {/* Discrete Authority Access Link */}
+                {/* Fixed High-Trust Authority Access Button */}
                 <div className="border-l border-[#DFE3E1] pl-2 ml-1 hidden sm:block">
                   <button
                     type="button"
                     onClick={onOpenAuthority || (() => setActiveTab('dashboard'))}
-                    className="px-2.5 py-1.5 rounded text-xs font-semibold text-[#79888E] hover:text-[#114B44] hover:bg-[#EBF4F2] transition-colors flex items-center space-x-1 border border-transparent hover:border-[#CCDCD8]"
-                    title="Access Government Authority Dashboard (Mode 2)"
+                    className="px-3 py-1.5 rounded-md text-xs font-semibold text-[#141D20] bg-[#F8F7F4] hover:bg-[#EBF4F2] hover:text-[#114B44] transition-all flex items-center space-x-1.5 border border-[#CCDCD8] hover:border-[#114B44] shadow-2xs cursor-pointer"
+                    title="Authorized Municipal Engineer & Departmental Login (Mode 2)"
                   >
-                    <Lock className="w-3 h-3 text-[#114B44]" />
+                    <Lock className="w-3.5 h-3.5 text-[#114B44]" />
                     <span>Authority Portal</span>
+                    <span className="text-[10px] font-mono bg-[#EBF4F2] text-[#114B44] px-1.5 py-0.2 rounded border border-[#CCDCD8]">
+                      Mode 2
+                    </span>
                   </button>
                 </div>
               </>
