@@ -223,13 +223,10 @@ export default function ImageUploader({
         </div>
       )}
 
-      {/* Compact Photo Quality Warning */}
-      <div className="flex items-start gap-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-2.5 text-xs text-amber-900">
-        <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-amber-700" />
-        <p className="leading-relaxed">
-          <strong>For better detection results:</strong> Upload a clear, well-lit photo with road damage fully visible and in focus.
-        </p>
-      </div>
+      {/* Subtle clean photo quality tip */}
+      <p className="text-[11px] text-[#79888E] text-center pt-1 font-sans">
+        Tip: Ensure the road surface defect is well-lit and in focus for optimal dual-model detection.
+      </p>
     </div>
   );
 }

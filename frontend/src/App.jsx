@@ -318,73 +318,34 @@ export default function App() {
                       <LoadingOverlay />
                     </div>
                   ) : (
-                    /* Intentional Professional Empty State */
-                    <div className="p-6 sm:p-8 rounded-lg bg-white border border-[#DFE3E1] space-y-6 shadow-2xs">
+                    /* Clean Minimalist Inspection Readiness State */
+                    <div className="p-8 sm:p-12 rounded-xl bg-white border border-[#DFE3E1] text-center space-y-6 shadow-2xs">
+                      <div className="mx-auto w-14 h-14 rounded-2xl bg-[#EBF4F2] border border-[#CCDCD8] flex items-center justify-center text-[#114B44]">
+                        <Layers className="w-7 h-7" />
+                      </div>
 
-                      <div className="space-y-1.5 border-b border-[#DFE3E1] pb-4">
-                        <div className="flex items-center space-x-2 text-[#141D20]">
-                          <Layers className="w-4 h-4 text-[#114B44]" />
-                          <h2 className="text-sm font-bold uppercase font-mono tracking-wider">
-                            Ready for Inspection
-                          </h2>
-                        </div>
-                        <p className="text-xs text-[#505E63] leading-relaxed font-sans">
-                          Select a road surface photograph and specify road classification to calculate condition rating and maintenance risk.
+                      <div className="max-w-md mx-auto space-y-2">
+                        <h2 className="text-lg font-bold text-[#141D20] tracking-tight">
+                          Awaiting Road Surface Inspection
+                        </h2>
+                        <p className="text-xs text-[#505E63] leading-relaxed">
+                          Select a road photo and verify geographic coordinates on the left to evaluate pavement distress, calculate condition rating, and generate maintenance priorities.
                         </p>
                       </div>
 
-                      {/* Technical Pipeline Overview Cards */}
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-
-                        <div className="p-4 rounded-lg bg-[#F8F7F4] border border-[#DFE3E1] space-y-1.5">
-                          <div className="flex items-center space-x-2 text-xs font-bold text-[#141D20]">
-                            <Cpu className="w-4 h-4 text-[#114B44]" />
-                            <span>Defect Object Detection</span>
-                          </div>
-                          <p className="text-xs text-[#505E63] leading-relaxed">
-                            Autonomous Dual-Model detection: Potholes (D40), Alligator Cracks (D20), and unified Linear Cracks (D00).
-                          </p>
-                        </div>
-
-                        <div className="p-4 rounded-lg bg-[#F8F7F4] border border-[#DFE3E1] space-y-1.5">
-                          <div className="flex items-center space-x-2 text-xs font-bold text-[#141D20]">
-                            <Activity className="w-4 h-4 text-[#114B44]" />
-                            <span>Condition Scoring</span>
-                          </div>
-                          <p className="text-xs text-[#505E63] leading-relaxed">
-                            Exponential damage load decay formula (100 = intact, 0 = severe distress) with overlap compensation.
-                          </p>
-                        </div>
-
-                        <div className="p-4 rounded-lg bg-[#F8F7F4] border border-[#DFE3E1] space-y-1.5">
-                          <div className="flex items-center space-x-2 text-xs font-bold text-[#141D20]">
-                            <ShieldCheck className="w-4 h-4 text-[#114B44]" />
-                            <span>Context-Calibrated Risk</span>
-                          </div>
-                          <p className="text-xs text-[#505E63] leading-relaxed">
-                            Calibrates defect severity using road classification, traffic volume, and proximity to sensitive facilities.
-                          </p>
-                        </div>
-
-                        <div className="p-4 rounded-lg bg-[#F8F7F4] border border-[#DFE3E1] space-y-1.5">
-                          <div className="flex items-center space-x-2 text-xs font-bold text-[#141D20]">
-                            <FileText className="w-4 h-4 text-[#114B44]" />
-                            <span>Actionable Telemetry</span>
-                          </div>
-                          <p className="text-xs text-[#505E63] leading-relaxed">
-                            Generates maintenance priority bands (LOW to CRITICAL) and operational guidance recorded to SQLite.
-                          </p>
-                        </div>
-
+                      {/* Clean 3-Status Badges */}
+                      <div className="inline-flex flex-wrap items-center justify-center gap-2 pt-2">
+                        <span className="inline-flex items-center gap-1.5 text-xs font-mono text-[#114B44] bg-[#EBF4F2] px-3 py-1 rounded-full border border-[#CCDCD8]">
+                          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                          <span>Dual YOLOv8 Ready</span>
+                        </span>
+                        <span className="inline-flex items-center gap-1.5 text-xs font-mono text-[#505E63] bg-[#F8F7F4] px-3 py-1 rounded-full border border-[#DFE3E1]">
+                          <span>1.0 km Safezone</span>
+                        </span>
+                        <span className="inline-flex items-center gap-1.5 text-xs font-mono text-[#505E63] bg-[#F8F7F4] px-3 py-1 rounded-full border border-[#DFE3E1]">
+                          <span>150m Cluster Active</span>
+                        </span>
                       </div>
-
-                      {/* Technical Specs Footer */}
-                      <div className="p-3 rounded bg-[#F8F7F4] border border-[#DFE3E1] text-[11px] font-mono text-[#505E63] flex flex-wrap items-center justify-between gap-2">
-                        <span>Model: Dual-Model YOLOv8 (MS-NMS Fusion)</span>
-                        <span>Backend: FastAPI + SQLite</span>
-                        <span>Mode: Single Frame Inspection</span>
-                      </div>
-
                     </div>
                   )}
                 </div>

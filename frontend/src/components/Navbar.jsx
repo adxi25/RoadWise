@@ -7,9 +7,7 @@ export default function Navbar({ health, activeTab, setActiveTab, onRefreshHealt
   const isAuthorityMode = activeTab === 'dashboard';
 
   return (
-    <header className={`sticky top-0 z-40 w-full border-b backdrop-blur-md shadow-2xs transition-colors ${
-      isAuthorityMode ? 'bg-[#0F1E1C] border-[#1D3632] text-white' : 'bg-white/95 border-[#DFE3E1] text-[#141D20]'
-    }`}>
+    <header className="sticky top-0 z-40 w-full border-b backdrop-blur-md shadow-2xs transition-colors bg-white/95 border-[#DFE3E1] text-[#141D20]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-15 flex items-center justify-between">
         
         {/* Left: RoadWise Identity with dynamic Mode Tag */}
@@ -17,26 +15,18 @@ export default function Navbar({ health, activeTab, setActiveTab, onRefreshHealt
           <button
             type="button"
             onClick={onHome}
-            className={`flex items-center space-x-3 text-left group rounded p-1 -ml-1 transition-colors ${
-              isAuthorityMode ? 'hover:bg-white/10' : 'hover:bg-[#F3F1EC]'
-            } focus-visible:ring-2 focus-visible:ring-[#114B44]`}
+            className="flex items-center space-x-3 text-left group rounded p-1 -ml-1 transition-colors hover:bg-[#F3F1EC] focus-visible:ring-2 focus-visible:ring-[#114B44]"
             title="Return to RoadWise Home"
             aria-label="Return to RoadWise Home"
           >
-            <div className={`flex items-center justify-center w-8 h-8 rounded font-mono font-bold text-xs shadow-xs transition-colors ${
-              isAuthorityMode ? 'bg-emerald-500 text-black' : 'bg-[#114B44] text-white group-hover:bg-[#0D3833]'
-            }`}>
+            <div className="flex items-center justify-center w-8 h-8 rounded font-mono font-bold text-xs shadow-xs transition-colors bg-[#114B44] text-white group-hover:bg-[#0D3833]">
               RW
             </div>
             <div className="flex flex-col">
-              <span className={`text-base font-bold tracking-tight font-sans transition-colors ${
-                isAuthorityMode ? 'text-white' : 'text-[#141D20] group-hover:text-[#114B44]'
-              }`}>
+              <span className="text-base font-bold tracking-tight font-sans transition-colors text-[#141D20] group-hover:text-[#114B44]">
                 RoadWise
               </span>
-              <span className={`text-[10px] font-mono leading-none hidden sm:block ${
-                isAuthorityMode ? 'text-emerald-400' : 'text-[#505E63]'
-              }`}>
+              <span className="text-[10px] font-mono leading-none hidden sm:block text-[#505E63]">
                 {isAuthorityMode ? 'Authority Portal (Mode 2)' : 'Public Citizen Portal'}
               </span>
             </div>
@@ -49,17 +39,17 @@ export default function Navbar({ health, activeTab, setActiveTab, onRefreshHealt
           {/* Navigation Controls */}
           <nav className="flex items-center space-x-1" aria-label="Main Navigation">
             
-            {/* If in Authority Mode: Show Return button and telemetry */}
+            {/* If in Authority Mode: Show Return button and telemetry with clean unified colors */}
             {isAuthorityMode ? (
               <div className="flex items-center space-x-2">
-                <span className="hidden lg:inline-flex items-center gap-1.5 text-xs text-emerald-300 font-mono bg-emerald-950/60 px-2.5 py-1 rounded border border-emerald-800">
+                <span className="hidden sm:inline-flex items-center gap-1.5 text-xs text-[#114B44] font-mono bg-[#EBF4F2] px-2.5 py-1.5 rounded-lg border border-[#CCDCD8]">
                   <Shield className="w-3.5 h-3.5" />
                   <span>Authorized Municipal Session</span>
                 </span>
                 <button
                   type="button"
                   onClick={onExitAuthority || (() => setActiveTab('inspect'))}
-                  className="px-3 py-1.5 rounded text-xs font-semibold bg-white/10 hover:bg-white/20 text-white transition-all flex items-center space-x-1.5 border border-white/20"
+                  className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-white hover:bg-[#F3F1EC] text-[#141D20] transition-all flex items-center space-x-1.5 border border-[#DFE3E1] shadow-2xs cursor-pointer"
                 >
                   <span>← Exit to Citizen Portal</span>
                 </button>

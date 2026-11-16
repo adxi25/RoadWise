@@ -182,11 +182,11 @@ export default function AuthorityDashboard({ onBackToInspect }) {
             </div>
 
             <h1 className="text-xl sm:text-2xl font-bold text-[#141D20] font-sans tracking-tight">
-              Road Asset Maintenance Prioritization Dashboard
+              Road Asset Maintenance Prioritization
             </h1>
 
-            <p className="text-xs text-[#505E63] font-sans max-w-3xl leading-relaxed">
-              Synthesizes real inspection telemetry to answer which road corridors require intervention first, where they are located, and the defect manifestations driving urgent risk.
+            <p className="text-xs text-[#505E63] font-sans max-w-2xl leading-relaxed">
+              Geospatial telemetry and objective repair scheduling across municipal road corridors.
             </p>
           </div>
 
