@@ -19,9 +19,6 @@ __pycache__/
 # OS files
 .DS_Store
 Thumbs.db
-docs/RoadWise_Final_Project_Report.docx
-docs/RoadWise_Final_Project_Report_v2.docx
-docs/bennett_logo.png
 
 
 # Large local raw and processed datasets (retained locally, excluded from git)
